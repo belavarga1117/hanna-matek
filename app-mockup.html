@@ -101,7 +101,7 @@
     .tile .emoji{width:46px; height:46px; border-radius:13px; display:grid; place-items:center; font-size:1.5rem; margin-bottom:10px;}
     .tile .nm{font-weight:700; font-size:.98rem; line-height:1.2;}
     .tile .tg{font-size:.78rem; color:var(--ink-soft); margin-top:3px;}
-    .tile .cat{margin-top:auto; padding-top:8px; font-size:.68rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--clay);}
+    .tile .cat{margin-top:auto; padding-top:8px; padding-right:46px; font-size:.68rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--clay);}
     .tile.soon{opacity:.62;}
     .tile .soon-badge{position:absolute; top:12px; right:12px; background:var(--ink); color:#fff; font-size:.64rem; font-weight:700; padding:4px 8px; border-radius:20px; letter-spacing:.03em;}
 
@@ -280,6 +280,18 @@
     .find-cell.got{background:#d9f5e0; box-shadow:inset 0 0 0 2px var(--b2); opacity:.65;}
     .find-cell.miss{background:#fde2de; animation:shakeX .35s ease;}
 
+    /* Fény-ösvény (téri Simon, 3×3) */
+    .path-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; max-width:280px; width:100%; margin:18px auto;}
+    .path-cell{aspect-ratio:1; border-radius:16px; background:var(--cream-soft); border:1px solid rgba(61,43,33,.08); box-shadow:var(--shadow-sm); transition:transform .1s ease, background .12s ease, box-shadow .12s ease;}
+    .path-cell.lit{background:linear-gradient(135deg,#319ed9,#7ec8e3); box-shadow:0 0 22px rgba(49,158,217,.7), inset 0 0 0 3px rgba(255,255,255,.5); transform:scale(1.05);}
+
+    /* Memória rács (memory matrix, 4×4) */
+    .matrix-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:9px; max-width:300px; width:100%; margin:16px auto;}
+    .matrix-cell{aspect-ratio:1; border-radius:12px; background:var(--cream-soft); border:1px solid rgba(61,43,33,.08); box-shadow:var(--shadow-sm); transition:transform .1s ease, background .15s ease, box-shadow .15s ease;}
+    .matrix-cell.lit{background:linear-gradient(135deg,#319ed9,#7ec8e3); box-shadow:0 0 16px rgba(49,158,217,.6);}
+    .matrix-cell.correct{background:#d9f5e0; box-shadow:inset 0 0 0 2px var(--b2);}
+    .matrix-cell.wrong{background:#fde2de; box-shadow:inset 0 0 0 2px var(--coral);}
+
     /* a "mockup" jelölő szalag */
     .mock-flag{position:fixed; top:14px; left:14px; z-index:200; background:var(--ink); color:#fff; font-size:.72rem; font-weight:700; padding:7px 13px; border-radius:30px; box-shadow:var(--shadow); opacity:.92;}
     /* Mobilon a telefon teljes képernyős, ezért a lebegő jelölő a fejlécre úszna –
@@ -335,6 +347,11 @@
     /* tile "Mit fejleszt?" info gomb */
     .tile{position:relative;}
     .tile .info-btn{position:absolute; top:10px; right:10px; width:28px; height:28px; border-radius:50%; background:rgba(255,255,255,.9); box-shadow:var(--shadow-sm); font-size:.8rem; display:grid; place-items:center; z-index:3; color:var(--blue-deep); font-weight:800;}
+    /* javasolt kortól jelvény a csempe jobb-alsó sarkában */
+    .tile .age-badge{position:absolute; bottom:12px; right:12px; min-width:30px; height:24px; padding:0 7px; border-radius:8px; display:grid; place-items:center; font-size:.72rem; font-weight:800; z-index:2;}
+    .age-badge.age-0p{background:#e9f6ec; color:#2a8a44;}
+    .age-badge.age-3p{background:#e3f1fb; color:#1d7cb0;}
+    .age-badge.age-6p{background:#fdeede; color:#b5762a;}
 
     /* info sheet (alulról felcsúszó) */
     .sheet-back{position:absolute; inset:0; z-index:130; background:rgba(61,43,33,.45); display:flex; align-items:flex-end; opacity:0; pointer-events:none; transition:opacity .25s ease;}
@@ -617,6 +634,8 @@
       { id:'oddeven',  name:'Páros-páratlan',tag:'Oszd két oszlopba',     cat:'Matek',      emoji:'⚖️', bg:'#fde7e3', playable:true, mount:oddEvenGame },
       { id:'simon',    name:'Színlánc',      tag:'Jegyezd meg a sorrendet',cat:'Memória',   emoji:'🌈', bg:'#fff4d6', playable:true, mount:simonGame },
       { id:'span',     name:'Számlánc',      tag:'Meddig emlékszel?',     cat:'Memória',    emoji:'#️⃣', bg:'#e3f1fb', playable:true, mount:spanGame },
+      { id:'path',     name:'Fény-ösvény',   tag:'Kövesd az utat sorrendben', cat:'Memória', emoji:'🟪', bg:'#f6ecf7', playable:true, mount:pathGame },
+      { id:'matrix',   name:'Memória rács',  tag:'Mely mezők villantak?', cat:'Memória',    emoji:'🟦', bg:'#e3f1fb', playable:true, mount:matrixGame },
       { id:'sequence', name:'Mi jön a sorban?', tag:'Folytasd a mintát',  cat:'Logika',     emoji:'🔺', bg:'#f6ecf7', playable:true, mount:sequenceGame },
       { id:'shapes',   name:'Formapárosító', tag:'Találd meg a formát',   cat:'Logika',     emoji:'⬛', bg:'#efe7df', playable:true, mount:shapesGame },
       { id:'grade',    name:'Színárnyalatok',tag:'Világostól sötétig',    cat:'Érzékelés',  emoji:'🎨', bg:'#e9f6ec', playable:true, mount:gradeGame },
@@ -630,12 +649,14 @@
       vanished: { ages:['3-6','6+'],       develops:'Vizuális munkamemória és megfigyelés. A „mi változott?" feladatok a figyelmi fókuszt erősítik.' },
       more:     { ages:['3-6','6+'],       develops:'Szám-érzék (number sense). A mennyiségek gyors összevetése a matematikai intuíció alapja.' },
       count:    { ages:['3-6','6+'],       develops:'Mennyiség–szám megfeleltetés (Montessori „cards & counters"): a leírt szám összekötése a valós darabszámmal.' },
-      oddeven:  { ages:['3-6','6+'],       develops:'Számfogalom és az osztás előkészítése. A párba rendezett korongok láthatóvá teszik a páros/páratlan szerkezetet.' },
+      oddeven:  { ages:['6+'],       develops:'Számfogalom és az osztás előkészítése. A párba rendezett korongok láthatóvá teszik a páros/páratlan szerkezetet.' },
       simon:    { ages:['0-3','3-6','6+'], develops:'Szekvenciális munkamemória. A növekvő sorozatok a prefrontális kéreg munkamemória-kapacitását fejlesztik.' },
-      span:     { ages:['3-6','6+'],       develops:'Számjegy-terjedelem (digit span) – a munkamemória klasszikus edzése és mérőszáma.' },
+      span:     { ages:['6+'],       develops:'Számjegy-terjedelem (digit span) – a munkamemória klasszikus edzése és mérőszáma.' },
       sequence: { ages:['3-6','6+'],       develops:'Mintafelismerés és logikai gondolkodás – a sorozatok az algebrai gondolkodás előfutárai.' },
       shapes:   { ages:['0-3','3-6','6+'], develops:'Forma-absztrakció és vizuális diszkrimináció (Montessori geometriai szekrény): a forma a színtől függetlenül azonosítható.' },
       grade:    { ages:['0-3','3-6','6+'], develops:'Finom vizuális gradálás (Montessori színtáblák): a részletek és árnyalatok megkülönböztetését élesíti.' },
+      path:     { ages:['6+'],       develops:'Téri-szekvenciális munkamemória. Az útvonal sorrendben való felidézése a figyelmet és a téri emlékezetet együtt edzi.' },
+      matrix:   { ages:['6+'],       develops:'Téri munkamemória (memory matrix). A felvillanó mezők megjegyzése a vizuális-téri emlékezet kapacitását növeli.' },
       attention:{ ages:['3-6','6+'],       develops:'Szelektív figyelem és feldolgozási sebesség. A vizuális keresés a fókusz fenntartását gyakorolja.' }
     };
     /* aktuális korosztály (localStorage-ból; üres = még nincs onboarding) */
@@ -649,6 +670,10 @@
         el('div', {class:'tg', text:g.tag}),
         el('div', {class:'cat', text:g.cat})
       ]);
+      /* javasolt kortól jelvény a sarokban (0+ / 3+ / 6+) – mindegyik csempén */
+      var ages = (GAME_META[g.id] && GAME_META[g.id].ages) || [];
+      var fromAge = ages.indexOf('0-3') >= 0 ? '0+' : ages.indexOf('3-6') >= 0 ? '3+' : '6+';
+      node.appendChild(el('span',{class:'age-badge age-' + fromAge.replace('+','p'), text:fromAge}));
       if (!g.playable) { node.appendChild(el('span',{class:'soon-badge',text:'Hamarosan'})); return node; }
       node.addEventListener('click', function(){ openGame(g); });
       /* "Mit fejleszt?" info gomb (a szülőknek) – külön kattintható, nem indítja a játékot */
@@ -1251,6 +1276,86 @@
       playRound();
     }
 
+    /* ---------- FÉNY-ÖSVÉNY (téri Simon: kövesd az utat sorrendben) ---------- */
+    function pathGame(root, done){
+      var N = 9;                        // 3×3 rács
+      var seq = [], step = 0, accepting = false;
+      var banner = el('div',{class:'game-banner',html:'Fény-ösvény 🟪<small>Jegyezd meg az utat, majd kövesd sorrendben!</small>'});
+      root.appendChild(banner);
+      var grid = el('div',{class:'path-grid'}), cells = [];
+      for (var i=0;i<N;i++){
+        (function(idx){
+          var c = el('button',{class:'path-cell','aria-label':'mező ' + (idx+1)});
+          c.addEventListener('click', function(){ if (accepting) press(idx); });
+          cells.push(c); grid.appendChild(c);
+        })(i);
+      }
+      root.appendChild(grid);
+      function light(idx, freq){ var c = cells[idx]; c.classList.add('lit'); beep(freq || (300 + idx*45), 0.28); T(function(){ c.classList.remove('lit'); }, 300); }
+      function press(idx){
+        light(idx, 520);
+        if (idx === seq[step]){
+          step++;
+          if (step === seq.length){ accepting = false; banner.innerHTML = 'Szuper! 👏<small>Jön a hosszabb út…</small>'; T(next, 800); }
+        } else {
+          accepting = false; feedbackTone(false);
+          T(function(){ done({emoji:(seq.length-1)>=5?'🏆':'🟪', title:'Vége!', score:(seq.length-1) + ' lépés', msg:(seq.length-1)>=5?'Kiváló téri memória! 🌟':'Jó kör – próbáld újra!'}); }, 600);
+        }
+      }
+      function next(){
+        /* új mező az úthoz – ne ugyanaz legyen, mint az előző (átláthatóság) */
+        var nx; do { nx = randInt(0, N-1); } while (seq.length && nx === seq[seq.length-1]);
+        seq.push(nx); step = 0; setMeta('Szint ' + seq.length);
+        banner.innerHTML = 'Nézd az utat… 👀'; accepting = false;
+        var i = 0;
+        (function go(){
+          if (i >= seq.length){ accepting = true; banner.innerHTML = 'Te jössz! ✋<small>Koppints sorrendben.</small>'; return; }
+          light(seq[i]); i++; T(go, 650);
+        })();
+      }
+      T(next, 500);
+    }
+
+    /* ---------- MEMÓRIA RÁCS (memory matrix: mely mezők villantak fel?) ---------- */
+    function matrixGame(root, done){
+      var N = 16;                       // 4×4 rács
+      var round = 0;                    // hány szintet teljesített
+      var banner = el('div',{class:'game-banner',html:'Memória rács 🟦<small>Jegyezd meg a kék mezőket!</small>'});
+      root.appendChild(banner);
+      var grid = el('div',{class:'matrix-grid'}), cells = [];
+      for (var i=0;i<N;i++) { var c = el('button',{class:'matrix-cell'}); cells.push(c); grid.appendChild(c); }
+      root.appendChild(grid);
+      var lit = [], found = 0, accepting = false;
+      function showLevel(){
+        var k = Math.min(3 + round, 9);                 // felvillanó mezők száma (3 → 9)
+        setMeta('Szint ' + (round+1)); found = 0; accepting = false;
+        cells.forEach(function(c){ c.className = 'matrix-cell'; });
+        var idxs = []; for (var j=0;j<N;j++) idxs.push(j);
+        lit = pick(idxs, k);
+        banner.innerHTML = 'Jegyezd meg… 👀';
+        lit.forEach(function(idx){ cells[idx].classList.add('lit'); });
+        T(function(){
+          lit.forEach(function(idx){ cells[idx].classList.remove('lit'); });
+          banner.innerHTML = 'Te jössz! ✋<small>Koppints a felvillant mezőkre.</small>';
+          accepting = true;
+        }, 1500 + k*120);
+      }
+      cells.forEach(function(c, idx){
+        c.addEventListener('click', function(){
+          if (!accepting || c.classList.contains('correct') || c.classList.contains('wrong')) return;
+          if (lit.indexOf(idx) >= 0){
+            c.classList.add('correct'); beep(560 + found*40, 0.12); found++;
+            if (found === lit.length){ accepting = false; round++; T(showLevel, 750); }
+          } else {
+            c.classList.add('wrong'); accepting = false; feedbackTone(false);
+            lit.forEach(function(i2){ if (!cells[i2].classList.contains('correct')) cells[i2].classList.add('lit'); });
+            T(function(){ done({emoji: round>=4?'🏆':'🟦', title:'Vége!', score: round + ' szint', msg: round>=4?'Fotografikus memória! 🌟':'Szép – a téri memória is edzhető!'}); }, 900);
+          }
+        });
+      });
+      showLevel();
+    }
+
     /* ============================================================
        WOW-RÉTEG: életkor-onboarding, szint/XP, jelvények, konfetti,
        "Mit fejleszt?" info-lap. Minden localStorage-ban marad meg.
@@ -1262,11 +1367,18 @@
       var note = document.getElementById('ageNote');
       if (note) note.textContent = currentAge ? (ageLabel(currentAge) + ' hangolva') : '';
       homeTiles.textContent = '';
-      /* csak a korosztálynak ajánlott játékok; ha kevés, mindenre visszaesünk */
+      /* a korosztálynak ajánlott játékok (0–3: a 0-3-asok, 3–6: 9, 6+: mind a 13) */
       var list = GAMES.filter(function(g){ return g.playable && (!currentAge || (GAME_META[g.id] && GAME_META[g.id].ages.indexOf(currentAge) >= 0)); });
-      if (list.length < 4) list = GAMES.filter(function(g){ return g.playable; });
-      list.slice(0,4).forEach(function(g){ homeTiles.appendChild(tile(g)); });
+      /* 6+ esetén a kifejezetten 6+-os (nehezebb) játékok kerüljenek előre */
+      if (currentAge === '6+'){
+        var ex = list.filter(function(g){ return isAgeExclusive6(g.id); });
+        var rest = list.filter(function(g){ return !isAgeExclusive6(g.id); });
+        list = ex.concat(rest);
+      }
+      list.forEach(function(g){ homeTiles.appendChild(tile(g)); });
     }
+    /* igaz, ha a játék KIZÁRÓLAG 6+-os (a 3–6 nem éri el a kezdőlapon) */
+    function isAgeExclusive6(id){ var m = GAME_META[id]; return !!(m && m.ages.length === 1 && m.ages[0] === '6+'); }
 
     /* ---------- SPLASH + ONBOARDING ---------- */
     (function initIntro(){
