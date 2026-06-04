@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ============================================================
+       SEO + közösségi megosztás (Open Graph) meta adatok
+       A márka: "Hanna – I love matek & montessori" (Németh Hanna)
+       ============================================================ -->
+  <title>Hanna – I ❤️ matek &amp; montessori | Németh Hanna, matematikus &amp; Montessori matek</title>
+  <meta name="description" content="Németh Hanna matematikus és kognitív idegtudós. A matektanulás nem az iskolában kezdődik, hanem születésünktől fogva. Montessori-alapú, tudományos és játékos matematika babáknak és kisgyerekeknek." />
+  <meta name="author" content="Németh Hanna" />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="hu_HU" />
+  <meta property="og:title" content="Hanna – I ❤️ matek &amp; montessori" />
+  <meta property="og:description" content="Minden, ami matek, Montessori, gondolkodás és én. Tudományos és játékos matematika a legkisebbeknek." />
+  <meta name="theme-color" content="#319ed9" />
+
+  <!-- Beágyazott SVG favicon: egy kis piros szív (az "I ❤️ matek"-ból) — így a fájl önálló marad -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23f6f1ea'/%3E%3Cpath d='M16 26C7 19.5 6 14 9.5 11c2.4-2 5 0 6.5 2 1.5-2 4.1-4 6.5-2C26 14 25 19.5 16 26z' fill='%23ef5a48'/%3E%3C/svg%3E" />
+
+  <!-- Google Fonts: Poppins (a márka tényleges betűtípusa) + Fraunces a kiemelt idézetekhez.
+       A rendszer-fallback miatt offline is olvasható marad az oldal. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       1. DESIGN TOKENS — a márka színei és tipográfiája
+       A hex értékek Hanna élő oldaláról (montessoriakademia.hu)
+       lettek kinyerve, hogy az arculat pontosan illeszkedjen.
+       ============================================================ */
+    :root {
+      /* Márkaszínek */
+      --cream:      #f6f1ea;   /* meleg, krémszínű háttér (Montessori természetesség) */
+      --cream-soft: #fdfaf4;   /* világosabb kártya-háttér */
+      --ink:        #3d2b21;   /* mély kávébarna — fő szövegszín (fa-tónus) */
+      --ink-soft:   #6f5d52;   /* halványabb barna — másodlagos szöveg */
+      --blue:       #319ed9;   /* a márka világoskék kiemelőszíne */
+      --blue-deep:  #1d7cb0;   /* sötétebb kék — gombok, kontraszt (AA megfelelő) */
+      --clay:       #b2967e;   /* agyag/taupe — természetes másodlagos akcent */
+      --yellow:     #fede11;   /* napsárga — játékos kiemelés */
+      --coral:      #ef5a48;   /* meleg korall/piros — az "I ❤️ matek" szíve */
+      --white:      #ffffff;
+
+      /* Montessori színes gyöngylépcső HITELES színei (1–10) — az eszköz-illusztrációkhoz */
+      --bead-1:  #e23b2e;  /* 1 = piros */
+      --bead-2:  #2aa84a;  /* 2 = zöld */
+      --bead-3:  #f48fb1;  /* 3 = rózsaszín */
+      --bead-4:  #ffd23f;  /* 4 = sárga */
+      --bead-5:  #7ec8e3;  /* 5 = világoskék */
+      --bead-6:  #a978d6;  /* 6 = lila */
+      --bead-7:  #ffffff;  /* 7 = fehér */
+      --bead-8:  #8a5a3b;  /* 8 = barna */
+      --bead-9:  #1f4e9c;  /* 9 = sötétkék */
+      --bead-10: #f0a830;  /* 10 = arany */
+      --gold:    #efb33d;  /* aranygyöngy anyag */
+
+      /* Tipográfia */
+      --font-sans: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+
+      /* Forma */
+      --radius:   22px;
+      --radius-lg: 34px;
+      --shadow-sm: 0 4px 18px rgba(61, 43, 33, 0.07);
+      --shadow:    0 14px 40px rgba(61, 43, 33, 0.10);
+      --shadow-lg: 0 26px 70px rgba(61, 43, 33, 0.14);
+      --maxw: 1160px;
+    }
+
+    /* ============================================================
+       2. ALAP RESET + tipográfiai alapok
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      font-family: var(--font-sans);
+      color: var(--ink);
+      background: var(--cream);
+      line-height: 1.65;
+      font-size: clamp(16px, 1.05vw, 17.5px);
+      overflow-x: hidden;
+    }
+    h1, h2, h3, h4 { line-height: 1.15; margin: 0 0 .5em; font-weight: 700; letter-spacing: -0.015em; }
+    p { margin: 0 0 1em; }
+    a { color: var(--blue-deep); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    img, svg { max-width: 100%; display: block; }
+    ul { margin: 0; padding: 0; list-style: none; }
+
+    /* Fókusz-állapot billentyűzetes navigációhoz (akadálymentesség) */
+    :focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; border-radius: 6px; }
+
+    /* "Ugrás a tartalomra" link — képernyőolvasóknak / billentyűzethez */
+    .skip-link {
+      position: absolute; left: -999px; top: 0; z-index: 200;
+      background: var(--ink); color: #fff; padding: 12px 20px; border-radius: 0 0 12px 0;
+    }
+    .skip-link:focus { left: 0; }
+
+    /* ============================================================
+       3. ELRENDEZÉS — konténer, szekciók
+       ============================================================ */
+    .container { width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+    section { position: relative; }
+    .section-pad { padding: clamp(64px, 9vw, 120px) 0; }
+
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-weight: 600; font-size: .82rem; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--blue-deep); margin-bottom: 16px;
+    }
+    .eyebrow::before { content: ""; width: 26px; height: 2px; background: var(--blue); border-radius: 2px; }
+
+    .section-title { font-size: clamp(1.9rem, 4.2vw, 3rem); max-width: 18ch; }
+    .section-lead { font-size: clamp(1.05rem, 1.5vw, 1.22rem); color: var(--ink-soft); max-width: 60ch; }
+    .center { text-align: center; }
+    .center .section-title, .center .section-lead { margin-left: auto; margin-right: auto; }
+
+    /* ============================================================
+       4. GOMBOK
+       ============================================================ */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      font-family: var(--font-sans); font-weight: 600; font-size: 1rem;
+      padding: 14px 26px; border-radius: 50px; border: 2px solid transparent;
+      cursor: pointer; transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+      text-decoration: none; white-space: nowrap;
+    }
+    .btn:hover { text-decoration: none; transform: translateY(-2px); }
+    .btn-primary { background: var(--blue-deep); color: #fff; box-shadow: 0 10px 24px rgba(29,124,176,.32); }
+    .btn-primary:hover { background: #19699a; box-shadow: 0 14px 30px rgba(29,124,176,.40); }
+    .btn-sun { background: var(--yellow); color: var(--ink); box-shadow: 0 10px 24px rgba(240,180,0,.30); }
+    .btn-sun:hover { background: #ffd400; }
+    .btn-ghost { background: transparent; color: var(--ink); border-color: rgba(61,43,33,.20); }
+    .btn-ghost:hover { border-color: var(--ink); background: rgba(61,43,33,.04); }
+    .btn-light { background: #fff; color: var(--ink); box-shadow: var(--shadow-sm); }
+    .btn-light:hover { background: var(--cream-soft); }
+
+    /* ============================================================
+       5. HEADER / NAVIGÁCIÓ (ragadós)
+       ============================================================ */
+    .site-header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(246, 241, 234, 0.82);
+      backdrop-filter: saturate(160%) blur(12px);
+      -webkit-backdrop-filter: saturate(160%) blur(12px);
+      border-bottom: 1px solid rgba(61,43,33,.07);
+      transition: box-shadow .25s ease;
+    }
+    .site-header.scrolled { box-shadow: var(--shadow-sm); }
+    .nav { display: flex; align-items: center; justify-content: space-between; gap: 20px; height: 72px; }
+
+    /* Logó: szív-ikon + szöveg */
+    .logo { display: flex; align-items: center; gap: 12px; font-weight: 800; color: var(--ink); letter-spacing: -.02em; text-decoration: none; font-size: 1.05rem; }
+    .logo:hover { text-decoration: none; }
+    .logo .mark { width: 40px; height: 40px; flex: 0 0 auto; }
+    .logo b { color: var(--coral); }
+    .logo small { display: block; font-size: .68rem; font-weight: 500; color: var(--ink-soft); letter-spacing: .02em; }
+
+    .nav-links { display: flex; align-items: center; gap: 6px; }
+    .nav-links a {
+      color: var(--ink); font-weight: 500; font-size: .96rem; padding: 8px 14px; border-radius: 30px;
+      transition: background .15s ease, color .15s ease;
+    }
+    .nav-links a:hover { background: rgba(49,158,217,.12); color: var(--blue-deep); text-decoration: none; }
+    .nav-cta { display: flex; align-items: center; gap: 10px; }
+
+    /* Mobil hamburger gomb */
+    .nav-toggle {
+      display: none; width: 46px; height: 46px; border: none; background: #fff; border-radius: 14px;
+      box-shadow: var(--shadow-sm); cursor: pointer; padding: 0; position: relative;
+    }
+    .nav-toggle span, .nav-toggle span::before, .nav-toggle span::after {
+      content: ""; position: absolute; left: 50%; transform: translateX(-50%); width: 20px; height: 2.3px;
+      background: var(--ink); border-radius: 2px; transition: .25s ease;
+    }
+    .nav-toggle span { top: 50%; margin-top: -1px; }
+    .nav-toggle span::before { top: -6px; }
+    .nav-toggle span::after { top: 6px; }
+    .nav-toggle[aria-expanded="true"] span { background: transparent; }
+    .nav-toggle[aria-expanded="true"] span::before { top: 0; transform: translateX(-50%) rotate(45deg); }
+    .nav-toggle[aria-expanded="true"] span::after { top: 0; transform: translateX(-50%) rotate(-45deg); }
+
+    /* ============================================================
+       6. HERO
+       ============================================================ */
+    .hero { padding: clamp(40px, 6vw, 84px) 0 clamp(60px, 8vw, 110px); position: relative; }
+    .hero-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: clamp(30px, 5vw, 64px); align-items: center; }
+    .hero-tagline {
+      display: inline-flex; align-items: center; gap: 9px; background: #fff; color: var(--ink);
+      padding: 8px 16px; border-radius: 40px; font-size: .86rem; font-weight: 600;
+      box-shadow: var(--shadow-sm); margin-bottom: 22px;
+    }
+    .hero-tagline .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--bead-2); }
+    .hero h1 {
+      font-size: clamp(2.15rem, 5.3vw, 3.7rem); margin-bottom: 22px; max-width: 16ch;
+    }
+    .hero h1 .hl { color: var(--blue-deep); position: relative; white-space: nowrap; }
+    .hero h1 .heart { color: var(--coral); }
+    .hero-sub { font-size: clamp(1.05rem, 1.6vw, 1.28rem); color: var(--ink-soft); max-width: 48ch; margin-bottom: 30px; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 30px; }
+
+    /* Bizalmi sáv a hero alatt */
+    .hero-trust { display: flex; flex-wrap: wrap; gap: 10px 26px; align-items: center; color: var(--ink-soft); font-size: .92rem; font-weight: 500; }
+    .hero-trust b { color: var(--ink); }
+    .hero-trust .sep { width: 5px; height: 5px; background: var(--clay); border-radius: 50%; }
+
+    .hero-art { position: relative; }
+    .hero-art svg { width: 100%; height: auto; filter: drop-shadow(0 30px 50px rgba(61,43,33,.14)); }
+
+    /* ============================================================
+       7. ÁLTALÁNOS KÁRTYÁK + RÁCSOK
+       ============================================================ */
+    .grid { display: grid; gap: 24px; }
+    .grid-2 { grid-template-columns: repeat(2, 1fr); }
+    .grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+    .card {
+      background: var(--cream-soft); border: 1px solid rgba(61,43,33,.07); border-radius: var(--radius);
+      padding: 30px; box-shadow: var(--shadow-sm); transition: transform .22s ease, box-shadow .22s ease;
+    }
+    .card:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
+    .card h3 { font-size: 1.22rem; }
+    .card p { color: var(--ink-soft); margin-bottom: 0; }
+    .card .ico {
+      width: 56px; height: 56px; border-radius: 16px; display: grid; place-items: center; margin-bottom: 18px;
+    }
+
+    /* ============================================================
+       8. "HIEDELEM" sáv — Hanna szó szerinti idézete
+       ============================================================ */
+    .belief { background: var(--ink); color: var(--cream); }
+    .belief .container { display: grid; grid-template-columns: auto 1fr; gap: clamp(24px,4vw,54px); align-items: center; }
+    .belief .quotemark { font-family: var(--font-display); font-size: clamp(4rem, 12vw, 9rem); line-height: .7; color: var(--yellow); }
+    .belief blockquote { margin: 0; }
+    .belief blockquote p { font-family: var(--font-display); font-size: clamp(1.5rem, 3.6vw, 2.5rem); line-height: 1.25; color: #fff; font-weight: 500; }
+    .belief blockquote .src { font-family: var(--font-sans); font-size: .98rem; color: rgba(255,255,255,.72); font-weight: 500; }
+    .belief .src b { color: var(--yellow); }
+
+    /* ============================================================
+       9. RÓLAM (Hanna)
+       ============================================================ */
+    .about-grid { display: grid; grid-template-columns: .85fr 1.15fr; gap: clamp(30px,5vw,64px); align-items: center; }
+    .portrait { position: relative; }
+    .portrait svg { width: 100%; height: auto; }
+    .cred-list { display: flex; flex-wrap: wrap; gap: 10px; margin: 22px 0 26px; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 1px solid rgba(61,43,33,.1);
+      padding: 8px 15px; border-radius: 40px; font-size: .9rem; font-weight: 500; color: var(--ink); box-shadow: var(--shadow-sm);
+    }
+    .chip .e { font-size: 1.05rem; }
+
+    /* ============================================================
+       10. A MÓDSZER — fejlődési szakaszok (0–3 / 3–6 / 6+)
+       ============================================================ */
+    .stage { background: var(--cream-soft); border-radius: var(--radius); padding: 30px; border: 1px solid rgba(61,43,33,.07); box-shadow: var(--shadow-sm); position: relative; overflow: hidden; }
+    .stage .age { display: inline-block; font-weight: 800; font-size: .8rem; letter-spacing: .08em; padding: 5px 12px; border-radius: 30px; margin-bottom: 16px; }
+    .stage svg { height: 70px; width: auto; margin-bottom: 14px; }
+    .stage h3 { font-size: 1.15rem; }
+    .stage p { color: var(--ink-soft); margin: 0; font-size: .96rem; }
+    .stage-0 .age { background: #fdeede; color: #b5762a; }
+    .stage-1 .age { background: #e3f1fb; color: var(--blue-deep); }
+    .stage-2 .age { background: #e9f6ec; color: #2a8a44; }
+
+    /* ============================================================
+       11. INTERAKTÍV gyöngy-összeadás demó
+       ============================================================ */
+    .demo { background: linear-gradient(170deg, #fff 0%, var(--cream-soft) 100%); border-radius: var(--radius-lg); border: 1px solid rgba(61,43,33,.08); box-shadow: var(--shadow); padding: clamp(26px, 4vw, 48px); }
+    .demo-head { text-align: center; margin-bottom: 28px; }
+    .demo-controls { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; justify-content: center; margin-bottom: 30px; }
+    .stepper { display: flex; align-items: center; gap: 4px; background: #fff; border-radius: 50px; padding: 6px; box-shadow: var(--shadow-sm); }
+    .stepper button {
+      width: 42px; height: 42px; border-radius: 50%; border: none; background: var(--cream); color: var(--ink);
+      font-size: 1.4rem; font-weight: 700; cursor: pointer; transition: background .15s ease, transform .1s ease; line-height: 1;
+    }
+    .stepper button:hover { background: var(--blue); color: #fff; }
+    .stepper button:active { transform: scale(.92); }
+    .stepper .val { min-width: 48px; text-align: center; font-size: 1.5rem; font-weight: 800; }
+    .demo-op { font-size: 2rem; font-weight: 800; color: var(--clay); }
+    .demo-stage { display: flex; flex-wrap: wrap; gap: 12px 26px; align-items: flex-end; justify-content: center; min-height: 120px; padding: 18px; background: rgba(255,255,255,.6); border-radius: var(--radius); }
+    .bead-bar { display: flex; gap: 4px; padding: 6px; border-radius: 40px; background: rgba(61,43,33,.04); }
+    .bead-bar .bead { width: 24px; height: 24px; border-radius: 50%; box-shadow: inset -2px -2px 4px rgba(0,0,0,.18), inset 2px 2px 3px rgba(255,255,255,.5); }
+    .demo-result { text-align: center; margin-top: 24px; font-size: 1.3rem; font-weight: 600; color: var(--ink); }
+    .demo-result .sum { font-size: 2.2rem; font-weight: 800; color: var(--blue-deep); }
+
+    /* ============================================================
+       12. MONTESSORI ESZKÖZÖK galéria (SVG-vel, JS építi)
+       ============================================================ */
+    .material { background: var(--cream-soft); border: 1px solid rgba(61,43,33,.07); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm); transition: transform .22s ease, box-shadow .22s ease; }
+    .material:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
+    .material .stage-art { background: radial-gradient(circle at 50% 30%, #fff, var(--cream)); padding: 26px; display: grid; place-items: center; min-height: 180px; }
+    .material .stage-art svg { width: auto; max-height: 150px; }
+    .material .body { padding: 22px 26px 28px; }
+    .material h3 { font-size: 1.12rem; margin-bottom: 6px; }
+    .material p { color: var(--ink-soft); font-size: .94rem; margin: 0; }
+
+    /* ============================================================
+       13. NÉGY PILLÉR
+       ============================================================ */
+    .pillar .ico svg { width: 30px; height: 30px; }
+
+    /* ============================================================
+       14. TUDOMÁNY sáv
+       ============================================================ */
+    .science { background: linear-gradient(160deg, #eaf5fc 0%, var(--cream) 100%); }
+    .science-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(28px,5vw,60px); align-items: center; }
+    .fact { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 22px; }
+    .fact .num { flex: 0 0 auto; width: 46px; height: 46px; border-radius: 14px; background: var(--white); color: var(--blue-deep); display: grid; place-items: center; font-weight: 800; box-shadow: var(--shadow-sm); }
+    .fact h4 { margin: 0 0 3px; font-size: 1.05rem; }
+    .fact p { margin: 0; color: var(--ink-soft); font-size: .95rem; }
+
+    /* ============================================================
+       15. PROGRAMOK
+       ============================================================ */
+    .program { display: flex; flex-direction: column; background: var(--cream-soft); border: 1px solid rgba(61,43,33,.08); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm); transition: transform .22s ease, box-shadow .22s ease; }
+    .program:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
+    .program .top { padding: 26px 26px 0; }
+    .program .tag { display: inline-block; font-size: .76rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 5px 12px; border-radius: 30px; margin-bottom: 14px; }
+    .program.free .tag { background: #e9f6ec; color: #2a8a44; }
+    .program.acad .tag { background: #e3f1fb; color: var(--blue-deep); }
+    .program.toys .tag { background: #fdeede; color: #b5762a; }
+    .program h3 { font-size: 1.3rem; margin-bottom: 8px; }
+    .program p { color: var(--ink-soft); margin-bottom: 18px; }
+    .program .foot { margin-top: auto; padding: 0 26px 26px; }
+
+    /* ============================================================
+       16. MISSZIÓ pull-quote
+       ============================================================ */
+    .mission { background: var(--blue); color: #fff; text-align: center; overflow: hidden; }
+    .mission .container { position: relative; z-index: 1; }
+    .mission p.big { font-family: var(--font-display); font-size: clamp(1.7rem, 4.5vw, 3rem); line-height: 1.2; font-weight: 600; max-width: 22ch; margin: 0 auto 18px; }
+    .mission .who { font-weight: 600; opacity: .92; }
+    .mission .emoji-row { font-size: 1.8rem; margin-bottom: 18px; letter-spacing: .2em; }
+
+    /* ============================================================
+       17. KÖZÖSSÉG / közösségi linkek
+       ============================================================ */
+    .social-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 18px; }
+    .social-card {
+      display: flex; flex-direction: column; gap: 6px; padding: 24px; border-radius: var(--radius);
+      background: var(--cream-soft); border: 1px solid rgba(61,43,33,.08); box-shadow: var(--shadow-sm);
+      transition: transform .2s ease, box-shadow .2s ease; color: var(--ink); text-decoration: none;
+    }
+    .social-card:hover { transform: translateY(-5px); box-shadow: var(--shadow); text-decoration: none; }
+    .social-card .ico { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; margin-bottom: 8px; color: #fff; }
+    .social-card .name { font-weight: 700; }
+    .social-card .handle { font-size: .9rem; color: var(--ink-soft); }
+    .social-card .followers { margin-top: 4px; font-size: .85rem; font-weight: 600; color: var(--blue-deep); }
+
+    /* ============================================================
+       18. KAPCSOLAT / záró CTA
+       ============================================================ */
+    .cta-final { background: var(--ink); color: var(--cream); border-radius: var(--radius-lg); padding: clamp(34px, 5vw, 64px); text-align: center; box-shadow: var(--shadow-lg); position: relative; overflow: hidden; }
+    .cta-final h2 { color: #fff; font-size: clamp(1.7rem, 4vw, 2.6rem); }
+    .cta-final p { color: rgba(255,255,255,.8); max-width: 52ch; margin: 0 auto 28px; }
+    .cta-final .actions { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
+    .cta-final .email { margin-top: 20px; font-size: .95rem; color: rgba(255,255,255,.7); }
+    .cta-final .email a { color: var(--yellow); }
+
+    /* ============================================================
+       19. FOOTER
+       ============================================================ */
+    .site-footer { background: var(--cream); border-top: 1px solid rgba(61,43,33,.08); padding: 54px 0 30px; }
+    .footer-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 36px; margin-bottom: 36px; }
+    .footer-brand .logo { margin-bottom: 14px; }
+    .footer-brand p { color: var(--ink-soft); font-size: .94rem; max-width: 36ch; }
+    .footer-col h4 { font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 14px; }
+    .footer-col a { display: block; color: var(--ink); padding: 5px 0; font-size: .96rem; }
+    .footer-col a:hover { color: var(--blue-deep); }
+    .footer-bottom { border-top: 1px solid rgba(61,43,33,.08); padding-top: 22px; display: flex; flex-wrap: wrap; gap: 10px 24px; justify-content: space-between; align-items: center; color: var(--ink-soft); font-size: .86rem; }
+
+    /* ============================================================
+       20. DEKORÁCIÓ — lebegő alakzatok + hullámos elválasztók
+       ============================================================ */
+    .blob { position: absolute; border-radius: 50%; filter: blur(2px); opacity: .5; z-index: 0; pointer-events: none; }
+    .wave { display: block; width: 100%; height: auto; }
+
+    /* Lebegő animáció a hero díszekhez */
+    @keyframes floaty { 0%,100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-14px) rotate(4deg); } }
+    .float { animation: floaty 6s ease-in-out infinite; transform-origin: center; }
+    .float.f2 { animation-duration: 7.5s; animation-delay: -2s; }
+    .float.f3 { animation-duration: 9s; animation-delay: -4s; }
+
+    /* ============================================================
+       21. SCROLL-REVEAL animáció (IntersectionObserver kapcsolja be)
+       ============================================================ */
+    .reveal { opacity: 0; transform: translateY(26px); transition: opacity .7s ease, transform .7s ease; }
+    .reveal.in { opacity: 1; transform: none; }
+    .reveal.d1 { transition-delay: .08s; }
+    .reveal.d2 { transition-delay: .16s; }
+    .reveal.d3 { transition-delay: .24s; }
+
+    /* ============================================================
+       22. RESPONSZÍV TÖRÉSPONTOK
+       ============================================================ */
+    @media (max-width: 920px) {
+      .hero-grid { grid-template-columns: 1fr; }
+      .hero-art { order: -1; max-width: 460px; margin: 0 auto; }
+      .about-grid, .science-grid, .belief .container { grid-template-columns: 1fr; }
+      .portrait { max-width: 360px; margin: 0 auto; }
+      .grid-4 { grid-template-columns: repeat(2,1fr); }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+      .belief .quotemark { display: none; }
+    }
+    @media (max-width: 760px) {
+      /* Mobil navigáció: lenyíló menü */
+      .nav-toggle { display: block; }
+      .nav-links {
+        position: absolute; top: 72px; left: 0; right: 0;
+        flex-direction: column; align-items: stretch; gap: 4px;
+        background: var(--cream-soft); padding: 16px; border-bottom: 1px solid rgba(61,43,33,.08);
+        box-shadow: var(--shadow); transform: translateY(-12px); opacity: 0; pointer-events: none; transition: .22s ease;
+      }
+      .nav-links.open { transform: none; opacity: 1; pointer-events: auto; }
+      .nav-links a { padding: 12px 16px; }
+      .nav .nav-cta .btn-cta-desktop { display: none; }
+    }
+    @media (max-width: 600px) {
+      .grid-2, .grid-3, .grid-4, .social-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr; }
+      .hero-actions .btn { width: 100%; }
+    }
+
+    /* Mozgáscsökkentés tisztelete (akadálymentesség) */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+      .reveal { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+
+<body>
+  <a class="skip-link" href="#main">Ugrás a tartalomra</a>
+
+  <!-- ============================================================
+       HEADER / NAVIGÁCIÓ
+       ============================================================ -->
+  <header class="site-header" id="top">
+    <div class="container">
+      <nav class="nav" aria-label="Fő navigáció">
+        <a class="logo" href="#top" aria-label="Hanna – I love matek és montessori, kezdőlap">
+          <!-- Szív-monogram logó -->
+          <svg class="mark" viewBox="0 0 40 40" aria-hidden="true">
+            <rect width="40" height="40" rx="11" fill="#fff"/>
+            <path d="M20 32C9 24 8 17.5 12 14c2.9-2.5 6 .2 8 2.6 2-2.4 5.1-5.1 8-2.6 4 3.5 3 10-8 18z" fill="#ef5a48"/>
+            <text x="20" y="25" font-family="Poppins, sans-serif" font-size="12" font-weight="800" fill="#fff" text-anchor="middle">H</text>
+          </svg>
+          <span>Hanna <b>♥</b> matek
+            <small>&amp; montessori</small>
+          </span>
+        </a>
+
+        <button class="nav-toggle" id="navToggle" aria-label="Menü megnyitása" aria-expanded="false" aria-controls="navLinks">
+          <span></span>
+        </button>
+
+        <ul class="nav-links" id="navLinks">
+          <li><a href="#rolam">Rólam</a></li>
+          <li><a href="#modszer">A módszer</a></li>
+          <li><a href="#eszkozok">Eszközök</a></li>
+          <li><a href="#tudomany">Tudomány</a></li>
+          <li><a href="#programok">Programok</a></li>
+          <li><a href="#kapcsolat">Kapcsolat</a></li>
+        </ul>
+
+        <div class="nav-cta">
+          <a class="btn btn-primary btn-cta-desktop" href="https://montessoriakademia.hu/matekbabaknak/" target="_blank" rel="noopener">Díjmentes előadás</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- ============================================================
+         HERO
+         ============================================================ -->
+    <section class="hero">
+      <!-- dekoratív háttér-buborékok -->
+      <div class="blob" style="width:300px;height:300px;background:#bfe3f5;top:-60px;right:-40px;"></div>
+      <div class="blob" style="width:220px;height:220px;background:#ffe98a;bottom:-40px;left:-60px;opacity:.4;"></div>
+
+      <div class="container">
+        <div class="hero-grid">
+          <div class="hero-copy reveal">
+            <span class="hero-tagline"><span class="dot"></span> Minden, ami matek, Montessori, gondolkodás és én</span>
+            <h1>Szeretnél egy boldog, önálló gyermeket, aki <span class="hl">mer kérdezni</span> és <span class="heart">gondolkodni</span>?</h1>
+            <p class="hero-sub">A matektanulás nem az iskolában kezdődik&nbsp;– hanem születésünktől fogva. Montessori-alapon, az idegtudomány eszközeivel mutatom meg, hogyan lehet a matek nem rettegés, hanem öröm. Már babakortól.</p>
+            <div class="hero-actions">
+              <a class="btn btn-primary" href="https://montessoriakademia.hu/matekbabaknak/" target="_blank" rel="noopener">Díjmentes előadás: Matek babáknak</a>
+              <a class="btn btn-ghost" href="#modszer">Ismerd meg a módszert →</a>
+            </div>
+            <div class="hero-trust">
+              <span><b>BME</b> matematikus &amp; kognitív idegtudós</span>
+              <span class="sep"></span>
+              <span><b>28&nbsp;000+</b> szülő közössége</span>
+              <span class="sep"></span>
+              <span><b>Montessori</b> Akadémia</span>
+            </div>
+          </div>
+
+          <!-- HERO ILLUSZTRÁCIÓ: "I ♥ matek" + lebegő Montessori elemek -->
+          <div class="hero-art reveal d2" aria-hidden="true">
+            <svg viewBox="0 0 520 480" role="img" aria-label="Montessori matematikai eszközök illusztrációja">
+              <defs>
+                <linearGradient id="cardG" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#fdf7ee"/>
+                </linearGradient>
+                <linearGradient id="goldG" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#f7c65a"/><stop offset="1" stop-color="#e09f24"/>
+                </linearGradient>
+              </defs>
+
+              <!-- nagy lekerekített kártya -->
+              <rect x="70" y="60" width="380" height="360" rx="40" fill="url(#cardG)" stroke="#efe3d2"/>
+
+              <!-- "I ♥ matek" felirat — vízszintes lockup, a kártyán középre igazítva -->
+              <text x="182" y="153" font-family="Poppins, sans-serif" font-size="34" font-weight="800" fill="#3d2b21" text-anchor="middle">I</text>
+              <path d="M0,-7 C-7,-18 -24,-11 -24,2 C-24,15 0,26 0,26 C0,26 24,15 24,2 C24,-11 7,-18 0,-7 Z" transform="translate(227,142)" fill="#ef5a48"/>
+              <text x="253" y="153" font-family="Poppins, sans-serif" font-size="34" font-weight="800" fill="#319ed9" text-anchor="start">matek</text>
+
+              <!-- színes gyöngylépcső (1–5) a kártyán belül -->
+              <g transform="translate(120,210)">
+                <!-- minden sor: N gyöngy, hiteles Montessori színekkel -->
+                <circle cx="0"  cy="0"  r="11" fill="#e23b2e"/>
+                <circle cx="0"  cy="30" r="11" fill="#2aa84a"/><circle cx="28" cy="30" r="11" fill="#2aa84a"/>
+                <circle cx="0"  cy="60" r="11" fill="#f48fb1"/><circle cx="28" cy="60" r="11" fill="#f48fb1"/><circle cx="56" cy="60" r="11" fill="#f48fb1"/>
+                <circle cx="0"  cy="90" r="11" fill="#ffd23f"/><circle cx="28" cy="90" r="11" fill="#ffd23f"/><circle cx="56" cy="90" r="11" fill="#ffd23f"/><circle cx="84" cy="90" r="11" fill="#ffd23f"/>
+                <circle cx="0"  cy="120" r="11" fill="#7ec8e3"/><circle cx="28" cy="120" r="11" fill="#7ec8e3"/><circle cx="56" cy="120" r="11" fill="#7ec8e3"/><circle cx="84" cy="120" r="11" fill="#7ec8e3"/><circle cx="112" cy="120" r="11" fill="#7ec8e3"/>
+              </g>
+
+              <!-- aranygyöngy: tízes rúd -->
+              <g transform="translate(300,250)">
+                <rect x="-6" y="-8" width="150" height="16" rx="8" fill="#caa23a" opacity=".25"/>
+                <circle cx="6"  cy="0" r="8" fill="url(#goldG)"/><circle cx="22" cy="0" r="8" fill="url(#goldG)"/>
+                <circle cx="38" cy="0" r="8" fill="url(#goldG)"/><circle cx="54" cy="0" r="8" fill="url(#goldG)"/>
+                <circle cx="70" cy="0" r="8" fill="url(#goldG)"/><circle cx="86" cy="0" r="8" fill="url(#goldG)"/>
+                <circle cx="102" cy="0" r="8" fill="url(#goldG)"/><circle cx="118" cy="0" r="8" fill="url(#goldG)"/>
+                <circle cx="134" cy="0" r="8" fill="url(#goldG)"/><circle cx="150" cy="0" r="8" fill="url(#goldG)"/>
+              </g>
+
+              <!-- piros-kék számrúd -->
+              <g transform="translate(300,300)">
+                <rect x="0" y="0" width="40" height="20" rx="5" fill="#e23b2e"/>
+                <rect x="40" y="0" width="40" height="20" rx="5" fill="#2f6fb0"/>
+                <rect x="80" y="0" width="40" height="20" rx="5" fill="#e23b2e"/>
+              </g>
+
+              <!-- lebegő geometriai díszek -->
+              <g class="float">
+                <circle cx="95" cy="95" r="20" fill="#fede11"/>
+                <text x="95" y="102" font-family="Poppins" font-size="20" font-weight="800" fill="#3d2b21" text-anchor="middle">7</text>
+              </g>
+              <g class="float f2">
+                <rect x="408" y="92" width="40" height="40" rx="9" fill="#319ed9" transform="rotate(12 428 112)"/>
+                <text x="428" y="120" font-family="Poppins" font-size="20" font-weight="800" fill="#fff" text-anchor="middle" transform="rotate(12 428 112)">+</text>
+              </g>
+              <g class="float f3">
+                <path d="M58 350 l24 0 -12 -22 z" fill="#2aa84a"/>
+              </g>
+              <g class="float f2">
+                <circle cx="430" cy="370" r="22" fill="#ef5a48"/>
+                <text x="430" y="378" font-family="Poppins" font-size="22" font-weight="800" fill="#fff" text-anchor="middle">=</text>
+              </g>
+              <g class="float">
+                <text x="150" y="430" font-family="Fraunces, serif" font-size="30" font-weight="700" fill="#b2967e">×</text>
+              </g>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- hullámos elválasztó a sötét hiedelem-sávhoz -->
+    <svg class="wave" viewBox="0 0 1440 70" preserveAspectRatio="none" aria-hidden="true" style="margin-bottom:-2px;">
+      <path d="M0,40 C360,80 1080,0 1440,40 L1440,70 L0,70 Z" fill="#3d2b21"/>
+    </svg>
+
+    <!-- ============================================================
+         HIEDELEM-SÁV — Hanna szó szerinti gondolata
+         ============================================================ -->
+    <section class="belief section-pad">
+      <div class="container">
+        <div class="quotemark" aria-hidden="true">“</div>
+        <blockquote class="reveal">
+          <p>Nincs olyan, hogy „nincs agya a gyereknek a matekhoz”. Csak még nem élte meg, milyen jó dolog megérteni valamit.</p>
+          <span class="src">— <b>Németh Hanna</b>, matematikus &amp; Montessori matek oktató</span>
+        </blockquote>
+      </div>
+    </section>
+
+    <svg class="wave" viewBox="0 0 1440 70" preserveAspectRatio="none" aria-hidden="true" style="margin-top:-2px;">
+      <path d="M0,30 C360,-10 1080,70 1440,30 L1440,0 L0,0 Z" fill="#3d2b21"/>
+    </svg>
+
+    <!-- ============================================================
+         RÓLAM — Németh Hanna
+         ============================================================ -->
+    <section class="section-pad" id="rolam">
+      <div class="container">
+        <div class="about-grid">
+          <!-- Illusztrált portré-jelvény (monogram + diáksapka + matek-szimbólumok) -->
+          <div class="portrait reveal" aria-hidden="true">
+            <svg viewBox="0 0 360 360" role="img" aria-label="Németh Hanna jelvénye">
+              <defs>
+                <clipPath id="circ"><circle cx="180" cy="180" r="130"/></clipPath>
+              </defs>
+              <!-- pontozott díszgyűrű -->
+              <circle cx="180" cy="180" r="150" fill="none" stroke="#b2967e" stroke-width="3" stroke-dasharray="2 12" stroke-linecap="round"/>
+              <circle cx="180" cy="180" r="132" fill="#319ed9"/>
+              <g clip-path="url(#circ)">
+                <rect x="50" y="50" width="260" height="260" fill="#eaf5fc"/>
+                <!-- arc -->
+                <circle cx="180" cy="158" r="58" fill="#f6d6bd"/>
+                <!-- haj -->
+                <path d="M120 150 a60 60 0 0 1 120 0 c0 -42 -30 -64 -60 -64 s-60 22 -60 64z" fill="#5a3b28"/>
+                <path d="M122 150 c-6 30 -2 54 -2 54 l-14 0 c-6 -36 4 -70 16 -54z" fill="#5a3b28"/>
+                <path d="M238 150 c6 30 2 54 2 54 l14 0 c6 -36 -4 -70 -16 -54z" fill="#5a3b28"/>
+                <!-- szem + mosoly -->
+                <circle cx="160" cy="158" r="5" fill="#3d2b21"/><circle cx="200" cy="158" r="5" fill="#3d2b21"/>
+                <path d="M163 178 q17 16 34 0" fill="none" stroke="#c66a4a" stroke-width="4" stroke-linecap="round"/>
+                <!-- diáksapka 👩‍🎓 -->
+                <g transform="translate(180,92)">
+                  <path d="M-46 0 L0 -20 L46 0 L0 20 Z" fill="#3d2b21"/>
+                  <rect x="-30" y="2" width="60" height="20" rx="3" fill="#3d2b21"/>
+                  <line x1="40" y1="0" x2="46" y2="26" stroke="#fede11" stroke-width="3"/>
+                  <circle cx="46" cy="28" r="4" fill="#fede11"/>
+                </g>
+                <!-- váll/ruha -->
+                <path d="M104 300 c0 -50 34 -78 76 -78 s76 28 76 78 z" fill="#ef5a48"/>
+              </g>
+              <!-- lebegő matek-szimbólumok a jelvény körül -->
+              <g class="float"><circle cx="300" cy="92" r="24" fill="#fede11"/><text x="300" y="100" font-family="Poppins" font-size="22" font-weight="800" fill="#3d2b21" text-anchor="middle">π</text></g>
+              <g class="float f2"><circle cx="60" cy="250" r="22" fill="#2aa84a"/><text x="60" y="258" font-family="Poppins" font-size="20" font-weight="800" fill="#fff" text-anchor="middle">∑</text></g>
+              <g class="float f3"><circle cx="298" cy="270" r="20" fill="#fff" stroke="#b2967e" stroke-width="2"/><text x="298" y="277" font-family="Poppins" font-size="18" font-weight="800" fill="#ef5a48" text-anchor="middle">♥</text></g>
+            </svg>
+          </div>
+
+          <div class="about-copy reveal d1">
+            <span class="eyebrow">Rólam</span>
+            <h2 class="section-title">Németh Hanna vagyok – matematikus, idegtudós, két gyerek anyukája</h2>
+            <p class="section-lead">Matematikusként és a BME kognitív idegtudomány területén végezve abban hiszek, hogy a gondolkodás tanulható, fejleszthető – és örömteli. Gondolkodással provokálok: megmutatom, hogy a matek nem tantárgy, hanem a világ megértésének eszköze.</p>
+            <div class="cred-list">
+              <span class="chip"><span class="e">🧠</span> BME · kognitív idegtudomány</span>
+              <span class="chip"><span class="e">📐</span> Matematikus</span>
+              <span class="chip"><span class="e">🌿</span> Montessori matek oktató</span>
+              <span class="chip"><span class="e">👩‍👧‍👦</span> Két gyermek anyukája</span>
+              <span class="chip"><span class="e">🎓</span> Montessori Akadémia alapító</span>
+            </div>
+            <p>A célom egyszerű, mégis nagy: <strong>egy okosabb, tudatosabb, gondolkodóbb és boldogabb világ</strong>. Olyan gyerekek, akik nem félnek hibázni, akik szeretnek kérdezni – és akiknek a matek nem rémálom, hanem játék.</p>
+            <a class="btn btn-light" href="#programok">Nézd meg, hol találkozhatunk →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         A MÓDSZER — konkréttól az elvont felé (0–3 / 3–6 / 6+)
+         ============================================================ -->
+    <section class="section-pad" id="modszer" style="background:var(--cream-soft);">
+      <div class="container">
+        <div class="center" style="margin-bottom:54px;">
+          <span class="eyebrow" style="justify-content:center;">A módszer</span>
+          <h2 class="section-title center">A Montessori-matek mindig a konkréttól halad az elvont felé</h2>
+          <p class="section-lead center">A gyerek először <strong>megérti</strong>, és csak utána mondja ki – a hagyományos sorrend fordítottja. Nem elég elmondani neki valamit: a kezével kell megtapasztalnia. Így épül a matek a születéstől kezdve, lépésről lépésre.</p>
+        </div>
+
+        <div class="grid grid-3">
+          <!-- 0–3: érzékelés + gyakorlati élet -->
+          <div class="stage stage-0 reveal">
+            <span class="age">0–3 év</span>
+            <svg viewBox="0 0 120 70" aria-hidden="true">
+              <rect x="6" y="20" width="48" height="34" rx="7" fill="#f0a830"/>
+              <circle cx="86" cy="30" r="14" fill="#7ec8e3"/>
+              <path d="M86 48 q-8 10 0 18 q8 -8 0 -18z" fill="#319ed9"/>
+              <rect x="64" y="50" width="44" height="8" rx="4" fill="#b2967e"/>
+            </svg>
+            <h3>Érzékelés &amp; gyakorlati élet</h3>
+            <p>Narancsfacsarás, cipőpucolás, öntögetés. Ezek tanítják a sorrendiséget, a munkamemóriát és a koncentrációt – a matek igazi alapjait.</p>
+          </div>
+
+          <!-- 3–6: konkrét eszközök -->
+          <div class="stage stage-1 reveal d1">
+            <span class="age">3–6 év</span>
+            <svg viewBox="0 0 120 70" aria-hidden="true">
+              <circle cx="20" cy="50" r="9" fill="#e23b2e"/>
+              <circle cx="42" cy="50" r="9" fill="#2aa84a"/><circle cx="60" cy="50" r="9" fill="#2aa84a"/>
+              <circle cx="80" cy="50" r="9" fill="#f48fb1"/><circle cx="98" cy="50" r="9" fill="#f48fb1"/><circle cx="116" cy="50" r="9" fill="#f48fb1"/>
+              <rect x="14" y="14" width="92" height="12" rx="6" fill="#efb33d"/>
+            </svg>
+            <h3>Kézzelfogható eszközök</h3>
+            <p>Gyöngyök, számrudak, aranygyöngyök. A gyerek <em>érzi</em> a mennyiséget – hogy a tíz több, mint az egy, és hogy 2 + 3 mindig 5.</p>
+          </div>
+
+          <!-- 6+: elvonatkoztatás -->
+          <div class="stage stage-2 reveal d2">
+            <span class="age">6+ év</span>
+            <svg viewBox="0 0 120 70" aria-hidden="true">
+              <rect x="20" y="12" width="80" height="46" rx="6" fill="#fff" stroke="#b2967e" stroke-width="2"/>
+              <text x="60" y="44" font-family="Poppins" font-size="24" font-weight="800" fill="#319ed9" text-anchor="middle">12+3</text>
+              <circle cx="100" cy="14" r="8" fill="#fede11"/>
+            </svg>
+            <h3>Elvonatkoztatás</h3>
+            <p>Ami a kézben megszilárdult, az fejben is működik. A számok és műveletek így nem absztrakt szabályok, hanem megértett, biztos tudás.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         INTERAKTÍV gyöngy-összeadás demó
+         ============================================================ -->
+    <section class="section-pad">
+      <div class="container">
+        <div class="demo reveal">
+          <div class="demo-head">
+            <span class="eyebrow" style="justify-content:center;">Próbáld ki</span>
+            <h2 class="section-title center" style="font-size:clamp(1.5rem,3.5vw,2.2rem);">Így néz ki egy összeadás Montessori-gyöngyökkel</h2>
+            <p class="section-lead center">Állíts be két számot, és nézd, ahogy a színes gyöngysorok összeadódnak. Ez a „konkrétból az elvont felé” a gyakorlatban.</p>
+          </div>
+
+          <!-- vezérlők: két stepper -->
+          <div class="demo-controls">
+            <div class="stepper" role="group" aria-label="Első szám">
+              <button type="button" data-step="a" data-dir="-1" aria-label="Első szám csökkentése">−</button>
+              <span class="val" id="valA">2</span>
+              <button type="button" data-step="a" data-dir="1" aria-label="Első szám növelése">+</button>
+            </div>
+            <span class="demo-op">+</span>
+            <div class="stepper" role="group" aria-label="Második szám">
+              <button type="button" data-step="b" data-dir="-1" aria-label="Második szám csökkentése">−</button>
+              <span class="val" id="valB">3</span>
+              <button type="button" data-step="b" data-dir="1" aria-label="Második szám növelése">+</button>
+            </div>
+          </div>
+
+          <!-- gyöngyök színpada (JS tölti fel) -->
+          <div class="demo-stage" id="demoStage" aria-live="polite"></div>
+
+          <div class="demo-result">
+            <span id="exprText">2 + 3</span> = <span class="sum" id="sumText">5</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         MONTESSORI ESZKÖZÖK galéria (SVG-ket a JS rajzolja)
+         ============================================================ -->
+    <section class="section-pad" id="eszkozok" style="background:var(--cream-soft);">
+      <div class="container">
+        <div class="center" style="margin-bottom:48px;">
+          <span class="eyebrow" style="justify-content:center;">Montessori eszközök</span>
+          <h2 class="section-title center">Az eszközök, amelyekkel a matek kézzelfoghatóvá válik</h2>
+          <p class="section-lead center">Minden eszköznek egyetlen feladata van: egy elvont fogalmat megfoghatóvá tenni. A MontiBaba keretében ezek bérelhetők és megvásárolhatók is.</p>
+        </div>
+
+        <div class="grid grid-4" id="materialsGrid">
+          <!-- A kártyák tartalmát a buildMaterials() generálja, hiteles Montessori színekkel -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         NÉGY PILLÉR
+         ============================================================ -->
+    <section class="section-pad">
+      <div class="container">
+        <div class="center" style="margin-bottom:48px;">
+          <span class="eyebrow" style="justify-content:center;">Amit kapsz</span>
+          <h2 class="section-title center">Négy pillér, egy szemlélet</h2>
+        </div>
+        <div class="grid grid-4">
+          <div class="card pillar reveal">
+            <div class="ico" style="background:#e3f1fb;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#1d7cb0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+            <h3>Montessori szemlélet</h3>
+            <p>A legfontosabb a „hogyan”. Itt sokkal többet számít a módszertan és a szemlélet, mint maguk a fizikai eszközök.</p>
+          </div>
+          <div class="card pillar reveal d1">
+            <div class="ico" style="background:#fdeede;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#b5762a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-7 9 7v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 21V12h6v9"/></svg>
+            </div>
+            <h3>Otthoni tevékenységek</h3>
+            <p>Otthonba és hétköznapokba könnyen, olcsón illeszthető tevékenységek és DIY eszközök – nem kell drága készlet.</p>
+          </div>
+          <div class="card pillar reveal d2">
+            <div class="ico" style="background:#e9f6ec;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#2a8a44" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v6l-5 8a2 2 0 0 0 2 3h12a2 2 0 0 0 2-3l-5-8V3"/><path d="M8 3h8"/></svg>
+            </div>
+            <h3>Tudományos alapok</h3>
+            <p>A Montessori sok ponton találkozik a modern idegtudománnyal – ezért kutatásalapú, mégis érthető előadások épülnek rá.</p>
+          </div>
+          <div class="card pillar reveal d3">
+            <div class="ico" style="background:#f6ecf7;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#a978d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="7" r="3"/><circle cx="6" cy="17" r="3"/><circle cx="14" cy="7" r="3"/><circle cx="18" cy="17" r="3"/></svg>
+            </div>
+            <h3>Montessori eszközök</h3>
+            <p>Eredeti eszközök bemutatása – bérlésre és vásárlásra is van lehetőség a MontiBaba szolgáltatáson keresztül.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         TUDOMÁNY sáv
+         ============================================================ -->
+    <section class="section-pad science" id="tudomany">
+      <div class="container">
+        <div class="science-grid">
+          <div class="reveal">
+            <span class="eyebrow">Tudományos háttér</span>
+            <h2 class="section-title">Ahol a Montessori találkozik az idegtudománnyal</h2>
+            <p class="section-lead">A legtöbb „matek-nehézség” nem agyi adottság kérdése, hanem a felkészítésé. A megfelelő környezet a koncentrációt, a koordinációt és a finommotorikát fejleszti – mindazt, amire a matematikai gondolkodás épül.</p>
+            <a class="btn btn-primary" href="https://montessoriakademia.hu/" target="_blank" rel="noopener" style="margin-top:8px;">Tudományos előadások az Akadémián</a>
+          </div>
+          <div class="reveal d1">
+            <div class="fact">
+              <span class="num">01</span>
+              <div><h4>A kéz tanítja az agyat</h4><p>A konkrét eszközök tapintásos tapasztalattá fordítják az elvont fogalmakat – így az ismeret tartós, nem magolt marad.</p></div>
+            </div>
+            <div class="fact">
+              <span class="num">02</span>
+              <div><h4>Koncentráció és munkamemória</h4><p>A gyakorlati élet tevékenységei (öntögetés, rendezés) építik a végrehajtó funkciókat, amik a számoláshoz kellenek.</p></div>
+            </div>
+            <div class="fact">
+              <span class="num">03</span>
+              <div><h4>Színkód = struktúra</h4><p>A következetes színrendszer (egyes, tízes, százas) láthatóvá teszi a helyiérték logikáját, mielőtt a gyerek leírná.</p></div>
+            </div>
+            <div class="fact">
+              <span class="num">04</span>
+              <div><h4>Hibázni szabad</h4><p>Az eszközök önellenőrzők: a gyerek maga látja a hibát, így bátran kísérletezik – nem fél a rossz választól.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         PROGRAMOK
+         ============================================================ -->
+    <section class="section-pad" id="programok">
+      <div class="container">
+        <div class="center" style="margin-bottom:48px;">
+          <span class="eyebrow" style="justify-content:center;">Programok</span>
+          <h2 class="section-title center">Itt találkozhatunk</h2>
+          <p class="section-lead center">Kezdd egy díjmentes előadással – aztán lépj tovább a Montessori Akadémiára, ahol videók, gyakorlatok és élő webináriumok várnak.</p>
+        </div>
+
+        <div class="grid grid-2">
+          <!-- Díjmentes előadás: Matek babáknak -->
+          <div class="program free reveal">
+            <div class="top">
+              <span class="tag">Díjmentes előadás</span>
+              <h3>Matek babáknak (0–3)</h3>
+              <p>Hogyan kezdődik a matek a születéstől? Egyszerű, otthoni eszközökkel megmutatom, mit tehetsz már babakortól a gondolkodásért.</p>
+            </div>
+            <div class="foot"><a class="btn btn-primary" href="https://montessoriakademia.hu/matekbabaknak/" target="_blank" rel="noopener">Jelentkezem ingyen →</a></div>
+          </div>
+
+          <!-- Díjmentes előadás: Matek kicsiknek -->
+          <div class="program free reveal d1">
+            <div class="top">
+              <span class="tag">Díjmentes előadás</span>
+              <h3>Matek kicsiknek (3–6)</h3>
+              <p>Az óvodás évek aranykora a matekban. Megmutatom a konkrét eszközöket és játékokat, amik megalapozzák az iskolai sikert.</p>
+            </div>
+            <div class="foot"><a class="btn btn-primary" href="https://montessoriakademia.hu/matek-kicsiknek" target="_blank" rel="noopener">Jelentkezem ingyen →</a></div>
+          </div>
+
+          <!-- Montessori Akadémia -->
+          <div class="program acad reveal">
+            <div class="top">
+              <span class="tag">Tagság</span>
+              <h3>Montessori Akadémia</h3>
+              <p>Videós leckék, Montessori-alapú gyakorlatok, letölthető segédanyagok és élő webináriumok – minden egy helyen, szülőknek.</p>
+            </div>
+            <div class="foot"><a class="btn btn-ghost" href="https://montessoriakademia.hu/" target="_blank" rel="noopener">Belépek az Akadémiára →</a></div>
+          </div>
+
+          <!-- MontiBaba -->
+          <div class="program toys reveal d1">
+            <div class="top">
+              <span class="tag">Eszközök</span>
+              <h3>MontiBaba – eszközbérlés</h3>
+              <p>Eredeti Montessori eszközök bemutatása, bérlése és vásárlása. Próbáld ki otthon, mielőtt befektetnél – okosan, fenntarthatóan.</p>
+            </div>
+            <div class="foot"><a class="btn btn-ghost" href="https://montessoriakademia.hu/" target="_blank" rel="noopener">Megnézem az eszközöket →</a></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         MISSZIÓ pull-quote
+         ============================================================ -->
+    <section class="section-pad mission">
+      <div class="blob" style="width:260px;height:260px;background:#7ec8e3;top:-50px;left:-40px;opacity:.5;"></div>
+      <div class="blob" style="width:200px;height:200px;background:#fede11;bottom:-50px;right:-30px;opacity:.45;"></div>
+      <div class="container reveal">
+        <div class="emoji-row" aria-hidden="true">🫶 🧠 🌍</div>
+        <p class="big">„Szeretnék egy okosabb, tudatosabb, gondolkodóbb, boldogabb világot.”</p>
+        <p class="who">— Németh Hanna · @hannamatek</p>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         KÖZÖSSÉG / közösségi linkek
+         ============================================================ -->
+    <section class="section-pad" id="kovetes">
+      <div class="container">
+        <div class="center" style="margin-bottom:42px;">
+          <span class="eyebrow" style="justify-content:center;">Csatlakozz</span>
+          <h2 class="section-title center">Több tízezer szülő gondolkodik már együtt velem</h2>
+          <p class="section-lead center">Napi inspiráció, kísérletek és „gondolkodtató provokációk” – válaszd a kedvenc felületed.</p>
+        </div>
+
+        <div class="social-grid">
+          <a class="social-card reveal" href="https://www.instagram.com/hannamatek.montessori/" target="_blank" rel="noopener">
+            <span class="ico" style="background:linear-gradient(45deg,#f9ce34,#ee2a7b,#6228d7);" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.2" fill="#fff" stroke="none"/></svg>
+            </span>
+            <span class="name">Instagram</span>
+            <span class="handle">@hannamatek.montessori</span>
+            <span class="followers">28&nbsp;000+ követő</span>
+          </a>
+
+          <a class="social-card reveal d1" href="https://www.tiktok.com/@hannamatek" target="_blank" rel="noopener">
+            <span class="ico" style="background:#111;" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="#fff"><path d="M16 3c.3 2.3 1.8 4.1 4 4.4v3.1c-1.5.1-2.9-.3-4-1v6.1c0 3.3-2.7 5.4-5.6 5.4C7.5 21 5 18.8 5 15.9c0-2.9 2.4-5 5.3-4.9.4 0 .8.1 1.2.2v3.2c-.3-.1-.7-.2-1.1-.2-1.2 0-2.2.9-2.2 2 0 1.1 1 2 2.2 2 1.3 0 2.4-1 2.4-2.4V3z"/></svg>
+            </span>
+            <span class="name">TikTok</span>
+            <span class="handle">@hannamatek</span>
+            <span class="followers">Rövid videók, napi matek</span>
+          </a>
+
+          <a class="social-card reveal d2" href="https://www.youtube.com/@hannamatek_montessori" target="_blank" rel="noopener">
+            <span class="ico" style="background:#ff0000;" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="#fff"><path d="M23 12s0-3.2-.4-4.7a3 3 0 0 0-2.1-2.1C18.9 4.8 12 4.8 12 4.8s-6.9 0-8.5.4A3 3 0 0 0 1.4 7.3C1 8.8 1 12 1 12s0 3.2.4 4.7a3 3 0 0 0 2.1 2.1c1.6.4 8.5.4 8.5.4s6.9 0 8.5-.4a3 3 0 0 0 2.1-2.1C23 15.2 23 12 23 12zM10 15.5v-7l6 3.5z"/></svg>
+            </span>
+            <span class="name">YouTube</span>
+            <span class="handle">@hannamatek_montessori</span>
+            <span class="followers">Hosszabb előadások</span>
+          </a>
+
+          <a class="social-card reveal d3" href="https://www.facebook.com/hannamatek/" target="_blank" rel="noopener">
+            <span class="ico" style="background:#1877f2;" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="#fff"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.7l-.4 2.9h-2.3v7A10 10 0 0 0 22 12z"/></svg>
+            </span>
+            <span class="name">Facebook</span>
+            <span class="handle">/hannamatek</span>
+            <span class="followers">Közösség &amp; élő adások</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         KAPCSOLAT / záró CTA
+         ============================================================ -->
+    <section class="section-pad" id="kapcsolat">
+      <div class="container">
+        <div class="cta-final reveal">
+          <div class="blob" style="width:240px;height:240px;background:#319ed9;top:-60px;right:-40px;opacity:.35;"></div>
+          <div class="emoji-row" aria-hidden="true" style="font-size:1.6rem;margin-bottom:14px;">🤯 ➕ ❤️</div>
+          <h2>Kezdjük ott, hogy a matek jó élmény legyen</h2>
+          <p>Egyetlen díjmentes előadás megváltoztathatja, ahogy a gyermeked a számokra tekint. Gyere, és gondolkodjunk együtt!</p>
+          <div class="actions">
+            <a class="btn btn-sun" href="https://montessoriakademia.hu/matekbabaknak/" target="_blank" rel="noopener">Matek babáknak – ingyen</a>
+            <a class="btn btn-light" href="https://montessoriakademia.hu/matek-kicsiknek" target="_blank" rel="noopener">Matek kicsiknek – ingyen</a>
+          </div>
+          <p class="email">Írj nekem: <a href="mailto:hello@montessorimatek.hu">hello@montessorimatek.hu</a></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="logo" href="#top">
+            <svg class="mark" viewBox="0 0 40 40" aria-hidden="true">
+              <rect width="40" height="40" rx="11" fill="#fff" stroke="#efe3d2"/>
+              <path d="M20 32C9 24 8 17.5 12 14c2.9-2.5 6 .2 8 2.6 2-2.4 5.1-5.1 8-2.6 4 3.5 3 10-8 18z" fill="#ef5a48"/>
+              <text x="20" y="25" font-family="Poppins, sans-serif" font-size="12" font-weight="800" fill="#fff" text-anchor="middle">H</text>
+            </svg>
+            <span>Hanna <b>♥</b> matek <small>&amp; montessori</small></span>
+          </a>
+          <p>Minden, ami matek, Montessori, gondolkodás és én. Hogy egy okosabb, gondolkodóbb és boldogabb generáció nőjön fel.</p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Felfedezés</h4>
+          <a href="#rolam">Rólam</a>
+          <a href="#modszer">A módszer</a>
+          <a href="#eszkozok">Montessori eszközök</a>
+          <a href="#tudomany">Tudományos háttér</a>
+          <a href="#programok">Programok</a>
+        </div>
+
+        <div class="footer-col">
+          <h4>Kapcsolat &amp; közösség</h4>
+          <a href="mailto:hello@montessorimatek.hu">hello@montessorimatek.hu</a>
+          <a href="https://www.instagram.com/hannamatek.montessori/" target="_blank" rel="noopener">Instagram</a>
+          <a href="https://www.tiktok.com/@hannamatek" target="_blank" rel="noopener">TikTok</a>
+          <a href="https://www.youtube.com/@hannamatek_montessori" target="_blank" rel="noopener">YouTube</a>
+          <a href="https://www.facebook.com/hannamatek/" target="_blank" rel="noopener">Facebook</a>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© <span id="year">2026</span> Németh Hanna · I ❤️ matek &amp; montessori</span>
+        <span>Készült szeretettel a gondolkodó gyerekekért 🧠💛</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    /* ============================================================
+       JAVASCRIPT — minden interakció és a dinamikus SVG-k
+       Tagolt, bőven kommentált, hogy tanulóanyagként is olvasható
+       legyen. Mozgáscsökkentés (prefers-reduced-motion) tisztelve.
+       ============================================================ */
+    (function () {
+      'use strict';
+
+      var prefersReduced = window.matchMedia &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      /* ---- 1. Évszám a footerben (mindig aktuális) ---- */
+      document.getElementById('year').textContent = new Date().getFullYear();
+
+      /* ---- 2. Mobil navigáció nyitás/zárás ---- */
+      var navToggle = document.getElementById('navToggle');
+      var navLinks  = document.getElementById('navLinks');
+      navToggle.addEventListener('click', function () {
+        var open = navLinks.classList.toggle('open');
+        navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        navToggle.setAttribute('aria-label', open ? 'Menü bezárása' : 'Menü megnyitása');
+      });
+      /* Linkre kattintva csukódjon be a mobil menü */
+      navLinks.addEventListener('click', function (e) {
+        if (e.target.tagName === 'A') {
+          navLinks.classList.remove('open');
+          navToggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      /* ---- 3. Header árnyék görgetéskor ---- */
+      var header = document.querySelector('.site-header');
+      function onScroll() { header.classList.toggle('scrolled', window.scrollY > 8); }
+      onScroll();
+      window.addEventListener('scroll', onScroll, { passive: true });
+
+      /* ---- 4. Scroll-reveal animáció IntersectionObserverrel ---- */
+      var revealEls = document.querySelectorAll('.reveal');
+      if (prefersReduced || !('IntersectionObserver' in window)) {
+        /* Ha nincs támogatás vagy a felhasználó kerüli a mozgást: azonnal látszódjon */
+        revealEls.forEach(function (el) { el.classList.add('in'); });
+      } else {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('in');
+              io.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+        revealEls.forEach(function (el) { io.observe(el); });
+      }
+
+      /* ============================================================
+         5. MONTESSORI HITELES GYÖNGYSZÍNEK (1–10)
+         A színes gyöngylépcső szabványos színei. A 7 (fehér) külön
+         körvonalat kap, hogy krém háttéren is látszódjon.
+         ============================================================ */
+      var BEAD_COLORS = {
+        1: '#e23b2e', 2: '#2aa84a', 3: '#f48fb1', 4: '#ffd23f', 5: '#7ec8e3',
+        6: '#a978d6', 7: '#ffffff', 8: '#8a5a3b', 9: '#1f4e9c', 10: '#f0a830'
+      };
+
+      /* Egyetlen gyöngy DOM-elem létrehozása (immutáblan, új elem) */
+      function makeBead(color) {
+        var b = document.createElement('span');
+        b.className = 'bead';
+        b.style.background = color;
+        if (color === '#ffffff') { b.style.boxShadow = 'inset 0 0 0 2px #d9cdbd'; }
+        return b;
+      }
+
+      /* Egy adott számhoz tartozó gyöngysor (bar) létrehozása.
+         Minden gyöngy ugyanazt a Montessori-színt kapja (mint a gyöngylépcsőn). */
+      function makeBeadBar(n, color) {
+        var bar = document.createElement('div');
+        bar.className = 'bead-bar';
+        for (var i = 0; i < n; i++) { bar.appendChild(makeBead(color)); }
+        return bar;
+      }
+
+      /* ============================================================
+         6. INTERAKTÍV ÖSSZEADÁS-DEMÓ
+         Két szám (1–9), a gyöngysorok vizuálisan összeadódnak.
+         ============================================================ */
+      var state = { a: 2, b: 3 };
+      var MIN = 1, MAX = 9;
+
+      var stage    = document.getElementById('demoStage');
+      var valA     = document.getElementById('valA');
+      var valB     = document.getElementById('valB');
+      var exprText = document.getElementById('exprText');
+      var sumText  = document.getElementById('sumText');
+
+      /* A demó újrarajzolása az aktuális állapot alapján */
+      function renderDemo() {
+        /* színpad kiürítése */
+        stage.textContent = '';
+        /* első szám gyöngysora (a szám saját Montessori-színével) */
+        stage.appendChild(makeBeadBar(state.a, BEAD_COLORS[state.a]));
+        /* "+" jel */
+        var plus = document.createElement('span');
+        plus.className = 'demo-op';
+        plus.textContent = '+';
+        stage.appendChild(plus);
+        /* második szám gyöngysora */
+        stage.appendChild(makeBeadBar(state.b, BEAD_COLORS[state.b]));
+
+        /* szöveges kiírás frissítése */
+        valA.textContent = state.a;
+        valB.textContent = state.b;
+        exprText.textContent = state.a + ' + ' + state.b;
+        sumText.textContent = state.a + state.b;
+      }
+
+      /* Stepper gombok kezelése (+/-), korláttal MIN..MAX között */
+      document.querySelectorAll('.stepper button').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var key = btn.getAttribute('data-step');          // 'a' vagy 'b'
+          var dir = parseInt(btn.getAttribute('data-dir'), 10); // -1 vagy +1
+          var next = state[key] + dir;
+          if (next < MIN) next = MIN;
+          if (next > MAX) next = MAX;
+          /* immutábilis frissítés: új state objektum, nem mutáljuk a régit */
+          state = Object.assign({}, state, (function () { var o = {}; o[key] = next; return o; })());
+          renderDemo();
+        });
+      });
+
+      renderDemo(); // kezdeti kirajzolás
+
+      /* ============================================================
+         7. MONTESSORI ESZKÖZÖK – SVG illusztrációk generálása
+         Minden eszközhöz egy kis SVG-rajz + cím + leírás.
+         Az SVG-ket stringként építjük, hogy a kód olvasható maradjon.
+         ============================================================ */
+
+      /* Segéd: SVG-burkoló adott viewBox-szal */
+      function svg(vb, inner) {
+        return '<svg viewBox="' + vb + '" role="img">' + inner + '</svg>';
+      }
+
+      /* (a) Színes gyöngylépcső 1–10 – az ikonikus Montessori eszköz */
+      function artBeadStair() {
+        var inner = '';
+        for (var n = 1; n <= 10; n++) {
+          var c = BEAD_COLORS[n];
+          var y = (n - 1) * 14;
+          for (var i = 0; i < n; i++) {
+            var stroke = (c === '#ffffff') ? ' stroke="#d9cdbd" stroke-width="1.5"' : '';
+            inner += '<circle cx="' + (10 + i * 14) + '" cy="' + (y + 8) + '" r="6" fill="' + c + '"' + stroke + '/>';
+          }
+        }
+        return svg('0 0 150 150', inner);
+      }
+
+      /* (b) Piros-kék számrudak – 1-től 5-ig, lépcsőzetesen */
+      function artNumberRods() {
+        var inner = '';
+        for (var n = 1; n <= 5; n++) {
+          var y = (n - 1) * 18;
+          for (var i = 0; i < n; i++) {
+            var col = (i % 2 === 0) ? '#e23b2e' : '#2f6fb0';
+            inner += '<rect x="' + (i * 26) + '" y="' + y + '" width="26" height="14" rx="3" fill="' + col + '"/>';
+          }
+        }
+        return svg('0 0 150 100', inner);
+      }
+
+      /* (c) Aranygyöngy anyag: egyes, tízes, százas (tízes alapú rendszer) */
+      function artGoldenBeads() {
+        var g = '#efb33d', gd = '#d29521';
+        var inner = '';
+        /* egyes (1 gyöngy) */
+        inner += '<circle cx="16" cy="20" r="8" fill="' + g + '"/>';
+        /* tízes (10-es rúd, függőleges) */
+        for (var i = 0; i < 10; i++) {
+          inner += '<circle cx="56" cy="' + (8 + i * 12) + '" r="5.5" fill="' + g + '"/>';
+        }
+        /* százas (10x10 négyzet) */
+        for (var r = 0; r < 10; r++) {
+          for (var c2 = 0; c2 < 10; c2++) {
+            inner += '<circle cx="' + (92 + c2 * 6) + '" cy="' + (8 + r * 12) + '" r="2.6" fill="' + (r % 2 ? gd : g) + '"/>';
+          }
+        }
+        return svg('0 0 160 130', inner);
+      }
+
+      /* (d) Színkódolt helyiérték kártyák: egyes/tízes/százas */
+      function artPlaceValue() {
+        var inner =
+          '<rect x="6"  y="20" width="40" height="52" rx="6" fill="#2aa84a"/>' +
+          '<text x="26" y="54" font-family="Poppins" font-size="26" font-weight="800" fill="#fff" text-anchor="middle">1</text>' +
+          '<rect x="52" y="20" width="52" height="52" rx="6" fill="#2f6fb0"/>' +
+          '<text x="78" y="54" font-family="Poppins" font-size="26" font-weight="800" fill="#fff" text-anchor="middle">10</text>' +
+          '<rect x="110" y="20" width="64" height="52" rx="6" fill="#e23b2e"/>' +
+          '<text x="142" y="54" font-family="Poppins" font-size="26" font-weight="800" fill="#fff" text-anchor="middle">100</text>';
+        return svg('0 0 180 92', inner);
+      }
+
+      /* Az eszközök adatai: rajz + cím + leírás */
+      var MATERIALS = [
+        { art: artBeadStair(),   title: 'Színes gyöngylépcső', desc: 'Minden szám saját színt és hosszt kap. A gyerek látja és tapintja, hogy a 3 több, mint a 2.' },
+        { art: artNumberRods(),  title: 'Piros-kék számrudak',  desc: 'Az 1-es rúd 10 cm, a 10-es 1 méter. Az arány nem elmélet – a kéz méri le.' },
+        { art: artGoldenBeads(), title: 'Aranygyöngy anyag',    desc: 'Egyes, tízes, százas, ezres. A tízes alapú számrendszer kézzelfoghatóan, fizikai mennyiségként.' },
+        { art: artPlaceValue(),  title: 'Színkódolt helyiérték', desc: 'Következetes színek a helyiértékekhez – a struktúra láthatóvá válik, mielőtt a gyerek leírná.' }
+      ];
+
+      /* Kártyák beillesztése a rácsba (reveal animációval, lépcsőzött késleltetéssel) */
+      var grid = document.getElementById('materialsGrid');
+      MATERIALS.forEach(function (m, idx) {
+        var card = document.createElement('div');
+        card.className = 'material reveal' + (idx % 4 ? ' d' + (idx % 4) : '');
+        card.innerHTML =
+          '<div class="stage-art">' + m.art + '</div>' +
+          '<div class="body"><h3>' + m.title + '</h3><p>' + m.desc + '</p></div>';
+        grid.appendChild(card);
+        /* a most beszúrt kártya is kapja meg a reveal-megfigyelést */
+        if (!prefersReduced && 'IntersectionObserver' in window) {
+          var io2 = new IntersectionObserver(function (en) {
+            en.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io2.unobserve(e.target); } });
+          }, { threshold: 0.12 });
+          io2.observe(card);
+        } else {
+          card.classList.add('in');
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

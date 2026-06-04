@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Agytorna · Hanna – fejlesztő játékok (mockup)</title>
+  <meta name="description" content="Interaktív mockup: Montessori-ihlette fejlesztő játékok gyűjteménye napi kihívásokkal – Németh Hanna brandjéhez." />
+
+  <!-- Favicon: agy-emoji helyett a márka szíve -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23319ed9'/%3E%3Cpath d='M16 25C8 19 7 14 10 11.4c2-1.7 4.3 0 6 1.9 1.7-1.9 4-3.6 6-1.9C31 14 24 19 16 25z' fill='%23fff'/%3E%3C/svg%3E" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       AGYTORNA – interaktív app-mockup Hanna brandjéhez
+       Önálló HTML: minden inline (CSS + JS), csak a Poppins külső.
+       A márkaszínek megegyeznek a weboldaléval (montessoriakademia.hu).
+       ============================================================ */
+    :root {
+      --cream:#f6f1ea; --cream-soft:#fdfaf4;
+      --ink:#3d2b21; --ink-soft:#6f5d52;
+      --blue:#319ed9; --blue-deep:#1d7cb0;
+      --clay:#b2967e; --yellow:#fede11; --coral:#ef5a48; --white:#fff;
+      /* Montessori gyöngyszínek 1–10 (a játékokhoz) */
+      --b1:#e23b2e; --b2:#2aa84a; --b3:#f48fb1; --b4:#ffd23f; --b5:#7ec8e3;
+      --b6:#a978d6; --b7:#ffffff; --b8:#8a5a3b; --b9:#1f4e9c; --b10:#f0a830;
+      --app-bg:#fbf7f1;
+      --font:'Poppins',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+      --radius:22px; --radius-sm:16px;
+      --shadow:0 12px 30px rgba(61,43,33,.12);
+      --shadow-sm:0 4px 14px rgba(61,43,33,.08);
+      --nav-h:74px;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html,body{margin:0;height:100%;}
+    body{
+      font-family:var(--font); color:var(--ink);
+      background:radial-gradient(1200px 800px at 50% -10%, #eaf5fc 0%, var(--cream) 55%);
+      display:grid; place-items:center; min-height:100dvh; padding:22px;
+      -webkit-font-smoothing:antialiased;
+    }
+    button{font-family:inherit; cursor:pointer; border:none; background:none; color:inherit;}
+    :focus-visible{outline:3px solid var(--blue); outline-offset:2px; border-radius:8px;}
+
+    /* ---- TELEFON-KERET (asztali nézethez); mobilon teljes képernyő ---- */
+    .phone{
+      position:relative; width:392px; height:min(848px, calc(100dvh - 44px));
+      background:var(--app-bg); border-radius:46px; overflow:hidden;
+      display:flex; flex-direction:column;
+      box-shadow:0 0 0 11px #1d1712, 0 0 0 13px #2c2118, 0 40px 80px rgba(61,43,33,.34);
+    }
+    /* faux állapotsor (idő + ikonok), hogy app-érzetet keltsen */
+    .statusbar{display:flex; align-items:center; justify-content:space-between;
+      padding:12px 26px 4px; font-size:.78rem; font-weight:600; color:var(--ink); flex:0 0 auto;}
+    .statusbar .dots{letter-spacing:1px;}
+
+    .app-scroll{flex:1; overflow-y:auto; overflow-x:hidden; padding-bottom:calc(var(--nav-h) + 12px); scrollbar-width:none;}
+    .app-scroll::-webkit-scrollbar{display:none;}
+
+    .screen{display:none; padding:6px 20px 24px; animation:fade .35s ease;}
+    .screen.active{display:block;}
+    @keyframes fade{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;}}
+
+    /* ---- FEJLÉC (üdvözlés + sorozat) ---- */
+    .greet{display:flex; align-items:center; justify-content:space-between; gap:12px; margin:8px 0 18px;}
+    .greet h1{font-size:1.32rem; margin:0; letter-spacing:-.02em;}
+    .greet p{margin:2px 0 0; font-size:.86rem; color:var(--ink-soft);}
+    .streak{display:flex; align-items:center; gap:6px; background:#fff; padding:9px 13px; border-radius:30px;
+      box-shadow:var(--shadow-sm); font-weight:700; font-size:.92rem; white-space:nowrap;}
+    .streak .fire{font-size:1.05rem;}
+
+    /* ---- NAPI KIHÍVÁS kártya ---- */
+    .daily{position:relative; overflow:hidden; border-radius:var(--radius); padding:22px;
+      background:linear-gradient(135deg,#319ed9,#1d7cb0); color:#fff; box-shadow:var(--shadow); margin-bottom:24px;}
+    .daily .pill{display:inline-block; background:rgba(255,255,255,.22); padding:4px 11px; border-radius:30px; font-size:.72rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase;}
+    .daily h2{margin:12px 0 4px; font-size:1.3rem;}
+    .daily p{margin:0 0 16px; font-size:.9rem; opacity:.92;}
+    .daily .row{display:flex; align-items:center; gap:14px;}
+    .daily .start{background:#fff; color:var(--blue-deep); font-weight:700; padding:12px 22px; border-radius:30px; box-shadow:0 8px 18px rgba(0,0,0,.18); transition:transform .15s ease;}
+    .daily .start:active{transform:scale(.96);}
+    .daily .prog{display:flex; gap:6px;}
+    .daily .prog i{width:9px; height:9px; border-radius:50%; background:rgba(255,255,255,.4);}
+    .daily .prog i.on{background:var(--yellow);}
+    .daily .deco{position:absolute; right:-30px; top:-30px; width:130px; height:130px; border-radius:50%; background:rgba(255,255,255,.12);}
+    .daily .deco2{position:absolute; right:34px; bottom:-40px; width:90px; height:90px; border-radius:50%; background:rgba(254,222,17,.25);}
+
+    /* ---- SZEKCIÓCÍM ---- */
+    .sec-head{display:flex; align-items:baseline; justify-content:space-between; margin:6px 2px 14px;}
+    .sec-head h3{font-size:1.05rem; margin:0;}
+    .sec-head a{font-size:.84rem; color:var(--blue-deep); font-weight:600; text-decoration:none;}
+
+    /* ---- JÁTÉK-CSEMPÉK ---- */
+    .tiles{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+    .tile{position:relative; text-align:left; background:var(--cream-soft); border:1px solid rgba(61,43,33,.07);
+      border-radius:var(--radius-sm); padding:16px; box-shadow:var(--shadow-sm); transition:transform .15s ease, box-shadow .15s ease; min-height:128px; display:flex; flex-direction:column;}
+    .tile.play:active{transform:scale(.97);}
+    .tile.play:hover{box-shadow:var(--shadow);}
+    .tile .emoji{width:46px; height:46px; border-radius:13px; display:grid; place-items:center; font-size:1.5rem; margin-bottom:10px;}
+    .tile .nm{font-weight:700; font-size:.98rem; line-height:1.2;}
+    .tile .tg{font-size:.78rem; color:var(--ink-soft); margin-top:3px;}
+    .tile .cat{margin-top:auto; padding-top:8px; font-size:.68rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--clay);}
+    .tile.soon{opacity:.62;}
+    .tile .soon-badge{position:absolute; top:12px; right:12px; background:var(--ink); color:#fff; font-size:.64rem; font-weight:700; padding:4px 8px; border-radius:20px; letter-spacing:.03em;}
+
+    /* ---- SZŰRŐ CHIPEK (Játékok képernyő) ---- */
+    .chips{display:flex; gap:8px; overflow-x:auto; padding:2px 0 14px; scrollbar-width:none;}
+    .chips::-webkit-scrollbar{display:none;}
+    .chip{flex:0 0 auto; padding:8px 15px; border-radius:30px; background:#fff; border:1px solid rgba(61,43,33,.1);
+      font-size:.84rem; font-weight:600; color:var(--ink-soft);}
+    .chip.active{background:var(--ink); color:#fff; border-color:var(--ink);}
+
+    /* ---- HALADÁS képernyő ---- */
+    .stat-row{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:22px;}
+    .stat{background:var(--cream-soft); border:1px solid rgba(61,43,33,.07); border-radius:var(--radius-sm); padding:18px; box-shadow:var(--shadow-sm);}
+    .stat .big{font-size:1.9rem; font-weight:800; line-height:1;}
+    .stat .lbl{font-size:.82rem; color:var(--ink-soft); margin-top:4px;}
+    .week{background:var(--cream-soft); border:1px solid rgba(61,43,33,.07); border-radius:var(--radius-sm); padding:18px; box-shadow:var(--shadow-sm); margin-bottom:22px;}
+    .week h3{margin:0 0 14px; font-size:1rem;}
+    .bars{display:flex; align-items:flex-end; justify-content:space-between; gap:8px; height:110px;}
+    .bars .col{flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; height:100%; justify-content:flex-end;}
+    .bars .bar{width:100%; border-radius:8px 8px 4px 4px; background:linear-gradient(var(--blue),#7ec8e3); min-height:6px; transition:height .6s ease;}
+    .bars .col.today .bar{background:linear-gradient(var(--coral),#ffb199);}
+    .bars .d{font-size:.7rem; color:var(--ink-soft); font-weight:600;}
+
+    /* ---- PROFIL képernyő ---- */
+    .profile-top{text-align:center; padding:14px 0 6px;}
+    .avatar{width:92px; height:92px; border-radius:50%; margin:0 auto 12px; background:linear-gradient(135deg,#319ed9,#7ec8e3); display:grid; place-items:center; box-shadow:var(--shadow); color:#fff; font-size:2.4rem; font-weight:800;}
+    .settings{margin-top:18px;}
+    .set-item{display:flex; align-items:center; justify-content:space-between; gap:12px; background:var(--cream-soft); border:1px solid rgba(61,43,33,.07);
+      padding:15px 16px; border-radius:14px; margin-bottom:10px; box-shadow:var(--shadow-sm);}
+    .set-item .l{display:flex; align-items:center; gap:12px; font-weight:600; font-size:.94rem;}
+    .set-item .l .ic{width:34px; height:34px; border-radius:10px; display:grid; place-items:center; font-size:1.1rem;}
+    .toggle{width:46px; height:27px; border-radius:30px; background:#d9cebf; position:relative; transition:background .2s ease; flex:0 0 auto;}
+    .toggle.on{background:var(--b2);}
+    .toggle::after{content:""; position:absolute; top:3px; left:3px; width:21px; height:21px; border-radius:50%; background:#fff; transition:left .2s ease; box-shadow:0 1px 3px rgba(0,0,0,.3);}
+    .toggle.on::after{left:22px;}
+    .madefor{margin-top:18px; text-align:center; font-size:.78rem; color:var(--ink-soft);}
+
+    /* ---- ALSÓ MENÜ ---- */
+    .bottom-nav{position:absolute; bottom:0; left:0; right:0; height:var(--nav-h);
+      background:rgba(255,255,255,.92); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+      border-top:1px solid rgba(61,43,33,.08); display:flex; padding:8px 6px calc(8px + env(safe-area-inset-bottom));}
+    .nav-btn{flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; color:var(--ink-soft); font-size:.68rem; font-weight:600; padding:4px 0; border-radius:12px;}
+    .nav-btn svg{width:23px; height:23px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;}
+    .nav-btn.active{color:var(--blue-deep);}
+
+    /* ============================================================
+       JÁTÉK-SZÍNPAD (felcsúszó overlay a telefonon belül)
+       ============================================================ */
+    .game-stage{position:absolute; inset:0; z-index:50; background:var(--app-bg);
+      display:flex; flex-direction:column; transform:translateY(100%); transition:transform .32s cubic-bezier(.4,0,.2,1); }
+    .game-stage.open{transform:none;}
+    .game-top{flex:0 0 auto; display:flex; align-items:center; gap:12px; padding:16px 18px 10px;}
+    .game-top .back{width:40px; height:40px; border-radius:12px; background:#fff; box-shadow:var(--shadow-sm); display:grid; place-items:center; font-size:1.3rem; flex:0 0 auto;}
+    .game-top h2{font-size:1.05rem; margin:0; flex:1;}
+    .game-top .meta{font-size:.82rem; font-weight:700; color:var(--blue-deep); background:#e3f1fb; padding:6px 12px; border-radius:20px;}
+    .game-body{flex:1; overflow-y:auto; padding:8px 18px 26px; display:flex; flex-direction:column;}
+
+    /* játék-bevezető (szabályok) */
+    .intro{margin:auto 0; text-align:center; padding:20px 6px;}
+    .intro .big-emoji{font-size:3.4rem; margin-bottom:8px;}
+    .intro h3{font-size:1.3rem; margin:0 0 8px;}
+    .intro p{color:var(--ink-soft); font-size:.95rem; margin:0 auto 22px; max-width:30ch;}
+    .btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; font-weight:700; font-size:1rem;
+      padding:14px 26px; border-radius:30px; transition:transform .15s ease;}
+    .btn:active{transform:scale(.96);}
+    .btn-primary{background:var(--blue-deep); color:#fff; box-shadow:0 8px 20px rgba(29,124,176,.32);}
+    .btn-sun{background:var(--yellow); color:var(--ink); box-shadow:0 8px 20px rgba(240,180,0,.3);}
+    .btn-ghost{background:#fff; color:var(--ink); box-shadow:var(--shadow-sm);}
+
+    .game-banner{text-align:center; font-weight:700; font-size:1.05rem; margin:6px 0 14px; min-height:26px;}
+    .game-banner small{display:block; font-weight:500; font-size:.84rem; color:var(--ink-soft);}
+
+    /* MEMÓRIA rács */
+    .mem-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; max-width:300px; margin:0 auto; width:100%;}
+    .mcard{aspect-ratio:3/4; border-radius:14px; position:relative; perspective:600px; background:none;}
+    .mcard .inner{position:absolute; inset:0; transform-style:preserve-3d; transition:transform .4s ease; border-radius:14px;}
+    .mcard.flip .inner{transform:rotateY(180deg);}
+    .mcard .face{position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; border-radius:14px; display:grid; place-items:center; box-shadow:var(--shadow-sm);}
+    .mcard .front{background:linear-gradient(135deg,#319ed9,#7ec8e3); color:#fff; font-size:1.5rem;}
+    .mcard .back{background:#fff; transform:rotateY(180deg); font-size:2rem; font-weight:800; border:2px solid rgba(61,43,33,.06);}
+    .mcard.done .inner{transform:rotateY(180deg);}
+    .mcard.done .back{box-shadow:0 0 0 3px var(--b2) inset; animation:pop .4s ease;}
+    @keyframes pop{50%{transform:rotateY(180deg) scale(1.08);}}
+
+    /* MI TŰNT EL? rács */
+    .obj-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; max-width:300px; margin:0 auto 18px; width:100%;}
+    .obj{aspect-ratio:1; border-radius:16px; background:var(--cream-soft); border:1px solid rgba(61,43,33,.08); display:grid; place-items:center; font-size:2.1rem; box-shadow:var(--shadow-sm);}
+    .obj.empty{background:repeating-linear-gradient(45deg,#fff,#fff 6px,#f1e9dd 6px,#f1e9dd 12px); border:2px dashed var(--clay);}
+    .options{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; max-width:300px; margin:0 auto; width:100%;}
+    .opt{aspect-ratio:1; border-radius:14px; background:#fff; box-shadow:var(--shadow-sm); font-size:1.7rem; display:grid; place-items:center; transition:transform .12s ease;}
+    .opt:active{transform:scale(.92);}
+    .opt.right{background:#d9f5e0; box-shadow:0 0 0 2px var(--b2) inset;}
+    .opt.wrong{background:#fde2de; box-shadow:0 0 0 2px var(--coral) inset;}
+
+    /* MELYIK TÖBB? panelek */
+    .more-wrap{display:grid; grid-template-columns:1fr 1fr; gap:14px; max-width:320px; margin:10px auto; width:100%;}
+    .more-card{background:var(--cream-soft); border:2px solid rgba(61,43,33,.08); border-radius:18px; padding:14px; min-height:200px; display:flex; flex-wrap:wrap; gap:8px; align-content:center; justify-content:center; box-shadow:var(--shadow-sm); transition:transform .12s ease;}
+    .more-card:active{transform:scale(.97);}
+    .more-card.right{border-color:var(--b2); background:#e6f7ea;}
+    .more-card.wrong{border-color:var(--coral); background:#fdeae7;}
+    .more-card .dot{width:26px; height:26px; border-radius:50%; box-shadow:inset -2px -2px 4px rgba(0,0,0,.18);}
+    .more-vs{text-align:center; font-weight:800; color:var(--clay); margin:6px 0;}
+
+    /* EREDMÉNY panel */
+    .result{margin:auto 0; text-align:center; padding:24px 6px; animation:fade .4s ease;}
+    .result .big-emoji{font-size:3.6rem; margin-bottom:6px;}
+    .result h3{font-size:1.5rem; margin:0 0 4px;}
+    .result .score{font-size:2.6rem; font-weight:800; color:var(--blue-deep); margin:10px 0;}
+    .result p{color:var(--ink-soft); margin:0 0 22px;}
+    .result .acts{display:flex; flex-direction:column; gap:10px; max-width:260px; margin:0 auto;}
+
+    .countdown{font-size:3rem; font-weight:800; color:var(--blue-deep); text-align:center; margin:10px 0;}
+
+    /* ---- TOVÁBBI JÁTÉKOK stílusai ---- */
+    /* rázás-effekt hibás válaszhoz */
+    @keyframes shakeX{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+    .shake{animation:shakeX .35s ease;}
+    /* a flex-oszlop (game-body) gyermekei margin:auto mellett összementek volna –
+       width:100% kell, hogy kitöltsék a szélességet (mint az első 3 játéknál) */
+    .simon-board, .keypad, .seq-row, .shape-opts, .grade-wrap, .find-grid, .count-wrap{ width:100%; }
+
+    /* Számolj meg! */
+    .count-wrap{display:flex; flex-wrap:wrap; gap:10px; justify-content:center; align-content:center; max-width:320px; margin:0 auto 18px; padding:18px; background:rgba(255,255,255,.6); border-radius:18px; min-height:140px;}
+    .count-item{font-size:1.9rem; line-height:1;}
+    .num-row{display:flex; gap:12px; justify-content:center; flex-wrap:wrap;}
+    .num-opt{width:64px; height:64px; border-radius:16px; background:#fff; box-shadow:var(--shadow-sm); font-size:1.6rem; font-weight:800; color:var(--ink); transition:transform .12s ease;}
+    .num-opt:active{transform:scale(.93);}
+    .num-opt.right{background:#d9f5e0; box-shadow:0 0 0 2px var(--b2) inset;}
+    .num-opt.wrong{background:#fde2de; box-shadow:0 0 0 2px var(--coral) inset;}
+
+    /* Páros-páratlan */
+    .oe-dots{display:grid; grid-template-columns:repeat(2,38px); gap:10px; justify-content:center; margin:12px auto;}
+    .oe-dot{width:38px; height:38px; border-radius:50%; box-shadow:inset -2px -2px 4px rgba(0,0,0,.18);}
+    .oe-dot.lonely{box-shadow:inset -2px -2px 4px rgba(0,0,0,.18), 0 0 0 4px rgba(239,90,72,.5);}
+    .oe-num{text-align:center; font-size:2.4rem; font-weight:800; color:var(--ink); margin:6px 0 16px;}
+    .oe-btns{display:flex; gap:12px; justify-content:center;}
+
+    /* Színlánc (Simon) */
+    .simon-board{display:grid; grid-template-columns:repeat(2,1fr); gap:14px; max-width:280px; margin:18px auto;}
+    .simon-pad{aspect-ratio:1; border-radius:20px; opacity:.5; transition:opacity .12s ease, transform .12s ease, box-shadow .12s ease;}
+    .simon-pad.lit{opacity:1; transform:scale(1.04); box-shadow:0 0 26px rgba(255,255,255,.9), inset 0 0 0 4px rgba(255,255,255,.55);}
+
+    /* Számlánc (digit span) */
+    .span-digit{font-size:4rem; font-weight:800; color:var(--blue-deep); text-align:center; min-height:90px; line-height:90px; letter-spacing:.12em;}
+    .keypad{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; max-width:240px; margin:6px auto 0;}
+    .key{height:58px; border-radius:14px; background:#fff; box-shadow:var(--shadow-sm); font-size:1.5rem; font-weight:700; color:var(--ink); transition:transform .1s ease;}
+    .key:active{transform:scale(.92);}
+
+    /* Mi jön a sorban? (minta) */
+    .seq-row{display:flex; flex-wrap:wrap; gap:10px; justify-content:center; align-items:center; margin:18px auto; max-width:330px;}
+    .seq-item{font-size:2.2rem; line-height:1;}
+    .seq-q{width:46px; height:46px; border-radius:12px; border:2px dashed var(--clay); display:grid; place-items:center; font-weight:800; color:var(--clay); font-size:1.4rem;}
+    .choice-row{display:flex; gap:14px; justify-content:center;}
+    .choice-row .opt{width:72px; height:72px;}
+
+    /* Formapárosító */
+    .shape-target{display:grid; place-items:center; margin:10px auto 18px;}
+    .shape-target svg{width:104px; height:104px; filter:drop-shadow(0 8px 14px rgba(61,43,33,.18));}
+    .shape-opts{display:grid; grid-template-columns:repeat(2,1fr); gap:14px; max-width:280px; margin:0 auto;}
+    .shape-opt{background:#fff; border-radius:18px; box-shadow:var(--shadow-sm); padding:16px; transition:transform .12s ease; display:grid; place-items:center;}
+    .shape-opt svg{width:64px; height:64px;}
+    .shape-opt:active{transform:scale(.95);}
+    .shape-opt.right{box-shadow:inset 0 0 0 3px var(--b2); background:#e6f7ea;}
+    .shape-opt.wrong{box-shadow:inset 0 0 0 3px var(--coral); background:#fdeae7;}
+
+    /* Színárnyalatok (grading) */
+    .grade-wrap{display:flex; gap:10px; max-width:330px; margin:18px auto;}
+    .tablet{flex:1; height:120px; border-radius:14px; position:relative; box-shadow:var(--shadow-sm); transition:transform .1s ease;}
+    .tablet:active{transform:scale(.96);}
+    .tablet.picked{opacity:.5;}
+    .tablet .order{position:absolute; top:6px; right:6px; width:22px; height:22px; border-radius:50%; background:#fff; color:var(--ink); font-size:.8rem; font-weight:800; display:grid; place-items:center; box-shadow:var(--shadow-sm);}
+
+    /* Célkereső (figyelem) */
+    .find-grid{display:grid; grid-template-columns:repeat(5,1fr); gap:8px; max-width:320px; margin:14px auto;}
+    .find-cell{aspect-ratio:1; border-radius:12px; background:var(--cream-soft); box-shadow:var(--shadow-sm); font-size:1.35rem; display:grid; place-items:center; transition:transform .1s ease;}
+    .find-cell.got{background:#d9f5e0; box-shadow:inset 0 0 0 2px var(--b2); opacity:.65;}
+    .find-cell.miss{background:#fde2de; animation:shakeX .35s ease;}
+
+    /* a "mockup" jelölő szalag */
+    .mock-flag{position:fixed; top:14px; left:14px; z-index:200; background:var(--ink); color:#fff; font-size:.72rem; font-weight:700; padding:7px 13px; border-radius:30px; box-shadow:var(--shadow); opacity:.92;}
+    /* Mobilon a telefon teljes képernyős, ezért a lebegő jelölő a fejlécre úszna –
+       ott elrejtjük (a Profil képernyőn úgyis ott a "mockup" felirat). Asztali nézetben
+       a telefon mellett, a margóban marad, nem takar semmit. */
+    @media (max-width:480px){ .mock-flag{display:none;} }
+
+    @media (max-width:480px){
+      body{padding:0;}
+      .phone{width:100%; height:100dvh; border-radius:0; box-shadow:none;}
+    }
+    @media (prefers-reduced-motion:reduce){
+      *,*::before,*::after{animation:none !important; transition:none !important;}
+    }
+    /* ===== WOW: splash, onboarding, szint, jelvények, konfetti, info ===== */
+    .overlay{position:absolute; inset:0; z-index:120; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:34px; background:var(--app-bg); transition:opacity .45s ease;}
+    .overlay.hide{opacity:0; pointer-events:none;}
+    #splash{background:radial-gradient(120% 90% at 50% 22%, #eaf5fc, #fbf7f1); z-index:121;}
+    .splash-logo{width:112px; height:112px; border-radius:32px; background:linear-gradient(135deg,#319ed9,#7ec8e3); display:grid; place-items:center; font-size:3.2rem; box-shadow:var(--shadow-lg); margin-bottom:22px; animation:popIn .6s cubic-bezier(.2,1.2,.4,1);}
+    @keyframes popIn{0%{transform:scale(.3); opacity:0;} 100%{transform:scale(1); opacity:1;}}
+    #splash h1{font-size:2rem; margin:0 0 6px;}
+    #splash p{color:var(--ink-soft); margin:0;}
+    .spinner{margin-top:28px; width:30px; height:30px; border-radius:50%; border:3px solid #ded4c6; border-top-color:var(--blue); animation:spin 1s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    #onboarding h1{font-size:1.5rem; margin:0 0 8px;}
+    #onboarding p{color:var(--ink-soft); margin:0 0 26px; max-width:30ch;}
+    .age-opts{display:flex; flex-direction:column; gap:14px; width:100%; max-width:310px;}
+    .age-opt{display:flex; align-items:center; gap:16px; padding:18px; border-radius:18px; background:var(--cream-soft); border:2px solid rgba(61,43,33,.08); box-shadow:var(--shadow-sm); text-align:left; transition:transform .12s ease, border-color .12s ease;}
+    .age-opt:active{transform:scale(.97);}
+    .age-opt:hover{border-color:var(--blue);}
+    .age-opt .ae{font-size:2rem; flex:0 0 auto;}
+    .age-opt .at{font-weight:700;}
+    .age-opt .ad{font-size:.82rem; color:var(--ink-soft);}
+    .age-note{display:block; font-size:.8rem; color:var(--blue-deep); font-weight:600; margin-top:2px;}
+
+    /* szint / XP a profilban */
+    .level-card{background:linear-gradient(135deg,#319ed9,#1d7cb0); color:#fff; border-radius:18px; padding:18px; margin-bottom:14px; box-shadow:var(--shadow);}
+    .level-card .lr{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px;}
+    .level-card .lv{font-size:1.15rem; font-weight:800;}
+    .level-card .xp{font-size:.82rem; opacity:.92;}
+    .xpbar{height:10px; border-radius:10px; background:rgba(255,255,255,.25); overflow:hidden;}
+    .xpbar i{display:block; height:100%; border-radius:10px; background:var(--yellow); transition:width .6s ease;}
+    .ghost-link{display:block; width:100%; text-align:center; font-size:.85rem; font-weight:600; color:var(--blue-deep); padding:10px; margin-bottom:18px;}
+
+    /* jelvények */
+    .badges{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:6px;}
+    .badge{display:flex; flex-direction:column; align-items:center; gap:7px; padding:14px 8px; border-radius:16px; background:var(--cream-soft); border:1px solid rgba(61,43,33,.07); box-shadow:var(--shadow-sm); text-align:center;}
+    .badge .be{font-size:1.9rem; filter:grayscale(1); opacity:.32; transition:.2s ease;}
+    .badge.earned .be{filter:none; opacity:1;}
+    .badge .bn{font-size:.7rem; font-weight:600; color:var(--ink-soft); line-height:1.2;}
+    .badge.earned .bn{color:var(--ink);}
+
+    /* tile "Mit fejleszt?" info gomb */
+    .tile{position:relative;}
+    .tile .info-btn{position:absolute; top:10px; right:10px; width:28px; height:28px; border-radius:50%; background:rgba(255,255,255,.9); box-shadow:var(--shadow-sm); font-size:.8rem; display:grid; place-items:center; z-index:3; color:var(--blue-deep); font-weight:800;}
+
+    /* info sheet (alulról felcsúszó) */
+    .sheet-back{position:absolute; inset:0; z-index:130; background:rgba(61,43,33,.45); display:flex; align-items:flex-end; opacity:0; pointer-events:none; transition:opacity .25s ease;}
+    .sheet-back.open{opacity:1; pointer-events:auto;}
+    .sheet{width:100%; background:var(--cream-soft); border-radius:26px 26px 0 0; padding:24px 24px calc(26px + env(safe-area-inset-bottom)); transform:translateY(100%); transition:transform .3s cubic-bezier(.4,0,.2,1); box-shadow:0 -10px 40px rgba(61,43,33,.22);}
+    .sheet-back.open .sheet{transform:none;}
+    .sheet .sh-emoji{font-size:2.4rem;}
+    .sheet h3{font-size:1.3rem; margin:6px 0 4px;}
+    .sheet .sh-cat{font-size:.74rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--clay);}
+    .sheet .sh-dev{margin:14px 0; padding:15px; border-radius:14px; background:#eaf5fc; color:var(--ink); font-size:.92rem; line-height:1.55;}
+    .sheet .sh-dev b{color:var(--blue-deep);}
+    .sheet .sh-age{font-size:.85rem; color:var(--ink-soft); margin-bottom:18px;}
+
+    /* toast */
+    #toast{position:absolute; left:50%; bottom:94px; transform:translateX(-50%) translateY(20px); z-index:140; background:var(--ink); color:#fff; padding:12px 20px; border-radius:30px; font-weight:600; font-size:.88rem; box-shadow:var(--shadow-lg); opacity:0; pointer-events:none; transition:opacity .3s ease, transform .3s ease; max-width:88%; text-align:center;}
+    #toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+    /* konfetti */
+    #confetti{position:absolute; inset:0; z-index:135; pointer-events:none; overflow:hidden;}
+    .confetti-bit{position:absolute; top:-14px; width:10px; height:14px; border-radius:2px; will-change:transform;}
+    @keyframes confFall{to{transform:translateY(900px) rotate(720deg);}}
+
+  </style>
+</head>
+<body>
+  <span class="mock-flag">⚙️ MOCKUP – kattintható prototípus</span>
+
+  <div class="phone">
+    <!-- SPLASH (indító képernyő) -->
+    <div class="overlay" id="splash">
+      <div class="splash-logo">🧠</div>
+      <h1>Agytorna</h1>
+      <p>Montessori-ihlette fejlesztő játékok</p>
+      <div class="spinner" aria-hidden="true"></div>
+    </div>
+
+    <!-- ONBOARDING (életkor-választó) -->
+    <div class="overlay hide" id="onboarding">
+      <h1>Üdv az Agytornában! 👋</h1>
+      <p>Hogy a megfelelő játékokat ajánljuk, áruld el: hány éves a gyermeked?</p>
+      <div class="age-opts">
+        <button class="age-opt" data-age="0-3"><span class="ae">👶</span><span><span class="at">0–3 év</span><br><span class="ad">Érzékelés, egyszerű memória</span></span></button>
+        <button class="age-opt" data-age="3-6"><span class="ae">🧒</span><span><span class="at">3–6 év</span><br><span class="ad">Óvodás aranykor – a legtöbb játék</span></span></button>
+        <button class="age-opt" data-age="6+"><span class="ae">🎒</span><span><span class="at">6+ év</span><br><span class="ad">Matek és nagyobb kihívások</span></span></button>
+      </div>
+    </div>
+
+    <!-- "Mit fejleszt?" info-lap -->
+    <div class="sheet-back" id="sheetBack"><div class="sheet" id="sheetBody"></div></div>
+    <!-- toast üzenet (szint/jelvény) -->
+    <div id="toast"></div>
+    <!-- konfetti réteg -->
+    <div id="confetti"></div>
+
+    <!-- faux állapotsor -->
+    <div class="statusbar">
+      <span id="clock">9:41</span>
+      <span class="dots">●●● Hanna</span>
+      <span>📶 🔋</span>
+    </div>
+
+    <div class="app-scroll" id="appScroll">
+
+      <!-- ===================== KEZDŐLAP ===================== -->
+      <section class="screen active" id="screen-home">
+        <div class="greet">
+          <div>
+            <h1>Szia! 👋</h1>
+            <p>Készen állsz a mai agytornára?</p>
+          </div>
+          <div class="streak"><span class="fire">🔥</span><span id="streakNum">3</span> nap</div>
+        </div>
+
+        <!-- napi kihívás -->
+        <div class="daily">
+          <span class="deco"></span><span class="deco2"></span>
+          <span class="pill">Mai kihívás</span>
+          <h2>3 játék · ~5 perc</h2>
+          <p>Memória, megfigyelés és egy kis matek – a mindennapi gondolkodáshoz.</p>
+          <div class="row">
+            <button class="start" id="startDaily">Kezdés →</button>
+            <div class="prog" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+          </div>
+        </div>
+
+        <div class="sec-head">
+          <div><h3>Kiemelt játékok</h3><span class="age-note" id="ageNote"></span></div>
+          <a href="#" data-go="games">Összes →</a>
+        </div>
+        <div class="tiles" id="homeTiles"></div>
+      </section>
+
+      <!-- ===================== JÁTÉKOK ===================== -->
+      <section class="screen" id="screen-games">
+        <div class="greet"><div><h1>Játékok</h1><p>Válassz egy fejlesztő játékot</p></div></div>
+        <div class="chips" id="catChips"></div>
+        <div class="tiles" id="allTiles"></div>
+      </section>
+
+      <!-- ===================== HALADÁS ===================== -->
+      <section class="screen" id="screen-progress">
+        <div class="greet"><div><h1>Haladás</h1><p>A te agytornád, edzésnaplóban</p></div></div>
+        <div class="stat-row">
+          <div class="stat"><div class="big" id="statStreak">3</div><div class="lbl">🔥 napos sorozat</div></div>
+          <div class="stat"><div class="big" id="statPlayed">12</div><div class="lbl">lejátszott játék</div></div>
+        </div>
+        <div class="week">
+          <h3>Heti edzés</h3>
+          <div class="bars" id="weekBars"></div>
+        </div>
+        <div class="stat" style="text-align:center;">
+          <div class="lbl" style="margin-bottom:6px;">Heti cél</div>
+          <div class="big" style="font-size:1.4rem;">5 / 7 nap ✨</div>
+          <div class="lbl" style="margin-top:6px;">Még 2 nap a heti jelvényig!</div>
+        </div>
+      </section>
+
+      <!-- ===================== PROFIL ===================== -->
+      <section class="screen" id="screen-profile">
+        <div class="profile-top">
+          <div class="avatar">😊</div>
+          <h1 style="margin:0; font-size:1.3rem;">Kis Felfedező</h1>
+          <p id="profileLevelText" style="margin:4px 0 0; color:var(--ink-soft); font-size:.88rem;">2. szint · Gondolkodó 🧠</p>
+        </div>
+
+        <!-- szint + XP -->
+        <div class="level-card">
+          <div class="lr"><span class="lv">Szint <span id="lvNum">2</span></span><span class="xp" id="xpText">20 / 100 XP</span></div>
+          <div class="xpbar"><i id="xpBar" style="width:20%"></i></div>
+        </div>
+        <button class="ghost-link" id="changeAge">👶 Korosztály módosítása</button>
+
+        <div class="settings">
+          <div class="set-item">
+            <span class="l"><span class="ic" style="background:#e3f1fb;">🔔</span> Napi emlékeztető</span>
+            <span class="toggle on" data-toggle></span>
+          </div>
+          <div class="set-item">
+            <span class="l"><span class="ic" style="background:#fdeede;">🎚️</span> Nehézség: közepes</span>
+            <span class="toggle on" data-toggle></span>
+          </div>
+          <div class="set-item">
+            <span class="l"><span class="ic" style="background:#e9f6ec;">🔊</span> Hangok</span>
+            <span class="toggle" data-toggle></span>
+          </div>
+          <div class="set-item">
+            <span class="l"><span class="ic" style="background:#f6ecf7;">👨‍👩‍👧</span> Szülői mód</span>
+            <span class="toggle" data-toggle></span>
+          </div>
+        </div>
+
+        <!-- jelvények -->
+        <h4 style="font-size:.8rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft); margin:22px 2px 12px;">Jelvények</h4>
+        <div class="badges" id="badgeGrid"></div>
+
+        <p class="madefor">Mockup – Németh Hanna „I ❤️ matek &amp; montessori" brandjéhez 💛</p>
+      </section>
+
+    </div><!-- /app-scroll -->
+
+    <!-- ===================== JÁTÉK-SZÍNPAD ===================== -->
+    <div class="game-stage" id="gameStage" aria-hidden="true">
+      <div class="game-top">
+        <button class="back" id="gameBack" aria-label="Vissza">←</button>
+        <h2 id="gameTitle">Játék</h2>
+        <span class="meta" id="gameMeta" hidden></span>
+      </div>
+      <div class="game-body" id="gameBody"></div>
+    </div>
+
+    <!-- ===================== ALSÓ MENÜ ===================== -->
+    <nav class="bottom-nav">
+      <button class="nav-btn active" data-go="home">
+        <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Kezdőlap
+      </button>
+      <button class="nav-btn" data-go="games">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Játékok
+      </button>
+      <button class="nav-btn" data-go="progress">
+        <svg viewBox="0 0 24 24"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg>Haladás
+      </button>
+      <button class="nav-btn" data-go="profile">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Profil
+      </button>
+    </nav>
+  </div>
+
+  <script>
+  /* ============================================================
+     AGYTORNA – app logika
+     Egy kis "SPA": képernyő-váltó + 3 játszható játék + napi kihívás.
+     A haladás (sorozat) localStorage-ban marad meg, hogy valódi
+     app-érzete legyen. Minden bőven kommentálva.
+     ============================================================ */
+  (function(){
+    'use strict';
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* ---- óra a faux állapotsorban ---- */
+    (function tick(){
+      var d = new Date();
+      document.getElementById('clock').textContent =
+        d.getHours() + ':' + String(d.getMinutes()).padStart(2,'0');
+      setTimeout(tick, 20000);
+    })();
+
+    /* ---- egyszerű perzisztencia (sorozat) ---- */
+    function todayKey(){ var d=new Date(); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
+    var store = {
+      get streak(){ try { return parseInt(localStorage.getItem('agytorna_streak')||'3',10); } catch(e){ return 3; } },
+      set streak(v){ try { localStorage.setItem('agytorna_streak', v); } catch(e){} },
+      get last(){ try { return localStorage.getItem('agytorna_last')||''; } catch(e){ return ''; } },
+      set last(v){ try { localStorage.setItem('agytorna_last', v); } catch(e){} }
+    };
+    function refreshStreak(){
+      var s = store.streak;
+      document.getElementById('streakNum').textContent = s;
+      document.getElementById('statStreak').textContent = s;
+    }
+    refreshStreak();
+
+    /* ---- segéd: DOM-elem építő ---- */
+    function el(tag, attrs, kids){
+      var n = document.createElement(tag);
+      if (attrs) for (var k in attrs){
+        if (k === 'class') n.className = attrs[k];
+        else if (k === 'html') n.innerHTML = attrs[k];
+        else if (k === 'text') n.textContent = attrs[k];
+        else if (k.slice(0,2)==='on' && typeof attrs[k]==='function') n.addEventListener(k.slice(2), attrs[k]);
+        else if (attrs[k] !== false && attrs[k] != null) n.setAttribute(k, attrs[k]);
+      }
+      (kids||[]).forEach(function(c){ if (c) n.appendChild(typeof c==='string'?document.createTextNode(c):c); });
+      return n;
+    }
+    /* Fisher–Yates keverés (új tömböt ad vissza, nem mutál) */
+    function shuffle(arr){ var a=arr.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+    function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+    function pick(arr,n){ return shuffle(arr).slice(0,n); }
+
+    /* ============================================================
+       KÉPERNYŐ-VÁLTÓ
+       ============================================================ */
+    function show(name){
+      document.querySelectorAll('.screen').forEach(function(s){ s.classList.toggle('active', s.id==='screen-'+name); });
+      document.querySelectorAll('.nav-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.go===name); });
+      document.getElementById('appScroll').scrollTop = 0;
+    }
+    document.querySelectorAll('[data-go]').forEach(function(b){
+      b.addEventListener('click', function(e){ e.preventDefault(); show(b.dataset.go); });
+    });
+
+    /* profil kapcsolók (csak vizuális) */
+    document.querySelectorAll('[data-toggle]').forEach(function(t){
+      t.addEventListener('click', function(){ t.classList.toggle('on'); });
+    });
+
+    /* heti oszlopdiagram feltöltése (mintaadat) */
+    (function buildWeek(){
+      var days=['H','K','Sze','Cs','P','Szo','V'], vals=[60,80,45,90,70,30,100], today=(new Date().getDay()+6)%7;
+      var wrap=document.getElementById('weekBars');
+      days.forEach(function(d,i){
+        var col=el('div',{class:'col'+(i===today?' today':'')},[
+          el('div',{class:'bar'}), el('div',{class:'d',text:d})
+        ]);
+        wrap.appendChild(col);
+        var bar=col.querySelector('.bar');
+        requestAnimationFrame(function(){ bar.style.height=(i<=today?vals[i]:8)+'%'; });
+      });
+    })();
+
+    /* ============================================================
+       JÁTÉK-REGISZTER
+       playable: true → van mount() függvénye; false → "Hamarosan"
+       ============================================================ */
+    var GAMES = [
+      { id:'memory',   name:'Memóriapárok', tag:'Találd meg a párokat',  cat:'Memória',    emoji:'🃏', bg:'#e3f1fb', playable:true, mount:memoryGame },
+      { id:'vanished', name:'Mi tűnt el?',   tag:'Mi hiányzik a képről?', cat:'Megfigyelés',emoji:'👀', bg:'#e9f6ec', playable:true, mount:vanishedGame },
+      { id:'more',     name:'Melyik több?',  tag:'Gyors szám-érzék',      cat:'Matek',      emoji:'🔢', bg:'#fdeae7', playable:true, mount:moreGame },
+      { id:'count',    name:'Számolj meg!',  tag:'Hány darab van?',       cat:'Matek',      emoji:'🧮', bg:'#fff4d6', playable:true, mount:countGame },
+      { id:'oddeven',  name:'Páros-páratlan',tag:'Oszd két oszlopba',     cat:'Matek',      emoji:'⚖️', bg:'#fde7e3', playable:true, mount:oddEvenGame },
+      { id:'simon',    name:'Színlánc',      tag:'Jegyezd meg a sorrendet',cat:'Memória',   emoji:'🌈', bg:'#fff4d6', playable:true, mount:simonGame },
+      { id:'span',     name:'Számlánc',      tag:'Meddig emlékszel?',     cat:'Memória',    emoji:'#️⃣', bg:'#e3f1fb', playable:true, mount:spanGame },
+      { id:'sequence', name:'Mi jön a sorban?', tag:'Folytasd a mintát',  cat:'Logika',     emoji:'🔺', bg:'#f6ecf7', playable:true, mount:sequenceGame },
+      { id:'shapes',   name:'Formapárosító', tag:'Találd meg a formát',   cat:'Logika',     emoji:'⬛', bg:'#efe7df', playable:true, mount:shapesGame },
+      { id:'grade',    name:'Színárnyalatok',tag:'Világostól sötétig',    cat:'Érzékelés',  emoji:'🎨', bg:'#e9f6ec', playable:true, mount:gradeGame },
+      { id:'attention',name:'Célkereső',     tag:'Találd meg gyorsan',    cat:'Figyelem',   emoji:'🎯', bg:'#fde2de', playable:true, mount:attentionGame }
+    ];
+
+    /* játékonkénti meta: MIT FEJLESZT (idegtudományi/Montessori háttér) + mely életkorra ajánlott.
+       Itt definiáljuk (a regiszter után, a kezdőlap-render előtt), hogy a renderHome elérje. */
+    var GAME_META = {
+      memory:   { ages:['0-3','3-6','6+'], develops:'Rövidtávú memória és koncentráció. A párok felidézése a munkamemóriát és a vizuális emlékezetet edzi.' },
+      vanished: { ages:['3-6','6+'],       develops:'Vizuális munkamemória és megfigyelés. A „mi változott?" feladatok a figyelmi fókuszt erősítik.' },
+      more:     { ages:['3-6','6+'],       develops:'Szám-érzék (number sense). A mennyiségek gyors összevetése a matematikai intuíció alapja.' },
+      count:    { ages:['3-6','6+'],       develops:'Mennyiség–szám megfeleltetés (Montessori „cards & counters"): a leírt szám összekötése a valós darabszámmal.' },
+      oddeven:  { ages:['3-6','6+'],       develops:'Számfogalom és az osztás előkészítése. A párba rendezett korongok láthatóvá teszik a páros/páratlan szerkezetet.' },
+      simon:    { ages:['0-3','3-6','6+'], develops:'Szekvenciális munkamemória. A növekvő sorozatok a prefrontális kéreg munkamemória-kapacitását fejlesztik.' },
+      span:     { ages:['3-6','6+'],       develops:'Számjegy-terjedelem (digit span) – a munkamemória klasszikus edzése és mérőszáma.' },
+      sequence: { ages:['3-6','6+'],       develops:'Mintafelismerés és logikai gondolkodás – a sorozatok az algebrai gondolkodás előfutárai.' },
+      shapes:   { ages:['0-3','3-6','6+'], develops:'Forma-absztrakció és vizuális diszkrimináció (Montessori geometriai szekrény): a forma a színtől függetlenül azonosítható.' },
+      grade:    { ages:['0-3','3-6','6+'], develops:'Finom vizuális gradálás (Montessori színtáblák): a részletek és árnyalatok megkülönböztetését élesíti.' },
+      attention:{ ages:['3-6','6+'],       develops:'Szelektív figyelem és feldolgozási sebesség. A vizuális keresés a fókusz fenntartását gyakorolja.' }
+    };
+    /* aktuális korosztály (localStorage-ból; üres = még nincs onboarding) */
+    var currentAge = (function(){ try { return localStorage.getItem('agytorna_age') || ''; } catch(e){ return ''; } })();
+
+    /* csempe építése */
+    function tile(g){
+      var node = el('button', {class:'tile '+(g.playable?'play':'soon'), 'aria-label':g.name}, [
+        el('div', {class:'emoji', style:'background:'+g.bg}, [g.emoji]),
+        el('div', {class:'nm', text:g.name}),
+        el('div', {class:'tg', text:g.tag}),
+        el('div', {class:'cat', text:g.cat})
+      ]);
+      if (!g.playable) { node.appendChild(el('span',{class:'soon-badge',text:'Hamarosan'})); return node; }
+      node.addEventListener('click', function(){ openGame(g); });
+      /* "Mit fejleszt?" info gomb (a szülőknek) – külön kattintható, nem indítja a játékot */
+      var info = el('button',{class:'info-btn','aria-label':'Mit fejleszt?'},['ⓘ']);
+      info.addEventListener('click', function(e){ e.stopPropagation(); openInfo(g); });
+      node.appendChild(info);
+      return node;
+    }
+    /* kezdőlapi kiemelt – korosztályra szabva (renderHome a WOW blokkban, hoistolt) */
+    var homeTiles = document.getElementById('homeTiles');
+    renderHome();
+
+    /* "Játékok" képernyő: szűrhető rács */
+    var allTiles = document.getElementById('allTiles');
+    var cats = ['Mind'].concat(GAMES.map(function(g){return g.cat;}).filter(function(v,i,a){return a.indexOf(v)===i;}));
+    var activeCat = 'Mind';
+    function renderAll(){
+      allTiles.textContent='';
+      GAMES.filter(function(g){ return activeCat==='Mind'||g.cat===activeCat; }).forEach(function(g){ allTiles.appendChild(tile(g)); });
+    }
+    var chips = document.getElementById('catChips');
+    cats.forEach(function(c){
+      var chip = el('button',{class:'chip'+(c==='Mind'?' active':''),text:c});
+      chip.addEventListener('click', function(){
+        activeCat=c; document.querySelectorAll('.chip').forEach(function(x){x.classList.toggle('active', x.textContent===c);}); renderAll();
+      });
+      chips.appendChild(chip);
+    });
+    renderAll();
+
+    /* ============================================================
+       JÁTÉK-SZÍNPAD vezérlés
+       ============================================================ */
+    var stage = document.getElementById('gameStage');
+    var body  = document.getElementById('gameBody');
+    var titleEl = document.getElementById('gameTitle');
+    var metaEl = document.getElementById('gameMeta');
+    var timers = [];                          // futó időzítők (záráskor töröljük)
+    function T(fn,ms){ var id=setTimeout(fn,ms); timers.push(id); return id; }
+    function clearTimers(){ timers.forEach(clearTimeout); timers=[]; }
+
+    var challengeQueue = null;                 // napi kihívás játéksora vagy null
+    var challengeIdx = 0;
+
+    function setMeta(txt){ if(txt){ metaEl.textContent=txt; metaEl.hidden=false; } else { metaEl.hidden=true; } }
+
+    function openGame(g, asChallenge){
+      clearTimers();
+      titleEl.textContent = g.name;
+      setMeta(null);
+      body.textContent='';
+      stage.classList.add('open');
+      stage.setAttribute('aria-hidden','false');
+      /* a játék kap egy "befejez" callbacket az eredmény-panellel */
+      g.mount(body, function(result){ finishGame(g, result, asChallenge); });
+    }
+    function closeGame(){
+      clearTimers();
+      stage.classList.remove('open');
+      stage.setAttribute('aria-hidden','true');
+      challengeQueue=null;
+      T(function(){ body.textContent=''; setMeta(null); }, 320);
+    }
+    document.getElementById('gameBack').addEventListener('click', closeGame);
+
+    /* eredmény-panel + napi kihívás láncolás */
+    function finishGame(g, result, asChallenge){
+      clearTimers();
+      setMeta(null);
+      awardForResult(g, result);          // XP, jelvények, konfetti (WOW blokk)
+      var inChallenge = asChallenge && challengeQueue;
+      var acts = [];
+      if (inChallenge && challengeIdx < challengeQueue.length-1){
+        acts.push(el('button',{class:'btn btn-primary', onclick:function(){ challengeIdx++; openGame(challengeQueue[challengeIdx], true); }},['Következő játék →']));
+        acts.push(el('button',{class:'btn btn-ghost', onclick:closeGame},['Kilépés']));
+      } else if (inChallenge){
+        /* a kihívás vége → sorozat növelése (naponta egyszer) */
+        if (store.last !== todayKey()){ store.streak = store.streak + 1; store.last = todayKey(); refreshStreak(); }
+        body.textContent='';
+        body.appendChild(el('div',{class:'result'},[
+          el('div',{class:'big-emoji'},['🎉']),
+          el('h3',{text:'Mai agytorna kész!'}),
+          el('div',{class:'score',html:'🔥 '+store.streak+' napos sorozat'}),
+          el('p',{text:'Szuper voltál! Holnap új kihívás vár.'}),
+          el('div',{class:'acts'},[ el('button',{class:'btn btn-sun', onclick:closeGame},['Vissza a kezdőlapra']) ])
+        ]));
+        return;
+      } else {
+        acts.push(el('button',{class:'btn btn-primary', onclick:function(){ openGame(g, false); }},['Újra']));
+        acts.push(el('button',{class:'btn btn-ghost', onclick:closeGame},['Vissza']));
+      }
+      body.textContent='';
+      body.appendChild(el('div',{class:'result'},[
+        el('div',{class:'big-emoji'},[result.emoji||'⭐']),
+        el('h3',{text:result.title||'Kész!'}),
+        el('div',{class:'score',text:result.score!=null?result.score:''}),
+        el('p',{text:result.msg||''}),
+        el('div',{class:'acts'}, acts)
+      ]));
+    }
+
+    /* napi kihívás indítása (memória → mi tűnt el → melyik több) */
+    document.getElementById('startDaily').addEventListener('click', function(){
+      challengeQueue = ['memory','vanished','more'].map(function(id){ return GAMES.find(function(g){return g.id===id;}); });
+      challengeIdx = 0;
+      openGame(challengeQueue[0], true);
+    });
+
+    /* ============================================================
+       1) MEMÓRIAPÁROK (párkereső)
+       6 pár szám, hiteles Montessori színekkel, 3×4 rács.
+       ============================================================ */
+    function memoryGame(root, done){
+      var beadColors = ['#e23b2e','#2aa84a','#f48fb1','#ffd23f','#7ec8e3','#a978d6'];
+      var lightFaces = {'#ffd23f':1,'#f48fb1':1,'#7ec8e3':1}; // ezeken sötét szám kell
+      /* 6 érték duplázva, majd keverve */
+      var deck = shuffle([1,2,3,4,5,6,1,2,3,4,5,6].map(function(v){ return {v:v, color:beadColors[v-1]}; }));
+      var first=null, lock=false, moves=0, matched=0;
+
+      var banner = el('div',{class:'game-banner',html:'Találd meg a párokat!<small>Minél kevesebb fordítás, annál jobb.</small>'});
+      var grid = el('div',{class:'mem-grid'});
+      root.appendChild(banner); root.appendChild(grid);
+      setMeta('0 lépés');
+
+      deck.forEach(function(card){
+        var dark = lightFaces[card.color];
+        var back = el('div',{class:'face back', style:'color:'+card.color+';'+(dark?'':'')},[String(card.v)]);
+        var node = el('button',{class:'mcard'},[
+          el('div',{class:'inner'},[
+            el('div',{class:'face front'},['?']),
+            back
+          ])
+        ]);
+        node.addEventListener('click', function(){
+          if (lock || node.classList.contains('flip') || node.classList.contains('done')) return;
+          node.classList.add('flip');
+          if (!first){ first={card:card, node:node}; return; }
+          moves++; setMeta(moves+' lépés');
+          if (first.card.v === card.v){
+            /* találat */
+            var a=first.node; first=null;
+            T(function(){ a.classList.add('done'); node.classList.add('done'); }, 250);
+            matched += 2;
+            if (matched === deck.length){
+              T(function(){ done({emoji:'🧠', title:'Minden pár megvan!', score:moves+' lépés', msg: moves<=10?'Fantasztikus memória! 🌟':'Szép munka – legközelebb még gyorsabban!'}); }, 600);
+            }
+          } else {
+            /* nem talált → vissza */
+            lock=true; var a=first.node; var b=node; first=null;
+            T(function(){ a.classList.remove('flip'); b.classList.remove('flip'); lock=false; }, 750);
+          }
+        });
+        grid.appendChild(node);
+      });
+    }
+
+    /* ============================================================
+       2) MI TŰNT EL?  (megfigyelés / munkamemória)
+       9 tárgy, memorizálás, 1 eltűnik → melyik volt az? 3 kör.
+       ============================================================ */
+    function vanishedGame(root, done){
+      var POOL = ['🍎','🚗','⭐','🐱','🌸','🎈','🔑','🍀','🦋','🌙','🎩','🐢','🍓','🌈','⚽','🚀','🐞','🌻'];
+      var ROUNDS = 3, round = 0, score = 0;
+      setMeta('1 / '+ROUNDS);
+
+      function playRound(){
+        root.textContent='';
+        var items = pick(POOL, 9);
+        var banner = el('div',{class:'game-banner',html:'Nézd meg jól! 👀<small>Memorizáld a tárgyakat…</small>'});
+        var grid = el('div',{class:'obj-grid'});
+        items.forEach(function(em){ grid.appendChild(el('div',{class:'obj'},[em])); });
+        var cd = el('div',{class:'countdown',text:'4'});
+        root.appendChild(banner); root.appendChild(grid); root.appendChild(cd);
+
+        var n=4;
+        (function count(){
+          /* 4-3-2-1 visszaszámlálás, majd a számlálót eltüntetjük és elrejtünk 1 tárgyat */
+          if (n===0){ cd.remove(); hideOne(items, grid, banner); return; }
+          cd.textContent = n; n--; T(count, 800);
+        })();
+      }
+
+      function hideOne(items, grid, banner){
+        var missing = items[randInt(0, items.length-1)];
+        banner.innerHTML = '…';
+        grid.style.filter='blur(6px)';
+        T(function(){
+          grid.style.filter='';
+          banner.innerHTML = 'Mi tűnt el? 🤔<small>Koppints a hiányzó tárgyra.</small>';
+          /* a hiányzó helyére üres mező */
+          [].forEach.call(grid.children, function(cell){ if (cell.textContent===missing){ cell.textContent=''; cell.className='obj empty'; } });
+          /* 4 választási lehetőség: a hiányzó + 3 másik a képről */
+          var distract = pick(items.filter(function(x){return x!==missing;}), 3);
+          var opts = shuffle(distract.concat([missing]));
+          var optWrap = el('div',{class:'options'});
+          opts.forEach(function(em){
+            var o = el('button',{class:'opt'},[em]);
+            o.addEventListener('click', function(){
+              [].forEach.call(optWrap.children, function(b){ b.style.pointerEvents='none'; });
+              if (em===missing){ o.classList.add('right'); score++; }
+              else { o.classList.add('wrong'); [].forEach.call(optWrap.children,function(b){ if(b.textContent===missing) b.classList.add('right'); }); }
+              round++;
+              setMeta(Math.min(round+1,ROUNDS)+' / '+ROUNDS);
+              T(function(){
+                if (round<ROUNDS) playRound();
+                else done({emoji: score===ROUNDS?'🌟':'👀', title:'Vége a körnek!', score:score+' / '+ROUNDS, msg: score===ROUNDS?'Sasszem! Mindet eltaláltad.':'Ügyes! A megfigyelés is edzhető.'});
+              }, 1100);
+            });
+            optWrap.appendChild(o);
+          });
+          root.appendChild(optWrap);
+        }, 700);
+      }
+      playRound();
+    }
+
+    /* ============================================================
+       3) MELYIK TÖBB?  (matek / szám-érzék)
+       Két csoport gyöngy, koppints a többre. 8 kör.
+       ============================================================ */
+    function moreGame(root, done){
+      var ROUNDS = 8, round = 0, score = 0;
+      var beadColors = ['#319ed9','#2aa84a','#ef5a48','#a978d6','#f0a830'];
+      setMeta('1 / '+ROUNDS);
+
+      function playRound(){
+        root.textContent='';
+        var a = randInt(1,9), b = randInt(1,9);
+        while (b===a) b = randInt(1,9);
+        var color = beadColors[round % beadColors.length];
+
+        var banner = el('div',{class:'game-banner',html:'Melyik csoportban van több? 🔢<small>Koppints a többre – gyorsan!</small>'});
+        var wrap = el('div',{class:'more-wrap'});
+        root.appendChild(banner); root.appendChild(el('div',{class:'more-vs',text:'⬇'}));
+        root.appendChild(wrap);
+
+        function makeCard(count){
+          var card = el('div',{class:'more-card'});
+          for (var i=0;i<count;i++) card.appendChild(el('span',{class:'dot',style:'background:'+color}));
+          card.addEventListener('click', function(){
+            var correct = count === Math.max(a,b);
+            [].forEach.call(wrap.children, function(c){ c.style.pointerEvents='none'; });
+            card.classList.add(correct?'right':'wrong');
+            if (correct) score++;
+            else { [].forEach.call(wrap.children,function(c){ if(c===other) c.classList.add('right'); }); }
+            round++; setMeta(Math.min(round+1,ROUNDS)+' / '+ROUNDS);
+            T(function(){
+              if (round<ROUNDS) playRound();
+              else done({emoji: score>=7?'🏆':'🔢', title:'Vége!', score:score+' / '+ROUNDS, msg: score>=7?'Kiváló szám-érzék! 🌟':'Jó kezdés – a gyakorlás csodákat tesz.'});
+            }, 650);
+          });
+          return card;
+        }
+        var cardA = makeCard(a), cardB = makeCard(b);
+        var other; // a "másik" kártya jelölése helyes válasz mutatásához
+        cardA._n=a; cardB._n=b;
+        wrap.appendChild(cardA); wrap.appendChild(cardB);
+        other = (Math.max(a,b)===a)?cardA:cardB;
+      }
+      playRound();
+    }
+
+    /* ============================================================
+       TOVÁBBI JÁTÉKOK
+       Mind beépített eszközökkel: emoji, CSS, SVG és Web Audio
+       (szintetizált hangok) – nincs külső fájl/függőség, a mockup
+       önálló marad. Minden függvény ugyanazt a (root, done) mintát
+       követi, mint az első három játék.
+       ============================================================ */
+
+    /* kis hang-segéd: rövid szinusz "beep" a Web Audio API-val.
+       Az AudioContextet lustán, az első koppintáskor hozzuk létre. */
+    var audioCtx = null;
+    function beep(freq, dur){
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        var o = audioCtx.createOscillator(), g = audioCtx.createGain(), t = audioCtx.currentTime;
+        o.type = 'sine'; o.frequency.value = freq;
+        o.connect(g); g.connect(audioCtx.destination);
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.16, t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + (dur || 0.3));
+        o.start(t); o.stop(t + (dur || 0.3) + 0.03);
+      } catch (e) {}
+    }
+    /* helyes = magas csilingelés, hibás = mély hang */
+    function feedbackTone(ok){ beep(ok ? 660 : 180, ok ? 0.18 : 0.3); }
+
+    /* ---------- SZÁMOLJ MEG! (mennyiség ↔ szám, "cards & counters") ---------- */
+    function countGame(root, done){
+      var POOL = ['🍎','⭐','🐤','🌸','🍓','🐞','🎈','🦋','🐠','🍀'];
+      var ROUNDS = 8, round = 0, score = 0;
+      setMeta('1 / ' + ROUNDS);
+      function playRound(){
+        root.textContent = '';
+        var n = randInt(3, 12);
+        var emoji = pick(POOL, 1)[0];
+        root.appendChild(el('div',{class:'game-banner',html:'Hány darab van? 🧮<small>Számold meg, és koppints a számra.</small>'}));
+        var wrap = el('div',{class:'count-wrap'});
+        for (var i=0;i<n;i++) wrap.appendChild(el('span',{class:'count-item',text:emoji}));
+        root.appendChild(wrap);
+        /* helyes + 3 közeli, mind különböző szám 1..15 között */
+        var opts = [n];
+        while (opts.length < 4){ var d = n + randInt(-3,3); if (d>=1 && d<=15 && opts.indexOf(d)<0) opts.push(d); }
+        opts = shuffle(opts);
+        var row = el('div',{class:'num-row'});
+        opts.forEach(function(v){
+          var b = el('button',{class:'num-opt',text:v});
+          b.addEventListener('click', function(){
+            [].forEach.call(row.children,function(x){ x.style.pointerEvents='none'; });
+            var ok = v===n; b.classList.add(ok?'right':'wrong');
+            if (ok) score++; else [].forEach.call(row.children,function(x){ if(+x.textContent===n) x.classList.add('right'); });
+            feedbackTone(ok);
+            round++; setMeta(Math.min(round+1,ROUNDS)+' / '+ROUNDS);
+            T(function(){ if(round<ROUNDS) playRound(); else done({emoji:score>=7?'🏆':'🧮', title:'Vége!', score:score+' / '+ROUNDS, msg:score>=7?'Profi számoló! 🌟':'Egyre ügyesebb leszel!'}); }, 700);
+          });
+          row.appendChild(b);
+        });
+        root.appendChild(row);
+      }
+      playRound();
+    }
+
+    /* ---------- PÁROS-PÁRATLAN (Montessori odd/even, korongok párban) ---------- */
+    function oddEvenGame(root, done){
+      var ROUNDS = 8, round = 0, score = 0;
+      var colors = ['#319ed9','#2aa84a','#ef5a48','#a978d6','#f0a830'];
+      setMeta('1 / ' + ROUNDS);
+      function playRound(){
+        root.textContent = '';
+        var n = randInt(1,10), color = colors[round % colors.length];
+        root.appendChild(el('div',{class:'game-banner',html:'Páros vagy páratlan? ⚖️<small>A korongok párba rendezve segítenek.</small>'}));
+        /* korongok 2 oszlopban – páratlannál marad egy "magányos" (kiemelve) */
+        var grid = el('div',{class:'oe-dots'});
+        for (var i=0;i<n;i++){
+          var lonely = (n%2===1 && i===n-1);
+          grid.appendChild(el('span',{class:'oe-dot'+(lonely?' lonely':''), style:'background:'+color}));
+        }
+        root.appendChild(grid);
+        root.appendChild(el('div',{class:'oe-num',text:n}));
+        var btns = el('div',{class:'oe-btns'});
+        [['Páros',true],['Páratlan',false]].forEach(function(pair){
+          var even = pair[1];
+          var b = el('button',{class:'btn '+(even?'btn-primary':'btn-sun'),text:pair[0]});
+          b.addEventListener('click', function(){
+            [].forEach.call(btns.children,function(x){ x.style.pointerEvents='none'; });
+            var ok = (even === (n%2===0));
+            b.style.boxShadow = ok ? '0 0 0 3px #2aa84a' : '0 0 0 3px #ef5a48';
+            feedbackTone(ok); if (ok) score++;
+            round++; setMeta(Math.min(round+1,ROUNDS)+' / '+ROUNDS);
+            T(function(){ if(round<ROUNDS) playRound(); else done({emoji:score>=7?'🏆':'⚖️', title:'Vége!', score:score+' / '+ROUNDS, msg:score>=7?'Érted a páros-páratlant! 🌟':'A korongok sokat segítenek – ügyes!'}); }, 850);
+          });
+          btns.appendChild(b);
+        });
+        root.appendChild(btns);
+      }
+      playRound();
+    }
+
+    /* ---------- SZÍNLÁNC (Simon – növekvő szekvencia, hangokkal) ---------- */
+    function simonGame(root, done){
+      var PADS = [{c:'#e23b2e',f:329},{c:'#2aa84a',f:392},{c:'#319ed9',f:494},{c:'#fede11',f:587}];
+      var seq = [], step = 0, accepting = false;
+      var banner = el('div',{class:'game-banner',html:'Színlánc 🌈<small>Nézd a sorrendet, majd ismételd!</small>'});
+      root.appendChild(banner);
+      var board = el('div',{class:'simon-board'}), padEls = [];
+      PADS.forEach(function(p, idx){
+        var pad = el('button',{class:'simon-pad','aria-label':'Gomb '+(idx+1), style:'background:'+p.c});
+        pad.addEventListener('click', function(){ if (accepting) press(idx); });
+        padEls.push(pad); board.appendChild(pad);
+      });
+      root.appendChild(board);
+      function light(idx){ var p = padEls[idx]; p.classList.add('lit'); beep(PADS[idx].f, 0.3); T(function(){ p.classList.remove('lit'); }, 320); }
+      function press(idx){
+        light(idx);
+        if (idx === seq[step]){
+          step++;
+          if (step === seq.length){ accepting = false; banner.innerHTML = 'Szuper! 👏<small>Jön a következő…</small>'; T(next, 850); }
+        } else {
+          accepting = false; feedbackTone(false);
+          T(function(){ done({emoji: (seq.length-1)>=5?'🏆':'🌈', title:'Vége!', score:(seq.length-1)+' szint', msg:(seq.length-1)>=5?'Káprázatos memória! 🌟':'Jó kör – próbáld újra!'}); }, 600);
+        }
+      }
+      function next(){
+        seq.push(randInt(0,3)); step = 0; setMeta('Szint ' + seq.length);
+        banner.innerHTML = 'Nézd a sorrendet… 👀'; accepting = false;
+        var i = 0;
+        (function go(){
+          if (i >= seq.length){ accepting = true; banner.innerHTML = 'Te jössz! ✋<small>Ismételd a sorrendet.</small>'; return; }
+          light(seq[i]); i++; T(go, 640);
+        })();
+      }
+      T(next, 500);
+    }
+
+    /* ---------- SZÁMLÁNC (digit span – munkamemória) ---------- */
+    function spanGame(root, done){
+      var seq = [], inputIdx = 0;
+      var banner = el('div',{class:'game-banner',html:'Számlánc #️⃣<small>Jegyezd meg a számokat, majd üsd be!</small>'});
+      root.appendChild(banner);
+      var display = el('div',{class:'span-digit'}); root.appendChild(display);
+      var padWrap = el('div',{class:'keypad'}); root.appendChild(padWrap);
+      function keyBtn(d){
+        var b = el('button',{class:'key',text:d});
+        b.addEventListener('click', function(){
+          if (d === seq[inputIdx]){
+            inputIdx++; display.textContent = seq.slice(0,inputIdx).join(' '); beep(440 + d*30, 0.12);
+            if (inputIdx === seq.length){ feedbackTone(true); next(); }
+          } else {
+            feedbackTone(false);
+            done({emoji:(seq.length-1)>=5?'🏆':'#️⃣', title:'Vége!', score:(seq.length-1)+' számjegy', msg:(seq.length-1)>=5?'Hihetetlen memória! 🌟':'Szép – egyre hosszabb lesz!'});
+          }
+        });
+        return b;
+      }
+      function buildKeypad(active){
+        padWrap.textContent = '';
+        for (var d=1; d<=9; d++) padWrap.appendChild(keyBtn(d));
+        padWrap.appendChild(el('span',{}));          // üres a 0 középre igazításához
+        padWrap.appendChild(keyBtn(0));
+        padWrap.appendChild(el('span',{}));
+        if (!active) [].forEach.call(padWrap.children, function(b){ if (b.tagName==='BUTTON'){ b.disabled=true; b.style.opacity=.4; } });
+      }
+      function showSeq(){
+        buildKeypad(false); banner.innerHTML = 'Nézd a számokat… 👀'; display.textContent = '';
+        var i = 0;
+        (function go(){
+          if (i >= seq.length){ display.textContent = '?'; banner.innerHTML = 'Te jössz! ✋<small>Üsd be a számokat sorrendben.</small>'; inputIdx = 0; buildKeypad(true); return; }
+          display.textContent = seq[i]; beep(440 + seq[i]*30, 0.25); i++;
+          T(function(){ display.textContent = ''; T(go, 180); }, 700);
+        })();
+      }
+      function next(){ seq.push(randInt(0,9)); setMeta('Hossz ' + seq.length); T(showSeq, 500); }
+      next();
+    }
+
+    /* ---------- MI JÖN A SORBAN? (mintafolytatás: AB / AAB / ABB / ABC) ---------- */
+    function sequenceGame(root, done){
+      var TOKENS = ['🔴','🟢','🔵','🟡','🟣','🟠','⭐','🔺'];
+      var ROUNDS = 6, round = 0, score = 0;
+      setMeta('1 / ' + ROUNDS);
+      function buildUnit(toks){
+        if (toks.length === 2){
+          var r = Math.random();
+          if (r < 0.34) return [toks[0], toks[1]];           // AB
+          if (r < 0.67) return [toks[0], toks[0], toks[1]];  // AAB
+          return [toks[0], toks[1], toks[1]];                // ABB
+        }
+        return [toks[0], toks[1], toks[2]];                  // ABC
+      }
+      function playRound(){
+        root.textContent = '';
+        var toks = pick(TOKENS, randInt(2,3));
+        var unit = buildUnit(toks);
+        var full = unit.concat(unit);                        // a mintát kétszer mutatjuk
+        var correct = unit[full.length % unit.length];       // a ciklus következő eleme
+        root.appendChild(el('div',{class:'game-banner',html:'Mi jön a sorban? 🔺<small>Folytasd a mintát!</small>'}));
+        var seqRow = el('div',{class:'seq-row'});
+        full.forEach(function(t){ seqRow.appendChild(el('div',{class:'seq-item',text:t})); });
+        var qSlot = el('div',{class:'seq-q',text:'?'}); seqRow.appendChild(qSlot);
+        root.appendChild(seqRow);
+        var distract = pick(TOKENS.filter(function(t){ return t!==correct; }), 2);
+        var opts = shuffle([correct].concat(distract));
+        var choice = el('div',{class:'choice-row'});
+        opts.forEach(function(t){
+          var b = el('button',{class:'opt',text:t});
+          b.addEventListener('click', function(){
+            [].forEach.call(choice.children,function(x){ x.style.pointerEvents='none'; });
+            var ok = t===correct; b.classList.add(ok?'right':'wrong');
+            if (ok) score++; else [].forEach.call(choice.children,function(x){ if(x.textContent===correct) x.classList.add('right'); });
+            qSlot.textContent = correct; qSlot.className = 'seq-item';   // a "?" helyére a helyes elem
+            feedbackTone(ok);
+            round++; setMeta(Math.min(round+1,ROUNDS)+' / '+ROUNDS);
+            T(function(){ if(round<ROUNDS) playRound(); else done({emoji:score>=5?'🏆':'🔺', title:'Vége!', score:score+' / '+ROUNDS, msg:score>=5?'Mintamester! 🌟':'A minták egyre mennek – ügyes!'}); }, 800);
+          });
+          choice.appendChild(b);
+        });
+        root.appendChild(choice);
+      }
+      playRound();
+    }
+
+    /* ---------- FORMAPÁROSÍTÓ (geometriai – a forma számít, nem a szín) ---------- */
+    function shapesGame(root, done){
+      var SHAPES = ['circle','square','rect','triangle','diamond','star','pentagon','hexagon'];
+      var COLORS = ['#319ed9','#e23b2e','#2aa84a','#f0a830','#a978d6','#ef5a48'];
+      var ROUNDS = 6, round = 0, score = 0;
+      setMeta('1 / ' + ROUNDS);
+      function svgShape(type, color){
+        var inner = '';
+        if (type==='circle')   inner = '<circle cx="50" cy="50" r="40" fill="'+color+'"/>';
+        if (type==='square')   inner = '<rect x="14" y="14" width="72" height="72" rx="6" fill="'+color+'"/>';
+        if (type==='rect')     inner = '<rect x="8" y="28" width="84" height="44" rx="6" fill="'+color+'"/>';
+        if (type==='triangle') inner = '<polygon points="50,10 90,86 10,86" fill="'+color+'"/>';
+        if (type==='diamond')  inner = '<polygon points="50,8 90,50 50,92 10,50" fill="'+color+'"/>';
+        if (type==='star')     inner = '<polygon points="50,6 61,38 95,38 67,58 78,90 50,70 22,90 33,58 5,38 39,38" fill="'+color+'"/>';
+        if (type==='pentagon') inner = '<polygon points="50,8 92,40 76,90 24,90 8,40" fill="'+color+'"/>';
+        if (type==='hexagon')  inner = '<polygon points="28,12 72,12 94,50 72,88 28,88 6,50" fill="'+color+'"/>';
+        return '<svg viewBox="0 0 100 100" aria-hidden="true">'+inner+'</svg>';
+      }
+      function playRound(){
+        root.textContent = '';
+        var target = pick(SHAPES,1)[0];
+        var tColor = pick(COLORS,1)[0];
+        root.appendChild(el('div',{class:'game-banner',html:'Találd meg ugyanezt a formát! ⬛<small>A szín más lehet – a forma számít.</small>'}));
+        root.appendChild(el('div',{class:'shape-target', html: svgShape(target, tColor)}));
+        var others = pick(SHAPES.filter(function(s){ return s!==target; }), 3);
+        var correctColor = pick(COLORS.filter(function(c){ return c!==tColor; }), 1)[0];
+        var defs = shuffle(others.map(function(s){ return {s:s, c:pick(COLORS,1)[0]}; }).concat([{s:target, c:correctColor}]));
+        var grid = el('div',{class:'shape-opts'});
+        defs.forEach(function(d){
+          var b = el('button',{class:'shape-opt', html: svgShape(d.s, d.c)});
+          b.addEventListener('click', function(){
+            [].forEach.call(grid.children,function(x){ x.style.pointerEvents='none'; });
+            var ok = d.s===target; b.classList.add(ok?'right':'wrong');
+            if (!ok) [].forEach.call(grid.children,function(x,idx){ if(defs[idx].s===target) x.classList.add('right'); });
+            if (ok) score++;
+            feedbackTone(ok);
+            round++; setMeta(Math.min(round+1,ROUNDS)+' / '+ROUNDS);
+            T(function(){ if(round<ROUNDS) playRound(); else done({emoji:score>=5?'🏆':'⬛', title:'Vége!', score:score+' / '+ROUNDS, msg:score>=5?'Formaérző! 🌟':'Szép munka!'}); }, 750);
+          });
+          grid.appendChild(b);
+        });
+        root.appendChild(grid);
+      }
+      playRound();
+    }
+
+    /* ---------- SZÍNÁRNYALATOK (Montessori color tablets – grading) ---------- */
+    function gradeGame(root, done){
+      var ROUNDS = 5, round = 0, score = 0;
+      setMeta('1 / ' + ROUNDS);
+      function playRound(){
+        root.textContent = '';
+        var count = Math.min(3 + round, 6);          // 3..6 árnyalat, körönként nő
+        var hue = randInt(0,359), sat = randInt(55,75);
+        var shades = [];
+        for (var i=0;i<count;i++){
+          var L = 80 - i * (48/(count-1));           // 80% → 32% világosság
+          shades.push({rank:i, color:'hsl('+hue+','+sat+'%,'+L+'%)'});  // rank 0 = legvilágosabb
+        }
+        root.appendChild(el('div',{class:'game-banner',html:'Rendezd világostól sötétig! 🎨<small>Koppints a legvilágosabbtól kezdve.</small>'}));
+        var wrap = el('div',{class:'grade-wrap'});
+        var nextExpected = 0;
+        shuffle(shades.slice()).forEach(function(s){
+          var t = el('button',{class:'tablet', style:'background:'+s.color});
+          t.addEventListener('click', function(){
+            if (t.classList.contains('picked')) return;
+            if (s.rank === nextExpected){
+              t.classList.add('picked'); t.appendChild(el('span',{class:'order',text:nextExpected+1}));
+              beep(300 + nextExpected*60, 0.16); nextExpected++;
+              if (nextExpected === count){
+                score++; feedbackTone(true);
+                round++; setMeta(Math.min(round+1,ROUNDS)+' / '+ROUNDS);
+                T(function(){ if(round<ROUNDS) playRound(); else done({emoji:score>=4?'🏆':'🎨', title:'Vége!', score:score+' / '+ROUNDS, msg:score>=4?'Sasszemű! 🌟':'A szemed egyre élesebb!'}); }, 700);
+              }
+            } else { t.classList.add('shake'); feedbackTone(false); T(function(){ t.classList.remove('shake'); }, 400); }
+          });
+          wrap.appendChild(t);
+        });
+        root.appendChild(wrap);
+      }
+      playRound();
+    }
+
+    /* ---------- CÉLKERESŐ (vizuális figyelem, időre) ---------- */
+    function attentionGame(root, done){
+      var EMOJIS = ['🍎','🍐','🍊','🍋','🍓','🍇','🫐','🥝','🍒','🍑','🥕','🌽'];
+      var ROUNDS = 5, round = 0, startT = Date.now();
+      setMeta('1 / ' + ROUNDS);
+      function playRound(){
+        root.textContent = '';
+        var target = pick(EMOJIS,1)[0];
+        var distrPool = EMOJIS.filter(function(e){ return e!==target; });
+        var count = randInt(3,5), total = 20, cells = [];
+        for (var i=0;i<count;i++) cells.push(target);
+        while (cells.length < total) cells.push(pick(distrPool,1)[0]);
+        cells = shuffle(cells);
+        root.appendChild(el('div',{class:'game-banner',html:'Találd meg mind a '+count+' '+target+'-t! 🎯<small>Koppints rájuk, ahogy csak bírod!</small>'}));
+        var found = 0;
+        var grid = el('div',{class:'find-grid'});
+        cells.forEach(function(em){
+          var c = el('button',{class:'find-cell',text:em});
+          c.addEventListener('click', function(){
+            if (c.classList.contains('got')) return;
+            if (em === target){
+              c.classList.add('got'); beep(620, 0.12); found++;
+              if (found === count){
+                round++; setMeta(Math.min(round+1,ROUNDS)+' / '+ROUNDS);
+                if (round < ROUNDS) T(playRound, 450);
+                else { var secs = ((Date.now()-startT)/1000).toFixed(1); done({emoji:'⚡', title:'Megvan mind!', score:secs+' mp', msg:'Ennyi idő alatt találtad meg az összeset. Gyorsulsz? 🎯'}); }
+              }
+            } else { c.classList.remove('miss'); void c.offsetWidth; c.classList.add('miss'); feedbackTone(false); }
+          });
+          grid.appendChild(c);
+        });
+        root.appendChild(grid);
+      }
+      playRound();
+    }
+
+    /* ============================================================
+       WOW-RÉTEG: életkor-onboarding, szint/XP, jelvények, konfetti,
+       "Mit fejleszt?" info-lap. Minden localStorage-ban marad meg.
+       ============================================================ */
+
+    /* ---------- korosztály-fejléc + kezdőlapi ajánlás ---------- */
+    function ageLabel(a){ return a==='0-3' ? '👶 0–3 éveseknek' : a==='3-6' ? '🧒 3–6 éveseknek' : '🎒 6+ éveseknek'; }
+    function renderHome(){
+      var note = document.getElementById('ageNote');
+      if (note) note.textContent = currentAge ? (ageLabel(currentAge) + ' hangolva') : '';
+      homeTiles.textContent = '';
+      /* csak a korosztálynak ajánlott játékok; ha kevés, mindenre visszaesünk */
+      var list = GAMES.filter(function(g){ return g.playable && (!currentAge || (GAME_META[g.id] && GAME_META[g.id].ages.indexOf(currentAge) >= 0)); });
+      if (list.length < 4) list = GAMES.filter(function(g){ return g.playable; });
+      list.slice(0,4).forEach(function(g){ homeTiles.appendChild(tile(g)); });
+    }
+
+    /* ---------- SPLASH + ONBOARDING ---------- */
+    (function initIntro(){
+      var splash = document.getElementById('splash');
+      var onb = document.getElementById('onboarding');
+      /* életkor-gombok */
+      onb.querySelectorAll('.age-opt').forEach(function(b){
+        b.addEventListener('click', function(){
+          currentAge = b.getAttribute('data-age');
+          try { localStorage.setItem('agytorna_age', currentAge); } catch(e){}
+          onb.classList.add('hide');
+          renderHome();
+        });
+      });
+      /* "Korosztály módosítása" a profilban → onboarding újra */
+      var ch = document.getElementById('changeAge');
+      if (ch) ch.addEventListener('click', function(){ onb.classList.remove('hide'); });
+      /* splash ~1.6 mp, majd onboarding (ha nincs kor) vagy egyből az app */
+      setTimeout(function(){
+        if (!currentAge) onb.classList.remove('hide');
+        splash.classList.add('hide');
+      }, 1600);
+    })();
+
+    /* ---------- SZINT / XP ---------- */
+    function getXp(){ try { return parseInt(localStorage.getItem('agytorna_xp') || '120', 10); } catch(e){ return 120; } }
+    function setXp(v){ try { localStorage.setItem('agytorna_xp', v); } catch(e){} }
+    function levelFromXp(xp){ return Math.floor(xp/100) + 1; }
+    function levelTitle(lv){ return lv<3 ? 'Kezdő gondolkodó' : lv<6 ? 'Ügyes felfedező' : lv<10 ? 'Gondolkodó bajnok' : 'Agytorna mester'; }
+    function renderLevel(){
+      var xp = getXp(), lv = levelFromXp(xp), into = xp % 100;
+      var a = document.getElementById('lvNum'), b = document.getElementById('xpText'), c = document.getElementById('xpBar'), d = document.getElementById('profileLevelText');
+      if (a) a.textContent = lv;
+      if (b) b.textContent = into + ' / 100 XP';
+      if (c) c.style.width = into + '%';
+      if (d) d.textContent = lv + '. szint · ' + levelTitle(lv);
+    }
+    function addXp(n){
+      var before = levelFromXp(getXp());
+      var xp = getXp() + n; setXp(xp);
+      var after = levelFromXp(xp);
+      renderLevel();
+      if (after > before){ confetti(); toast('🎉 Új szint elérve: ' + after + '. szint!'); }
+    }
+
+    /* ---------- JELVÉNYEK ---------- */
+    var BADGES = [
+      { id:'first',    e:'🎮', n:'Első játék' },
+      { id:'streak3',  e:'🔥', n:'3 napos sorozat' },
+      { id:'perfect',  e:'🌟', n:'Hibátlan kör' },
+      { id:'math',     e:'🔢', n:'Matek-zseni' },
+      { id:'memory',   e:'🧠', n:'Memóriamester' },
+      { id:'explorer', e:'🧭', n:'6 játék kipróbálva' }
+    ];
+    function getBadges(){ try { return JSON.parse(localStorage.getItem('agytorna_badges') || '[]'); } catch(e){ return []; } }
+    function hasBadge(id){ return getBadges().indexOf(id) >= 0; }
+    function pushBadge(id){ var b = getBadges(); if (b.indexOf(id) < 0){ b.push(id); try { localStorage.setItem('agytorna_badges', JSON.stringify(b)); } catch(e){} return true; } return false; }
+    function renderBadges(){
+      var wrap = document.getElementById('badgeGrid'); if (!wrap) return;
+      var earned = getBadges(); wrap.textContent = '';
+      BADGES.forEach(function(bd){
+        wrap.appendChild(el('div',{class:'badge' + (earned.indexOf(bd.id) >= 0 ? ' earned' : '')}, [
+          el('div',{class:'be',text:bd.e}), el('div',{class:'bn',text:bd.n})
+        ]));
+      });
+    }
+    function getTried(){ try { return JSON.parse(localStorage.getItem('agytorna_tried') || '[]'); } catch(e){ return []; } }
+    function addTried(id){ var t = getTried(); if (t.indexOf(id) < 0){ t.push(id); try { localStorage.setItem('agytorna_tried', JSON.stringify(t)); } catch(e){} } return getTried(); }
+    function isPerfect(result){ var m = result && result.score ? (''+result.score).match(/^(\d+)\s*\/\s*(\d+)$/) : null; return !!(m && m[1] === m[2]); }
+    function isGood(result){ return result && ['🏆','🌟','🧠','⚡'].indexOf(result.emoji) >= 0; }
+
+    /* a játék végén: XP + jelvények + konfetti egy helyen */
+    function awardForResult(g, result){
+      addXp(12);
+      var tried = addTried(g.id);
+      var newly = [];
+      function tryB(id){ if (!hasBadge(id) && pushBadge(id)){ var d = BADGES.find(function(x){ return x.id===id; }); if (d) newly.push(d.n); } }
+      tryB('first');
+      if (tried.length >= 6) tryB('explorer');
+      if (g.cat === 'Matek') tryB('math');
+      if (g.cat === 'Memória') tryB('memory');
+      if (isPerfect(result)) tryB('perfect');
+      if (store.streak >= 3) tryB('streak3');
+      renderBadges();
+      if (newly.length){ confetti(); toast('🏅 Új jelvény: ' + newly.join(', ')); }
+      else if (isGood(result)) confetti();
+    }
+
+    /* ---------- KONFETTI (tiszta CSS+JS, nincs könyvtár) ---------- */
+    function confetti(){
+      if (reduce) return;
+      var c = document.getElementById('confetti'); if (!c) return;
+      var colors = ['#319ed9','#e23b2e','#2aa84a','#fede11','#ef5a48','#a978d6','#f0a830'];
+      for (var i=0;i<36;i++){
+        var bit = document.createElement('div');
+        bit.className = 'confetti-bit';
+        bit.style.left = (Math.random()*100) + '%';
+        bit.style.background = colors[Math.floor(Math.random()*colors.length)];
+        var dur = 0.9 + Math.random()*0.9, delay = Math.random()*0.25;
+        bit.style.transform = 'rotate(' + (Math.random()*360) + 'deg)';
+        bit.style.animation = 'confFall ' + dur + 's ' + delay + 's ease-in forwards';
+        c.appendChild(bit);
+        (function(b, ms){ setTimeout(function(){ if (b.parentNode) b.parentNode.removeChild(b); }, ms); })(bit, (dur+delay)*1000 + 300);
+      }
+    }
+
+    /* ---------- TOAST ---------- */
+    var toastTimer = null;
+    function toast(msg){
+      var t = document.getElementById('toast'); if (!t) return;
+      t.textContent = msg; t.classList.add('show');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2300);
+    }
+
+    /* ---------- "MIT FEJLESZT?" INFO-LAP ---------- */
+    function openInfo(g){
+      var back = document.getElementById('sheetBack'), sheet = document.getElementById('sheetBody');
+      var meta = GAME_META[g.id] || { develops:'', ages:[] };
+      var ageTxt = meta.ages.map(function(a){ return a==='0-3' ? '0–3' : a==='3-6' ? '3–6' : '6+'; }).join(', ');
+      sheet.textContent = '';
+      sheet.appendChild(el('div',{class:'sh-emoji',text:g.emoji}));
+      sheet.appendChild(el('div',{class:'sh-cat',text:g.cat}));
+      sheet.appendChild(el('h3',{text:g.name}));
+      sheet.appendChild(el('div',{class:'sh-dev',html:'<b>Mit fejleszt?</b><br>' + meta.develops}));
+      sheet.appendChild(el('div',{class:'sh-age',text:'Ajánlott: ' + ageTxt + ' éveseknek'}));
+      sheet.appendChild(el('button',{class:'btn btn-primary',style:'width:100%',onclick:function(){ closeInfo(); openGame(g); }},['Játék indítása ▶']));
+      back.classList.add('open');
+    }
+    function closeInfo(){ document.getElementById('sheetBack').classList.remove('open'); }
+    document.getElementById('sheetBack').addEventListener('click', function(e){ if (e.target === this) closeInfo(); });
+
+    /* ---------- KEZDETI RENDER ---------- */
+    renderLevel();
+    renderBadges();
+
+  })();
+  </script>
+</body>
+</html>
