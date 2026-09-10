@@ -15,3 +15,5 @@
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 
 .practice-navigation{display:flex;align-items:center;flex-wrap:wrap;gap:.65rem}.settings-panel input[type=number]{max-width:8rem;padding:.6rem;border:1px solid #cabfda;border-radius:.6rem;font:inherit}.settings-panel .inline-field select{max-width:65%}@media(max-width:900px){.practice-navigation{width:100%;gap:.5rem}.site-header{flex-wrap:wrap;gap:1rem}.practice-navigation .school-nav{flex:1 1 100%}}
+
+.school-practice-header{height:auto;min-height:102px;padding-top:16px;padding-bottom:16px;flex-wrap:wrap}.school-practice-header .practice-navigation{min-width:0}.school-practice-header .school-nav{max-width:100%}@media(max-width:900px){.school-practice-header{min-height:85px;gap:12px}.school-practice-header .practice-navigation{width:100%}}

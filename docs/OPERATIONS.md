@@ -4,7 +4,7 @@
 
 A meglévő `hanna-memoria` Railway-projektben `memoria-web` és `Postgres` szolgáltatás működik. Az alkalmazás címe: https://memoria-web-production-a86b.up.railway.app . A kiszolgáló és az API közös eredetű, a tanulói adatok belépést igényelnek. A HTML és a saját játékprogram nyilvános, személyes adatot nem tartalmaz.
 
-A konténer Node22, egy példány,512MB memóriakeret és1vCPU. PostgreSQL külön512MB/1vCPU, saját tartós kötettel. A healthcheck `/api/health`. A `DATABASE_URL` a `Postgres.DATABASE_URL` Railway-hivatkozás; nincs beégetett adatbázis-jelszó. A Docker csak a függőségeket, a `server`, `migrations` és `dist` állományokat csomagolja.
+A konténer Node22, egy példány,500MB memóriakeret és1vCPU. PostgreSQL külön500MB/1vCPU, saját tartós kötettel. A healthcheck `/api/health`. A `DATABASE_URL` a `Postgres.DATABASE_URL` Railway-hivatkozás; nincs beégetett adatbázis-jelszó. A Docker csak a függőségeket, a `server`, `migrations` és `dist` állományokat csomagolja.
 
 ## Tulajdonosi aktiválás
 
@@ -19,7 +19,7 @@ A kódot, jelszót és tanulói aktiváló linket ne tedd nyilvános dokumentumb
 
 A migrációk induláskor advisory lock alatt, tranzakcióban futnak, sorszámuk a `schema_migrations` táblában marad. A meglévő migrációt kiadás után ne írd át: új fájlt adj hozzá.
 
-Adatot érintő frissítés előtt készíts Railway-kötetmentést a Postgres Backups felületén. A napi mentést és a megőrzést ugyanott lehet követni. A visszaállítás előbb külön tesztkörnyezetben ellenőrizendő; éles visszaállítás valódi adatot cserélhet le, ezért külön tulajdonosi művelet.
+Adatot érintő frissítés előtt készíts Railway-kötetmentést a Postgres Backups felületén. A napi kötetmentés beállítását a jelenlegi Railway jogosultság elutasította (Not Authorized); automatizált mentést ezért ez a kiadás nem állít be. A tulajdonos a Backup felületen ellenőrizheti a csomag/jogosultság lehetőségét. Addig frissítés előtt kézi PostgreSQL-mentés szükséges. A visszaállítás előbb külön tesztkörnyezetben ellenőrizendő; éles visszaállítás valódi adatot cserélhet le, ezért külön tulajdonosi művelet.
 
 Alkalmazás-visszaállás: Railway → memoria-web → Deployments → előző sikeres build → Redeploy. Ez a PostgreSQL-adatokat nem tekeri vissza. A migrációval összeegyeztethetetlen régi programra ne állj vissza adatbázis-helyreállítási terv nélkül.
 

@@ -19,7 +19,7 @@ function toast(text){document.querySelector('.toast')?.remove();const node=h('di
 function stop(){generation++;active?.dispose();active=null;}
 function linkFor(game,settings){return `#/jatek/${game.id}?${settingsQuery(settings)}`;}
 function header(page='home'){
-  if(school?.supported)return h('header',{className:'site-header'},h('a',{href:'#/',className:'brand','aria-label':'Memória Műhely – kezdőlap'},h('span',{className:'brand-mark','aria-hidden':'true'},'m'),h('span',{},'memória',h('strong',{},'műhely'))),h('div',{className:'practice-navigation'},school.renderNav(),h('a',{className:'nav-link',href:'#/'},'Gyakorlatok'),h('a',{className:'nav-link',href:'#/fiok'},'Fiókom')));
+  if(school?.supported)return h('header',{className:'site-header school-practice-header'},h('a',{href:'#/',className:'brand','aria-label':'Memória Műhely – kezdőlap'},h('span',{className:'brand-mark','aria-hidden':'true'},'m'),h('span',{},'memória',h('strong',{},'műhely'))),h('div',{className:'practice-navigation'},school.renderNav(),h('a',{className:'nav-link',href:'#/'},'Gyakorlatok'),h('a',{className:'nav-link',href:'#/fiok'},'Fiókom')));
   return h('header',{className:'site-header'},h('a',{href:'#/',className:'brand','aria-label':'Memória Műhely – kezdőlap'},h('span',{className:'brand-mark','aria-hidden':'true'},'m'),h('span',{},'memória',h('strong',{},'műhely'))),h('nav',{'aria-label':'Főmenü'},h('a',{href:'#/',className:page==='home'?'nav-link current':'nav-link','aria-current':page==='home'?'page':null},'Gyakorlatok'),h('a',{href:'#/eredmenyek',className:page==='history'?'nav-link current':'nav-link','aria-current':page==='history'?'page':null},'Eredményeim')),h('span',{className:'header-note'},'Egy kis figyelem magadra'));
 }
 function footer(){if(school?.supported)return school.renderFooter();return h('footer',{className:'site-footer'},h('span',{},'A saját tempódban. Egy kör is számít.'),h('span',{},'Az eredmények ezen a böngészőn maradnak.'));}
@@ -77,7 +77,7 @@ async function shareSettings(game,settings){
 }
 
 async function startGame(game,rawSettings,assignment=null){
-  stop();const token=generation;let settings=normalizeGameSettings(game.id,rawSettings);let attempt=null;
+  stop();const pending=pendingEntries();if(pending.length){renderPending(pending[0]);return;}const token=generation;let settings=normalizeGameSettings(game.id,rawSettings);let attempt=null;
   const userId=school?.user?.id;
   const teacherPreview=school?.supported&&school.user?.role==='teacher';
   activeAssignment=assignment;
@@ -127,7 +127,7 @@ function renderHistory(){
   shell(h('div',{},h('section',{className:'intro compact'},h('div',{},h('span',{className:'eyebrow'},'A SAJÁT UTAD'),h('h1',{},'Egy kis ',h('em',{},'visszatekintés.')),h('p',{},'Az eredmények a gyakorlást követik. Nem képességvizsgálati pontszámok.'))),summary,h('div',{className:'section-title'},h('h2',{},'Legutóbbi körök'),history.length?h('button',{className:'text-link',onClick:confirmClear},'Előzmények törlése'):null),rows,h('p',{className:'privacy-note'},'Legfeljebb 200 kört őrzünk meg ezen a böngészőn. Másik eszközön ezek nem jelennek meg.')),'history');
 }
 function confirmClear(){const dialog=h('dialog',{className:'confirm-dialog'},h('h2',{},'Törlöd az előzményeket?'),h('p',{},'Az ezen a böngészőn mentett játékere­dmények eltűnnek. A játékokat bármikor újrakezdheted.'),h('div',{className:'answer-row'},h('button',{className:'secondary-button',onClick:()=>dialog.close()},'Mégsem'),h('button',{className:'primary-button',onClick:()=>{try{clearHistory(localStorage);}catch{toast('A mentett adatokat most nem sikerült törölni.');dialog.close();return;}history=[];dialog.close();renderHistory();}},'Igen, törlöm')));document.body.append(dialog);dialog.addEventListener('close',()=>dialog.remove());dialog.showModal();}
-function renderRoute(){if(!backendReady)return;stop();document.querySelectorAll('dialog').forEach(d=>d.remove());if(school?.renderRoute())return;if(school?.supported&&!school.user){location.hash='#/fiok';return;}const route=parseRoute(location.hash,ids);if(route.page==='history')renderHistory();else if(route.page==='game')renderSetup(games.find(g=>g.id===route.id),route.settings);else renderHome();}
+function renderRoute(){if(!backendReady)return;stop();document.querySelectorAll('dialog').forEach(d=>d.remove());if(school?.renderRoute())return;if(school?.supported&&!school.user){location.hash='#/fiok';return;}const pending=pendingEntries();if(pending.length){renderPending(pending[0]);return;}const route=parseRoute(location.hash,ids);if(route.page==='history')renderHistory();else if(route.page==='game')renderSetup(games.find(g=>g.id===route.id),route.settings);else renderHome();}
 window.addEventListener('hashchange',renderRoute);
 window.addEventListener('pagehide',event=>{if(!event.persisted)stop();});
 school=createSchool({h,games,onPlay:(gameId,settings,assignment)=>{const game=games.find(g=>g.id===gameId);if(game)startGame(game,settings,assignment);},onAuthChange:async()=>{stop();history=[];await loadAccountHistory();renderRoute();},renderPractice:()=>{location.hash='#/';renderRoute();}});

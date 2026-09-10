@@ -231,7 +231,7 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
       h('h1', {}, 'Folytasd ott, ahol tartasz.'),
       h('p', {className: 'muted'}, 'Add meg a tanártól kapott felhasználónevedet és a jelszavadat.'),
       noticeNode(notice),
-      field('Felhasználónév', h('input', {name: 'username', autocomplete: 'username', required: true, maxlength: '80'})),
+      field('Felhasználónév', h('input', {name: 'username', autocomplete: 'username', required: true, minlength: '3', maxlength: '32'})),
       field('Jelszó', h('input', {name: 'password', type: 'password', autocomplete: 'current-password', required: true})),
       h('p', {className: 'form-error', role: 'alert'}),
       h('button', {className: 'primary-button auth-submit', type: 'submit'}, 'Belépek'),
@@ -261,10 +261,10 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
       noticeNode(notice),
       field('Aktiváló kód', h('input', {name: 'token', type: 'password', autocomplete: 'off', required: true})),
       h('div', {className: 'form-grid'},
-        field('Felhasználónév', h('input', {name: 'username', autocomplete: 'username', required: true, maxlength: '80'})),
+        field('Felhasználónév', h('input', {name: 'username', autocomplete: 'username', required: true, minlength: '3', maxlength: '32'})),
         field('Megjelenő név', h('input', {name: 'displayName', autocomplete: 'name', required: true, maxlength: '120'})),
       ),
-      field('Jelszó', h('input', {name: 'password', type: 'password', autocomplete: 'new-password', required: true, minlength: '8'})),
+      field('Jelszó', h('input', {name: 'password', type: 'password', autocomplete: 'new-password', required: true, minlength: '10', maxlength: '200'})),
       h('p', {className: 'form-error', role: 'alert'}),
       h('button', {className: 'primary-button auth-submit', type: 'submit'}, 'Tanári fiók létrehozása'),
     );
@@ -301,8 +301,8 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
         h('h1', {}, `Üdv, ${info.displayName}!`),
         h('p', {className: 'muted'}, `Felhasználónév: ${info.username}`),
         h('p', {className: 'activation-expiry'}, `A link eddig használható: ${formatDate(info.expiresAt)}`),
-        field('Válassz jelszót', h('input', {name: 'password', type: 'password', autocomplete: 'new-password', minlength: '8', required: true})),
-        h('p', {className: 'form-hint'}, 'Legalább 8 karaktert adj meg.'),
+        field('Válassz jelszót', h('input', {name: 'password', type: 'password', autocomplete: 'new-password', minlength: '10', maxlength: '200', required: true})),
+        h('p', {className: 'form-hint'}, 'Legalább 10 karaktert adj meg.'),
         h('p', {className: 'form-error', role: 'alert'}),
         h('button', {className: 'primary-button auth-submit', type: 'submit'}, 'Aktiválom a fiókomat'),
       );
@@ -382,7 +382,7 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
       h('div', {}, h('h2', {}, 'Új tanuló'), h('p', {className: 'muted'}, 'A felhasználónév nem email cím. Legyen rövid és könnyen megjegyezhető.')),
       h('div', {className: 'form-grid'},
         field('Megjelenő név', h('input', {name: 'displayName', required: true, maxlength: '120'})),
-        field('Felhasználónév', h('input', {name: 'username', required: true, maxlength: '80', autocomplete: 'off'})),
+        field('Felhasználónév', h('input', {name: 'username', required: true, minlength: '3', maxlength: '32', autocomplete: 'off'})),
       ),
       groupChecks(groups, [], 'Kezdő csoportok'),
       h('p', {className: 'form-error', role: 'alert'}),
@@ -733,7 +733,7 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
           h('span', {className: 'review-mark', 'aria-label': detail.correct ? 'Helyes' : 'Hibás'}, detail.correct ? '✓' : '×'),
           h('div', {}, h('strong', {}, detail.label || `${index + 1}. válasz`), h('p', {}, `Válasz: ${displayValue(detail.actual)}`), detail.correct ? null : h('p', {}, `Helyes megoldás: ${displayValue(detail.expected)}`)),
         ))) : h('p', {className: 'muted'}, 'Ehhez a körhöz nincs válaszonkénti részlet.'),
-        result.answer !== undefined ? h('details', {className: 'raw-answer'}, h('summary', {}, 'Beküldött nyers válasz'), h('pre', {}, safeJson(result.answer))) : null,
+
       ),
     ), '/tanar/eredmenyek');
   }
