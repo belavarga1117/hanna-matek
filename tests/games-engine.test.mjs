@@ -1,9 +1,10 @@
+// Frozen v1 contracts: existing assignments and pending attempts must retain these results.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {seededRandom,normalizeGameSettings,scoreAttempt} from '../dist/game-engine.js';
-import {generateDigitsRound,generateGridRound,generatePathRound,generateMissingRound} from '../dist/games/core-games.js';
-import {generateStationsRound,generateFaces,generatePrices,generateShopping} from '../dist/games/association-games.js';
-import {generatePictureRounds,generateCodeRound} from '../dist/games/advanced-games.js';
+import {seededRandom,normalizeGameSettings,scoreAttempt} from '../dist/legacy/v1/game-engine.js';
+import {generateDigitsRound,generateGridRound,generatePathRound,generateMissingRound} from '../dist/legacy/v1/games/core-games.js';
+import {generateStationsRound,generateFaces,generatePrices,generateShopping} from '../dist/legacy/v1/games/association-games.js';
+import {generatePictureRounds,generateCodeRound} from '../dist/legacy/v1/games/advanced-games.js';
 
 const SEED=0x1234abcd;
 function generated(gameId,raw={}){

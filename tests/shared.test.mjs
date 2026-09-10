@@ -6,7 +6,7 @@ import {makePictureRound,makeCodeRound,scoreCode} from '../dist/games/advanced-g
 function rng(seed=42){return ()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};}
 test('shared links are bounded, deterministic and never carry history',()=>{
  const s=normalizeSettings({count:999,seconds:-2,difficulty:'bogus',reverse:'1'});
- assert.deepEqual(s,{count:8,seconds:3,difficulty:'normal',reverse:true,level:1,rounds:3,theme:'stations',symbolSet:'objects'});
+ assert.deepEqual(s,{count:9,seconds:3,difficulty:'normal',reverse:true,level:1,rounds:3,theme:'stations',symbolSet:'objects'});
  assert.deepEqual(parseRoute('#/jatek/digits?'+settingsQuery(s),['digits']),{page:'game',id:'digits',settings:s});
  assert.deepEqual(parseRoute('#/jatek/unknown?count=50',['digits']),{page:'home'});
  assert.equal(normalizeSettings({seconds:'bad'}).seconds,10);

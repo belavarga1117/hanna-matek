@@ -1,3 +1,4 @@
+import {pointerDrag} from '../drag.js';
 import {h,shuffle,sample} from '../core.js';
 
 export const COLORS=['#6844b6','#e3a224','#269e91','#e46c5f'];
@@ -202,11 +203,12 @@ function pictureMount(ctx){
           onClick:()=>{if(mode!=='check')return;if(selectedId)place(selectedId,slotIndex);else if(item){placements[slotIndex]=null;notice='';render();}},
           onDragover:event=>{if(mode==='check')event.preventDefault();},
           onDrop:event=>{event.preventDefault();place(event.dataTransfer?.getData('text/plain')||'',slotIndex);},
-        },item?scene(item,`${slotIndex+1}. helyen: ${item.label}`,false,{draggable:true,onDragstart:event=>dragId(event,item.id)}):h('span',{className:'scene-drop-number','aria-hidden':'true'},String(slotIndex+1)));
+        },item?scene(item,`${slotIndex+1}. helyen: ${item.label}`,false,{draggable:true,onPointerdown:pointerDrag(ctx.root,'.scene-drop',target=>place(item.id,Number(target.dataset.slot))),onDragstart:event=>dragId(event,item.id)}):h('span',{className:'scene-drop-number','aria-hidden':'true'},String(slotIndex+1)));
       }));
       palette.replaceChildren(...round.choices.map((item,index)=>{
         const used=placements.includes(item.id),button=scene(item,`${index+1}. kép: ${item.label}${used?', már elhelyezve':''}`,true,{
           disabled:mode!=='check'||used,draggable:mode==='check'&&!used,
+          onPointerdown:pointerDrag(ctx.root,'.scene-drop',target=>place(item.id,Number(target.dataset.slot))),
           onDragstart:event=>dragId(event,item.id),
           onClick:()=>{if(mode!=='check'||used)return;selectedId=selectedId===item.id?'':item.id;notice='';render();},
         });
@@ -255,7 +257,7 @@ export function generateCodeRound(settings,rng=Math.random){
   const pool=CODE_SYMBOL_SETS[settings?.symbolSet]||CODE_SYMBOL_SETS.objects;
   const symbols=sample(pool,10,rng).map(item=>({...item}));
   const count=Math.max(3,Math.min(5,Number(settings?.rounds)||3));
-  return {symbols,messages:Array.from({length:count},()=>Array.from({length},()=>Math.floor(rng()*10)))};
+  return {symbols,pool:pool.map(item=>({...item})),messages:Array.from({length:count},()=>Array.from({length},()=>Math.floor(rng()*10)))};
 }
 export function codeMaxAttempts(settings){return settings.level===3?3:2;}
 export function isWholeCodeCorrect(message,answer){return answer===message.join('');}
@@ -269,10 +271,11 @@ function codeMount(ctx){
 
   function drawEditor(){
     grid.replaceChildren(...mapping.map((symbol,digit)=>{
-      const select=h('select',{'aria-label':`${digit} számjegy jele`},...round.symbols.map(option=>h('option',{value:option.id,selected:option.id===symbol.id},`${option.glyph} ${option.label}`)));
+      const select=h('select',{'aria-label':`${digit} számjegy jele`},...round.pool.map(option=>h('option',{value:option.id,selected:option.id===symbol.id},`${option.glyph} ${option.label}`)));
       select.addEventListener('change',()=>{
         const other=mapping.findIndex(item=>item.id===select.value);
         if(other>=0)[mapping[digit],mapping[other]]=[mapping[other],mapping[digit]];
+        else mapping[digit]=round.pool.find(item=>item.id===select.value);
         drawEditor();
       });
       return h('label',{className:'code-pair'},h('strong',{className:'code-digit'},digit),h('span',{className:'code-symbol','aria-hidden':'true',style:{color:symbol.color||''}},symbol.glyph),select);
@@ -300,7 +303,7 @@ function codeMount(ctx){
       return h('div',{className:'object-tile'},h('span',{className:'object-emoji',role:'img','aria-label':symbol.label,style:{color:symbol.color||''}},symbol.glyph),h('small',{},`${index+1}. jel`));
     }));
     function move(step){active=Math.max(0,Math.min(values.length-1,active+step));render();}
-    function enterDigit(digit){if(terminal)return;values[active]=digit;if(active<values.length-1)active+=1;render();}
+    function enterDigit(digit){if(terminal)return;values[active]=digit;render();}
     function erase(){if(terminal)return;if(values[active])values[active]='';else if(active>0){active-=1;values[active]='';}render();}
     function submit(){
       if(terminal){messageIndex+=1;if(messageIndex<round.messages.length)recall();else finish();return;}

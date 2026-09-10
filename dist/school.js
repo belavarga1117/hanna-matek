@@ -569,6 +569,7 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
       requestKey ||= makeIdempotencyKey();
       withButton(form.querySelector('[type=submit]'), async () => {
         const result = await api.post('/api/teacher/assignments', {
+          clientRulesVersion: 2,
           title: values.get('title')?.trim(), instructions: values.get('instructions')?.trim() || undefined,
           dueAt: due ? new Date(due).toISOString() : undefined,
           studentIds: values.getAll('studentIds'), groupIds: values.getAll('groupIds'), steps,
@@ -636,7 +637,7 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
     }
     if (usesDifficulty(game.id, level)) {
       const options = difficultyOptions(game.id);
-      const selectedDifficulty = options.some(option => option.value === draft.difficulty) ? draft.difficulty : 'normal';
+      const selectedDifficulty = options.some(option => option.value === draft.difficulty) ? draft.difficulty : options[0].value;
       fields.push(field(game.id === 'prices' ? 'Nehézség' : 'Képi nehézség', h('select', {name: 'difficulty'}, options.map(({value, label}) => h('option', {value, selected: value === selectedDifficulty}, label)))));
     }
     if (Array.isArray(rule.themes) && level === 1) {
@@ -776,7 +777,7 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
       const results = resultsData.results || [];
       shell(h('div', {},
         schoolHero('HALADÁSOM', progress.rank || 'Kezdő', 'Minden befejezett kör hozzáad valamit a gyakorlásodhoz.'),
-        h('section', {className: 'metric-grid'}, metric('Befejezett kör', progress.rounds || 0, 'összesen'), metric('Pontosság', `${progress.percent || 0}%`, `${progress.correct || 0} / ${progress.total || 0}`), metric('Csillag', progress.stars || 0, 'összesen')),
+        h('section', {className: 'metric-grid'}, metric('Befejezett kör', progress.rounds || 0, 'összesen'), metric('Pontosság', `${progress.percent || 0}%`, `${progress.correct || 0} / ${progress.total || 0}`), metric('Csillag', progress.stars || 0, progress.ungradedStars ? `${progress.ungradedStars} kör csillagértékelése még nincs meghatározva` : 'összesen')),
         h('section', {className: 'rank-card school-card'},
           h('div', {className: 'rank-orbit', 'aria-hidden': 'true'}, '✦'),
           h('div', {}, h('span', {className: 'eyebrow'}, 'RANG'), h('h2', {}, progress.rank || 'Kezdő'), h('p', {}, rankHint(progress.stars || 0))),
@@ -844,11 +845,11 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
     if (game.id === 'picture' && level === 2) details.push('A képsorrend szintnek nincs külön képi nehézsége.');
     return details.join(' ');
   }
-  function usesDifficulty(gameId, level) { return gameId === 'grid' || gameId === 'prices' || (gameId === 'picture' && level === 1); }
+  function usesDifficulty(gameId, level) { return gameId === 'grid' || (gameId === 'shopping' && level === 2) || (gameId === 'picture' && level === 1); }
   function difficultyOptions(gameId) {
     const labels = {easy: 'Könnyű', normal: 'Normál', hard: 'Kihívás'};
-    const activeValues = gameId === 'grid' ? ['easy', 'normal'] : gameId === 'picture' ? ['normal', 'hard'] : COMMON_GAME_SETTINGS.difficulty;
-    const activeLabels = gameId === 'grid' ? {easy: 'Kisebb rács', normal: 'Nagyobb rács'} : gameId === 'picture' ? {normal: 'Alap képkészlet', hard: 'Bővített képkészlet'} : labels;
+    const activeValues = gameId === 'grid' ? ['easy', 'normal'] : ['picture','shopping'].includes(gameId) ? ['easy', 'hard'] : COMMON_GAME_SETTINGS.difficulty;
+    const activeLabels = gameId === 'grid' ? {easy: 'Kisebb rács', normal: 'Nagyobb rács'} : gameId === 'picture' ? {easy: '4 hasonló kép', hard: '6 hasonló kép'} : gameId === 'shopping' ? {easy:'9 termék, zavarók nélkül',hard:'14 termék, zavarókkal'} : labels;
     return COMMON_GAME_SETTINGS.difficulty.filter(value => activeValues.includes(value)).map(value => ({value, label: activeLabels[value] || labels[value] || value}));
   }
   function numericRange(min, max, step = 1) { const values = []; for (let value = min; value <= max; value += step) values.push(value); return values; }

@@ -216,3 +216,7 @@
     grid-template-columns: 1fr;
   }
 }
+
+.association-sort-row, .association-label, .association-shop-options [draggable], .association-cart-slot { touch-action:none; user-select:none; }
+.is-dragging { opacity:.6; cursor:grabbing; }
+.is-drop-target { outline:3px solid var(--purple); outline-offset:2px; }

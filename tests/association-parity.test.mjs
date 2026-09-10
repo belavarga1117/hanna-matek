@@ -149,13 +149,13 @@ test('retry history stores the real submitted raws, closes after success, and ca
 test('mounted association controls expose drag and keyboard paths without dropdowns or number inputs', () => {
   const order=mountHarness('stations',{level:2,count:5,theme:'stations'},70);order.recall();
   assert.equal(withClass(order.root,'association-sort-row').length,5);
-  assert.ok(withClass(order.root,'association-sort-row').every(row=>row.getAttribute('draggable')===''));
+  assert.ok(withClass(order.root,'association-sort-row').every(row=>row.getAttribute('draggable')==='true'));
   assert.ok(button(order.root,'Fel'));
   assert.ok(button(order.root,'Le'));
 
   const faces=mountHarness('faces',{level:3,count:5},701);faces.recall();
   assert.equal(all(faces.root,node=>node.tagName==='select').length,0);
-  assert.ok(withClass(faces.root,'association-label').every(label=>label.getAttribute('draggable')===''));
+  assert.ok(withClass(faces.root,'association-label').every(label=>label.getAttribute('draggable')==='true'));
 
   const prices=mountHarness('prices',{level:2,count:3,difficulty:'normal'},702);prices.recall();
   assert.ok(withClass(prices.root,'price-input').every(input=>input.getAttribute('type')==='text'&&input.getAttribute('inputmode')==='numeric'&&input.getAttribute('maxlength')==='2'));

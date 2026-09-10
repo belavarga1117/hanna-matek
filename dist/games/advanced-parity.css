@@ -164,3 +164,5 @@
   .code-position { width: 48px; height: 55px; font-size: 1.45rem; }
   .code-keypad { grid-template-columns: repeat(5, minmax(42px, 1fr)); gap: 7px; }
 }
+
+.scene-palette [draggable], .scene-drop [draggable] { touch-action:none; user-select:none; }

@@ -11,7 +11,6 @@ export function h(tag, props = {}, ...children) {
     }
     else if (key === 'dataset') Object.assign(node.dataset, value);
     else if (/^on[A-Z]/.test(key)) node.addEventListener(key.slice(2).toLowerCase(), value);
-    else if (key === 'draggable') node.setAttribute(key, String(value));
     else if (key === 'textContent') node.textContent = value;
     else if (['value', 'checked', 'disabled', 'selected', 'hidden', 'required', 'readOnly', 'tabIndex'].includes(key)) node[key] = value;
     else node.setAttribute(key, value === true ? '' : String(value));
@@ -45,7 +44,7 @@ export const DEFAULTS = Object.freeze({
 });
 export function normalizeSettings(raw = {}) {
   return {
-    count: raw.count == null ? 5 : clamp(raw.count, 3, 9, 5),
+    count: raw.count == null ? 5 : clamp(raw.count, 3, 8, 5),
     seconds: raw.seconds == null ? 10 : clamp(raw.seconds, 3, 180, 10),
     difficulty: ['easy', 'normal', 'hard'].includes(raw.difficulty) ? raw.difficulty : 'normal',
     reverse: raw.reverse === true || raw.reverse === '1',
@@ -78,7 +77,7 @@ export function parseRoute(hash, validIds) {
 export function normalizeResult(result) {
   const total = clamp(result?.total, 1, 1000, 1);
   const correct = clamp(result?.correct, 0, total, 0);
-  return { correct, total, stars:Number.isInteger(result?.stars)&&result.stars>=0&&result.stars<=3?result.stars:null, starBasis:String(result?.starBasis||'reference-unmeasured'), rulesVersion:result?.rulesVersion===1?1:2, percent: Math.round(correct / total * 100), summary: String(result?.summary || ''), details: Array.isArray(result?.details) ? result.details.slice(0, 30).map(d => ({ label: String(d.label || ''), expected: String(d.expected ?? ''), actual: String(d.actual ?? ''), correct: !!d.correct })) : [] };
+  return { correct, total, percent: Math.round(correct / total * 100), summary: String(result?.summary || ''), details: Array.isArray(result?.details) ? result.details.slice(0, 30).map(d => ({ label: String(d.label || ''), expected: String(d.expected ?? ''), actual: String(d.actual ?? ''), correct: !!d.correct })) : [] };
 }
 const HISTORY_KEY = 'memoria-muhely:history:v1';
 export function readHistory(storage, validIds) {

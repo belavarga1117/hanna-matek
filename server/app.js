@@ -85,6 +85,9 @@ function resultRow(row, includeAnswer = false, includeStudent = false) {
     correct: row.correct,
     total: row.total,
     percent: row.percent,
+    rulesVersion: row.rules_version,
+    stars: row.stars,
+    starBasis: row.star_basis,
     summary: row.summary,
     details: row.details,
     duration: row.duration,
@@ -191,6 +194,15 @@ async function activationFor(db, userId, createdBy, config) {
   return { activationToken: token, expiresAt: expiresAt.toISOString() };
 }
 
+function requestedRulesVersion(engine, body) {
+  const version = body.clientRulesVersion ?? 1;
+  if(![1,2].includes(version) || version > (engine.CURRENT_RULES_VERSION || 1))throw badRequest('Frissítsd az oldalt a gyakorlat indításához.', 'CLIENT_UPDATE_REQUIRED');
+  return version;
+}
+function settingsForVersion(engine, gameId, settings, version) {
+  return engine.normalizeSettingsForVersion ? engine.normalizeSettingsForVersion(gameId,settings,version) : engine.normalizeGameSettings(gameId,settings);
+}
+
 async function listAssignmentSteps(db, assignmentIds) {
   const map = new Map(assignmentIds.map((id) => [id, []]));
   if (!assignmentIds.length) return map;
@@ -203,6 +215,7 @@ async function listAssignmentSteps(db, assignmentIds) {
     gameId: row.game_id,
     settings: row.settings,
     repetitions: row.repetitions,
+    rulesVersion: row.rules_version,
   });
   return map;
 }
@@ -513,11 +526,12 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
         const groupIds = cleanIdList(body.groupIds, 'groupIds');
         if (!Array.isArray(body.steps) || body.steps.length < 1 || body.steps.length > 20) throw badRequest('1–20 feladatsor-lépés szükséges.', 'INVALID_STEPS');
         const engine = await getEngine();
+        const rulesVersion = requestedRulesVersion(engine, body);
         const steps = body.steps.map((step) => {
           if (!step || typeof step !== 'object') throw badRequest('Érvénytelen feladatsor-lépés.', 'INVALID_STEPS');
           if (!Number.isInteger(step.repetitions) || step.repetitions < 1 || step.repetitions > 10) throw badRequest('Az ismétlésszám 1–10 lehet.', 'INVALID_STEPS');
           try {
-            return { gameId: step.gameId, settings: engine.normalizeGameSettings(step.gameId, step.settings || {}), repetitions: step.repetitions };
+            return { gameId: step.gameId, settings: settingsForVersion(engine, step.gameId, step.settings || {}, rulesVersion), repetitions: step.repetitions, rulesVersion };
           } catch (error) {
             throw badRequest(error.message || 'Érvénytelen játékbeállítás.', 'INVALID_GAME_SETTINGS');
           }
@@ -553,8 +567,8 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
             const step = steps[index];
             const id = randomUUID();
             await db.query(
-              'INSERT INTO assignment_steps(id,assignment_id,position,game_id,settings,repetitions) VALUES($1,$2,$3,$4,$5,$6)',
-              [id, assignmentId, index, step.gameId, jsonb(step.settings), step.repetitions],
+              'INSERT INTO assignment_steps(id,assignment_id,position,game_id,settings,repetitions,rules_version) VALUES($1,$2,$3,$4,$5,$6,$7)',
+              [id, assignmentId, index, step.gameId, jsonb(step.settings), step.repetitions, step.rulesVersion],
             );
             savedSteps.push({ id, ...step });
           }
@@ -653,8 +667,9 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
           `SELECT game_id,COALESCE((settings->>'level')::int,1) level,max(percent)::int best_percent,count(*)::int rounds
            FROM results WHERE student_id=$1 GROUP BY game_id,COALESCE((settings->>'level')::int,1) ORDER BY game_id,level`, [user.id],
         );
-        const all = await pool.query('SELECT percent FROM results WHERE student_id=$1', [user.id]);
-        const stars = all.rows.reduce((sum, row) => sum + (row.percent === 100 ? 3 : row.percent >= 60 ? 2 : row.percent > 0 ? 1 : 0), 0);
+        const all = await pool.query('SELECT stars FROM results WHERE student_id=$1', [user.id]);
+        const stars = all.rows.reduce((sum, row) => sum + (row.stars ?? 0), 0);
+        const ungradedStars = all.rows.filter(row => row.stars === null).length;
         const rank = stars >= 60 ? 'Emlékmester' : stars >= 30 ? 'Gyakorló' : stars >= 10 ? 'Felfedező' : 'Kezdő';
         const total = totals.rows[0].total;
         const correct = totals.rows[0].correct;
@@ -664,6 +679,7 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
           total,
           percent: total ? Math.round(correct * 100 / total) : 0,
           stars,
+          ungradedStars,
           rank,
           games: games.rows.map((row) => ({ gameId: row.game_id, level: row.level, bestPercent: row.best_percent, rounds: row.rounds })),
         });
@@ -676,6 +692,7 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
         const output = await transaction(pool, async (db) => {
           let gameId;
           let settings;
+          let rulesVersion = requestedRulesVersion(engine, body);
           let stepId = null;
           if (body.assignmentStepId) {
             stepId = cleanId(body.assignmentStepId, 'assignmentStepId');
@@ -687,6 +704,8 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
             if (!step.rowCount) throw notFound('A kiosztott lépés nem található.');
             gameId = step.rows[0].game_id;
             settings = step.rows[0].settings;
+            rulesVersion = step.rows[0].rules_version;
+            if(rulesVersion > (body.clientRulesVersion ?? 1))throw conflict('A feladathoz frissítsd az oldalt.', 'CLIENT_UPDATE_REQUIRED');
             const completed = await db.query('SELECT count(*)::int count FROM results WHERE student_id=$1 AND assignment_step_id=$2', [user.id, stepId]);
             if (completed.rows[0].count >= step.rows[0].repetitions) throw conflict('Ezt a lépést már teljesítetted.', 'REPETITIONS_COMPLETE');
             const pending = await db.query(
@@ -695,22 +714,22 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
             );
             if (pending.rowCount && new Date(pending.rows[0].expires_at) > new Date()) {
               const row = pending.rows[0];
-              return { attempt: { id: row.id, seed: Number(row.seed), gameId: row.game_id, settings: row.settings, assignmentStepId: row.assignment_step_id, expiresAt: row.expires_at } };
+              return { attempt: { id: row.id, seed: Number(row.seed), gameId: row.game_id, settings: row.settings, rulesVersion: row.rules_version, assignmentStepId: row.assignment_step_id, expiresAt: row.expires_at } };
             }
             if (pending.rowCount) await db.query('DELETE FROM attempts WHERE id=$1', [pending.rows[0].id]);
           } else {
             gameId = body.gameId;
-            try { settings = engine.normalizeGameSettings(gameId, body.settings || {}); }
+            try { settings = settingsForVersion(engine, gameId, body.settings || {}, rulesVersion); }
             catch (error) { throw badRequest(error.message || 'Érvénytelen játékbeállítás.', 'INVALID_GAME_SETTINGS'); }
           }
           const id = randomUUID();
           const seed = randomInt(0, 0x1_0000_0000);
           const expiresAt = new Date(Date.now() + config.attemptHours * 3_600_000);
           await db.query(
-            `INSERT INTO attempts(id,student_id,game_id,settings,seed,assignment_step_id,expires_at)
-             VALUES($1,$2,$3,$4,$5,$6,$7)`, [id, user.id, gameId, jsonb(settings), seed, stepId, expiresAt],
+            `INSERT INTO attempts(id,student_id,game_id,settings,seed,assignment_step_id,expires_at,rules_version)
+             VALUES($1,$2,$3,$4,$5,$6,$7,$8)`, [id, user.id, gameId, jsonb(settings), seed, stepId, expiresAt, rulesVersion],
           );
-          return { attempt: { id, seed, gameId, settings, assignmentStepId: stepId, expiresAt: expiresAt.toISOString() } };
+          return { attempt: { id, seed, gameId, settings, rulesVersion, assignmentStepId: stepId, expiresAt: expiresAt.toISOString() } };
         });
         return sendJson(res, 201, output);
       }
@@ -746,18 +765,21 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
             if (completed.rows[0].count >= step.rows[0].repetitions) throw conflict('Ezt a lépést már teljesítetted.', 'REPETITIONS_COMPLETE');
           }
           let score;
-          try { score = engine.scoreAttempt(attempt.game_id, attempt.settings, Number(attempt.seed), body.answer); }
+          try { score = engine.scoreAttempt(attempt.game_id, attempt.settings, Number(attempt.seed), body.answer, attempt.rules_version); }
           catch (error) { throw badRequest(error.message || 'Érvénytelen válasz.', 'INVALID_ANSWER'); }
           if (!score || !Number.isInteger(score.correct) || !Number.isInteger(score.total) || score.total < 1 || score.correct < 0 || score.correct > score.total) {
             throw new Error('A scoreAttempt érvénytelen eredményt adott.');
           }
           const percent = Math.round(score.correct * 100 / score.total);
+          const stars = score.stars === undefined && attempt.rules_version === 1 ? (percent===100?3:percent>=60?2:percent>0?1:0) : (score.stars ?? null);
+          if(stars !== null && (!Number.isInteger(stars) || stars<0 || stars>3))throw new Error('Érvénytelen csillagérték.');
+          const starBasis = score.starBasis || (attempt.rules_version === 1 ? 'legacy-v1' : 'reference-unmeasured');
           const id = randomUUID();
           const duration = Math.max(0, Math.round(Date.now() - new Date(attempt.created_at).valueOf()));
           const inserted = await db.query(
-            `INSERT INTO results(id,attempt_id,student_id,assignment_id,assignment_step_id,game_id,settings,answer,answer_hash,correct,total,percent,summary,details,duration)
-             VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) RETURNING *`,
-            [id, attemptId, user.id, assignmentId, attempt.assignment_step_id, attempt.game_id, jsonb(attempt.settings), jsonb(body.answer), answerHash, score.correct, score.total, percent, String(score.summary || ''), jsonb(score.details ?? []), duration],
+            `INSERT INTO results(id,attempt_id,student_id,assignment_id,assignment_step_id,game_id,settings,answer,answer_hash,correct,total,percent,summary,details,duration,rules_version,stars,star_basis)
+             VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) RETURNING *`,
+            [id, attemptId, user.id, assignmentId, attempt.assignment_step_id, attempt.game_id, jsonb(attempt.settings), jsonb(body.answer), answerHash, score.correct, score.total, percent, String(score.summary || ''), jsonb(score.details ?? []), duration, attempt.rules_version, stars, starBasis],
           );
           await db.query('UPDATE attempts SET submitted_at=now() WHERE id=$1', [attemptId]);
           return { result: resultRow(inserted.rows[0]), duplicate: false };

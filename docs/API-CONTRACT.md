@@ -1,5 +1,15 @@
 # Implementációs szerződés – 2026-09-10
 
+## 2026-09-10 v2 paritásjavítás — elsőbbséget élvező kiegészítés
+
+Az alábbi történeti v1 szerződés tovább él a régi kiosztások és körök számára. Az új kliens a körindításhoz és feladatsor létrehozásához `clientRulesVersion:2` mezőt küld. Hiánya v1-kompatibilitást jelent; kiosztott feladat szabályverzióját mindig a szerver tárolt lépése határozza meg. A kliens nem írhatja felül azzal, hogy `rulesVersion` mezőt küld. V2 kiosztást régi kliensből indítani409 `CLIENT_UPDATE_REQUIRED`.
+
+A lépések, körök és eredmények `rulesVersion` mezőt adnak. A results új `stars` mezője0..3 vagy null; null = nem mért csillagszabály, nem nulla csillag. `starBasis`: legacy-v1, hanna-own, reference-observed-2026-09-10 vagy reference-unmeasured. A progress a tárolt csillagokat összegzi, `ungradedStars` a még értékeletlen körök száma. A régi pont és csillag nem számítódik újra.
+
+V2 nyers válasz: faces `{attempts:[{answers:[{faceId,name,job?,room?}]}]}`; shopping `{attempts:[{itemIds:string[]} ]}`; pictureL2 `{rounds:[{attempts:[{itemIds:string[]}]}]}`; code `{mapping:[{digit,symbolId}],answers:[{attempts:string[]} ]}`. Ár, állomás, pictureL1 és a négy saját alapjáték alakja változatlan. A válaszpróbák sorrendje megmarad, siker után nincs további próba; megoldásbemutatás nem kerül a nyers válaszba. A szerver újragenerálja a feladatot, és egész kódokat/egész képsorokat pontoz az új változatban.
+
+V2 faces rögzített5személy; shopping rögzített9cél,L1választék14,L2D1választék9/L2D2választék14; shoppingL1nehézség inaktív. Price nincs ársávnehézség, L1százaléklátható támpont. PictureL1D1négy/D2hatvalódi jelenet, L2nehézség inaktív. Az ATM pontospróbakeretének kiegészítése a végrehajtási jegyzőkönyvben kapja meg a referenciaazonosítót.
+
 Egy Node.js ESM alkalmazás + PostgreSQL, same-origin dist/ frontend a Railway hanna-memoria projektben. Nincs AMAkids-kapcsolat futáskor. Nincs emailküldés. A korábbi privát Sites-demo hozzáférése marad. Saját tesztadatok engedélyezettek.
 
 ## Közös játékprotokoll
