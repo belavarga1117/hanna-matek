@@ -5,6 +5,7 @@ import {
   generateStations,
   scoreStationOrder,
   generateFaces,
+  shuffleFacesForRecall,
   scoreFaceAnswers,
   generatePrices,
   scorePriceAnswers,
@@ -54,6 +55,22 @@ test('face scoring handles exact and partial name recall', () => {
   exact.set(faces[1].id, 'más név');
   exact.delete(faces[3].id);
   assert.deepEqual(scoreFaceAnswers(faces, exact), { correct: 2, total: 4 });
+});
+
+test('face recall is a changed permutation even when shuffle returns the study order', () => {
+  const faces = generateFaces(5, seeded(7));
+  const recalled = shuffleFacesForRecall(faces, () => 0.999999);
+  assert.deepEqual(
+    new Set(recalled.map((face) => face.id)),
+    new Set(faces.map((face) => face.id)),
+  );
+  assert.notDeepEqual(recalled.map((face) => face.id), faces.map((face) => face.id));
+  for (const face of recalled) {
+    assert.equal(face.name, faces.find((studied) => studied.id === face.id).name);
+  }
+
+  const shuffledAnswers = new Map(recalled.map((face) => [face.id, face.name]));
+  assert.deepEqual(scoreFaceAnswers(recalled, shuffledAnswers), { correct: 5, total: 5 });
 });
 
 test('price generator uses unique items and valid increments for each difficulty', () => {

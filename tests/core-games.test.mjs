@@ -7,6 +7,7 @@ import {
   generateGridRound,
   generateMissingRound,
   generatePathRound,
+  pathFlashAt,
   scoreDigits,
   scoreGrid,
   scoreMissing,
@@ -64,6 +65,31 @@ test('a fényösvény különböző mezőket generál és a pozíció szerinti r
   const oneWrong = [...round.expected];
   [oneWrong[0], oneWrong[1]] = [oneWrong[1], oneWrong[0]];
   assert.equal(scorePath(round.expected, oneWrong).correct, 2);
+});
+
+test('a fényösvény egyesével villant, rövid üres szünettel a lépések között', () => {
+  const path = [2, 8, 5];
+  assert.equal(pathFlashAt(path, 0), 2);
+  assert.equal(pathFlashAt(path, 0.65 / 3), 2);
+  assert.equal(pathFlashAt(path, 0.7 / 3), null);
+  assert.equal(pathFlashAt(path, 1 / 3), 8);
+  assert.equal(pathFlashAt(path, (1 + 0.65) / 3), 8);
+  assert.equal(pathFlashAt(path, (1 + 0.7) / 3), null);
+  assert.equal(pathFlashAt(path, 2 / 3), 5);
+  assert.equal(pathFlashAt(path, (2 + 0.7) / 3), null);
+});
+
+test('a fényösvény végén minden fény kialszik, a szélső értékek biztonságosak', () => {
+  const path = [4, 10, 1, 14];
+  assert.equal(pathFlashAt(path, 1), null);
+  assert.equal(pathFlashAt(path, 2), null);
+  assert.equal(pathFlashAt([], 0.5), null);
+  assert.equal(pathFlashAt(null, 0.5), null);
+  assert.equal(pathFlashAt(path, -0.5), 4);
+  for (let step = 0; step <= 100; step += 1) {
+    const active = pathFlashAt(path, step / 100);
+    assert.ok(active === null || path.includes(active));
+  }
 });
 
 test('a hiányzó tárgy köre különböző tárgyakat és négy egyedi választ ad', () => {

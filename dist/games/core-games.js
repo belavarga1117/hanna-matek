@@ -110,6 +110,16 @@ export function scorePath(expected, selected) {
   };
 }
 
+export function pathFlashAt(sequence, progress) {
+  if (!Array.isArray(sequence) || sequence.length === 0) return null;
+  const normalized = Math.max(0, Math.min(1, Number(progress) || 0));
+  if (normalized >= 1) return null;
+  const position = normalized * sequence.length;
+  const step = Math.floor(position);
+  const withinStep = position - step;
+  return withinStep < 0.68 ? sequence[step] : null;
+}
+
 export function generateMissingRound(settings, rng = Math.random) {
   const count = clampCount(settings?.count, 8);
   const objects = sample(EMOJI_OBJECTS, count, rng);
@@ -273,23 +283,26 @@ function mountPath(ctx) {
   const finish = once(ctx.done);
   const stack = make('div', { className: 'game-stack' });
   const grid = createGrid(make, 4);
-  const pathOrder = new Map(round.path.map((cell, index) => [cell, index + 1]));
+  const studyButtons = [];
 
   for (let index = 0; index < 16; index += 1) {
-    const order = pathOrder.get(index);
-    grid.append(make('button', {
-      className: `memory-tile${order ? ' is-lit' : ''}`,
+    const button = make('button', {
+      className: 'memory-tile',
       type: 'button',
       disabled: true,
-      'aria-label': order ? `${order}. lépés` : `Mező ${index + 1}`,
-    }, order ? make('span', { className: 'tile-number' }, String(order)) : ''));
+      'aria-label': `Mező ${index + 1}`,
+    });
+    studyButtons.push(button);
+    grid.append(button);
   }
   ctx.root.replaceChildren(stack);
   stack.append(grid);
-  ctx.phase('Fényösvény', 'Jegyezd meg a mezők sorrendjét!');
+  ctx.phase('Fényösvény', 'Figyeld a felvillanó mezőket sorrendben!');
 
   ctx.memorize(() => {
-    const instruction = ctx.settings.reverse ? 'Koppints az útvonalra visszafelé.' : 'Koppints az útvonalra sorrendben.';
+    const instruction = ctx.settings.reverse
+      ? 'Koppints a mezőkre fordított sorrendben.'
+      : 'Koppints a mezőkre ugyanebben a sorrendben.';
     ctx.phase('Te jössz!', instruction);
     grid.replaceChildren();
     const selected = [];
@@ -348,6 +361,16 @@ function mountPath(ctx) {
     });
     controls.append(undo, clear, check);
     stack.append(note, controls);
+  }, {
+    allowSkip: false,
+    onProgress(progress) {
+      const activeCell = pathFlashAt(round.path, progress);
+      studyButtons.forEach((button, index) => {
+        const isActive = index === activeCell;
+        button.classList.toggle('is-lit', isActive);
+        button.setAttribute('aria-label', isActive ? `Mező ${index + 1}, most világít` : `Mező ${index + 1}`);
+      });
+    },
   });
 }
 

@@ -19,7 +19,7 @@ Nincs telepítendő csomag. Az indításhoz Python 3, az ellenőrzésekhez Node.
 
 ## Ellenőrzések
 
-`npm test` — húsz teszt a generátorokra, pontozásra, időzítőre és mentésre.
+`npm test` — tesztek a generátorokra, pontozásra, időzítőre és mentésre.
 
 `npm run check` — modulok, szintaxis és a kiadható állományok ellenőrzése.
 

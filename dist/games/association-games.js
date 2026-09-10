@@ -81,6 +81,13 @@ export function generateFaces(count, rng = Math.random) {
   return sample(FACE_CATALOG, boundedCount(count, 6), rng).map((face) => ({ ...face }));
 }
 
+export function shuffleFacesForRecall(faces, rng = Math.random) {
+  const recalled = shuffle(faces, rng);
+  const unchanged = recalled.length > 1
+    && recalled.every((face, index) => face.id === faces[index].id);
+  return unchanged ? [...recalled.slice(1), recalled[0]] : recalled;
+}
+
 export function scoreFaceAnswers(faces, answers) {
   const read = answers instanceof Map
     ? (id) => answers.get(id)
@@ -276,11 +283,12 @@ function mountFaces(ctx) {
 
   ctx.memorize(() => {
     ctx.phase('Arcok és nevek felidézése', 'Válaszd ki minden portréhoz a hozzá tartozó nevet!');
+    const recalledFaces = shuffleFacesForRecall(faces, ctx.rand);
     const answers = new Map();
     const selects = [];
     const options = shuffle(faces.map((face) => face.name), ctx.rand);
     const note = h('p', { className: 'game-note', 'aria-live': 'polite' }, 'Minden archoz válassz egy nevet.');
-    const rows = faces.map((face, index) => {
+    const rows = recalledFaces.map((face, index) => {
       const select = h('select', {
         'aria-label': `Név a(z) ${index + 1}. személyhez`,
       },
@@ -298,11 +306,11 @@ function mountFaces(ctx) {
     const check = primary('Ellenőrzés', () => {
       if (finished || selects.some((field) => !field.value)) return;
       finished = true;
-      const result = scoreFaceAnswers(faces, answers);
+      const result = scoreFaceAnswers(recalledFaces, answers);
       ctx.done({
         ...result,
         summary: `${result.correct} nevet párosítottál helyesen ${result.total}-ból.`,
-        details: faces.map((face, index) => ({
+        details: recalledFaces.map((face, index) => ({
           label: `${index + 1}. személy`,
           expected: face.name,
           actual: answers.get(face.id) || '—',
