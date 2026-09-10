@@ -22,3 +22,21 @@ Root saját későbbi UAT: mobil gyakorlófejléc fix magassága átfedett; füg
 ## Képrészletek nyitóképének javítása
 
 A felhasználó képernyőképe és a root aktuális Chrome-próbája igazolta: a nyitójelenet898×898px-re nyúlt, a gomb kilógott. Kizárólag CSS-méretezés és a megjegyzési szakasz térközei változtak. Grok4.6 medium statikus ellenőrzés: bc3eea7 PASS; köztes fejlécméret2f8c4ad PASS feltétellel. Root további tanári próba901px szélességnél igazolta, hogy a hosszabb menü korábban törik; a végleges, egyszerűbb helyfoglalás ezt is kezeli. Végső0f0ef70 Grok-fixreview PASS; hat tanári képernyőméret és az eredeti egyképes jelenet ténylegesen ellenőrizve. A korábbi játéklogikai teszteket nem ismételtük tisztán CSS-módosítás miatt; az integrált szintaxis/állományellenőrzés ismét PASS.
+
+## V2 paritásjavítás és bizonyítékok – 2026-09-10
+
+A fenti bekezdések korábbi kiadások történeti ellenőrzései. Nem igazolják a most feltárt Memorica-szabályok teljes azonosságát. A friss referenciaaudit az elsődleges; az új eredményeket a PARITY-IMPLEMENTATION-2026-09-10.md választja külön a még ismeretlenektől.
+
+| Szerep | Modell / végrehajtás | Valós eredmény és korlát |
+|---|---|---|
+| Controller | Codex, látható végrehajtási controller | Referencia szabad játékok, közös v2 szerződés és szerverpontozás, v1 kompatibilitás, integráció, kézi UAT, backup és kiadás. Az executor sikere nem volt elfogadási kapu. |
+| Association | gpt-5.6-sol, high, izolált munkafa, natív alügynök | Négy játék javítása; controller-integráció után11 aktív változat saját Chrome-UAT, majd6 játékos tanári–tanulói folyamat és Picture L1 easy mentése. A tanári részletnézet hiányzó metaadatait és katalógus-ID-ből származó rossz portrészámait kézi UAT találta; controller javította, az alügynök ugyanazokon az eredményeken újraellenőrizte, raw/pont változatlan. |
+| Advanced | gpt-5.6-sol, high, izolált CLI-végrehajtó | ATM és Storyboard. A natív negyedik agent indítása kapacitáshibát adott, ezért dokumentált CLI-fallback futott. Controller külön javította a16 elemű jelkészlet teljes szerkeszthetőségét, a számjegypozíció kezelését és a közös szerveres szerződést. |
+| Első teljes review | Grok4.6 medium, statikus; shell/tool/web/subagent tiltva | 7c4c7a3, teljes diff és kritikus források, egyedi request, tényleges PASS. Valós üzemeltetési finding: a frissítéskor még futó v1 szerver új csillagoszlop nélküli INSERT-je NULL csillagot hagyhat. Controller valódi SQL-regresszióval reprodukálta; külön003 migráció megoldotta. |
+| Fixreview | Grok4.6 medium, ugyanazok a korlátozások | 03c78def, teljes előzmény és fixdiff, tényleges PASS, folyamat exit0. A003 v1-only triggerét, a tanári adatlekérést/pozíciócímkéket, a mért csillagcellákat és az atlasz CSS-kivágási képletét átnézte. Nem állított teljes paritást. |
+
+A controller tényleges Chrome-próbája a `draggable` hibás HTML-attribútumát és a gombokon nem megbízható natív húzást is kimutatta. A közös pointerhúzás javítása után Stations/Who/Shopping/Storyboard tényleges húzással is működött. A mobil képellenőrzés egy szomszédos atlaszsorból belógó képcsíkot talált; a képlettel számolt, panelen belüli négyzetes kivágás után a desktop és390×844 telefonos íróasztalképen eltűnt. Ezek saját UAT-tal talált hibák, nem a korábbi tesztszám bizonyítékai.
+
+84 integrált teszt és27 nyilvános fájl ellenőrzése PASS a03c78def jelölten. Kiadás után a futó konténer saját forrásával, ugyanazon PostgreSQL18 szolgáltatás külön, ideiglenes adatbázisában lefutott a20 új változat kiosztás/mentés/idempotencia/tanári részlet és a történeti v1 kompatibilitási teszt. Ez valódi node-postgres út; nem PGlite-adapter és nem az éles tanulók adatbázisa. A kizárólag saját ideiglenes adatbázist és szkriptet utána eltávolította.
+
+A Grok mobil- és Safari/iOS-megjegyzései lefedettségi korlátok, nem bizonyított kódhibák. A mobil Chrome-atlaszvizsgálat azóta megtörtént; natív Safari/iOS nincs igazolva. Nyilvános éles tanári–tanulói újrabelépési UAT-ot a működő, kijelölt QA-hozzáférés hiányában nem lehet ezzel a konténerteszttel helyettesíteni. Hitelesítés vagy referencia-szabály ismeretlenségét nem minősítjük modell által igazolt paritásnak.

@@ -32,3 +32,12 @@ A jelen verzió tanulói gyakorlásra szolgál, nem vizsgafelügyeleti rendszer.
 A jelszó-helyreállítás tanulónál tanári új aktiváló linken történik. Elfelejtett tulajdonosi jelszóhoz egyedi üzemeltetői helyreállítás kell; a setupkód önmagában már nem nyit új tulajdonosi fiókot.
 
 A 2026-09-10-i tiszta induló adatbázis kézi mentését külön ideiglenes PostgreSQL-adatbázisba sikeresen visszaállítottuk. A privát mentés helye a projekt `.local/backups/` könyvtára; a részletes kiadási bizonyíték a `RELEASE-VERIFICATION.md`. Ez a sikeres próba nem jelent automatikus napi mentést.
+
+
+## V2 szabályverzió-frissítés – 2026-09-10
+
+Az új kliens és szerver a körrel együtt tárolt szabályverziót használja. A korábbi kiosztás, függő kör és eredmény v1 marad; az új feladatsorok v2 szabályúak. A régi böngésző szabad gyakorlása továbbra is v1, újv2 kiosztáskor frissítést kér. A mentett pontok és csillagok nem értelmeződnek újra. A002 és003 migráció hozzáadó;003 a kiadáskor még futó régi szerver mentéseinek eredeti csillagát is megőrzi.
+
+V2 eredmények létrejötte után ne állj vissza egyszerűen v1 programra: az a csillagösszesítést újra a korábbi százalékképlettel számolná. Elsődleges helyreállítás a javított v2 program kiadása. Adatbázis-visszaállítás csak külön egyeztetett adatmegőrzési tervvel történhet, mert a mentés óta létrejött valódi munkát elveszítheti. A mentés visszaállíthatóságát ideiglenes, külön adatbázisban kell próbálni.
+
+A korábbi üresrendszeres QA-törlő, reset- és seed-szkriptek nem futtathatók a jelenlegi éles adatokon. A paritásjavítás helyi próbái izolált, tartós PGlite-adatbázist használnak; éles próbához külön, azonosítható saját QA-profil szükséges. A privát jegyzetek, referencia-képernyőképek és `.local` állományok nem kerülnek sem a konténerbe, sem a nyilvános GitHub-tárolóba.

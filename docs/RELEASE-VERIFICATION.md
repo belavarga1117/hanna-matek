@@ -1,3 +1,5 @@
+> Aktuális v2 kiadás:03c78def / Railway66cc7fcb-9cd0-4fe3-8a12-5f399c560118. A részletes, bizonyítékhoz kötött jelenlegi állapot a [PARITY-IMPLEMENTATION-2026-09-10.md](PARITY-IMPLEMENTATION-2026-09-10.md) jelentésben van. Az alábbi korábbi kiadási napló történeti; nem igazolja a friss szabályok teljes paritását. A nyilvános éles tanári–tanulói végigjátszási kapu még hozzáférésre vár.
+
 # Memória Műhely – kiadási igazolás
 
 2026-09-10. Alkalmazás: [Memória Műhely](https://memoria-web-production-a86b.up.railway.app).

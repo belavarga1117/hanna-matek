@@ -8,7 +8,13 @@ A lépések, körök és eredmények `rulesVersion` mezőt adnak. A results új 
 
 V2 nyers válasz: faces `{attempts:[{answers:[{faceId,name,job?,room?}]}]}`; shopping `{attempts:[{itemIds:string[]} ]}`; pictureL2 `{rounds:[{attempts:[{itemIds:string[]}]}]}`; code `{mapping:[{digit,symbolId}],answers:[{attempts:string[]} ]}`. Ár, állomás, pictureL1 és a négy saját alapjáték alakja változatlan. A válaszpróbák sorrendje megmarad, siker után nincs további próba; megoldásbemutatás nem kerül a nyers válaszba. A szerver újragenerálja a feladatot, és egész kódokat/egész képsorokat pontoz az új változatban.
 
-V2 faces rögzített5személy; shopping rögzített9cél,L1választék14,L2D1választék9/L2D2választék14; shoppingL1nehézség inaktív. Price nincs ársávnehézség, L1százaléklátható támpont. PictureL1D1négy/D2hatvalódi jelenet, L2nehézség inaktív. Az ATM pontospróbakeretének kiegészítése a végrehajtási jegyzőkönyvben kapja meg a referenciaazonosítót.
+V2 faces rögzített5személy; shopping rögzített9cél,L1választék14,L2D1választék9/L2D2választék14; shoppingL1nehézség inaktív. Price nincs ársávnehézség, L1százaléklátható támpont. PictureL1D1négy/D2hatvalódi jelenet, L2nehézség inaktív. ATM L1/L2 legfeljebb2, L3 legfeljebb3 próbálkozás egy teljes kódra; siker után nincs újabb próbálkozás. Mind a hat kombináció külön referencia-végponttal szerepel a végrehajtási jegyzőkönyvben. A megfigyelt csillagcellák más megjegyzési időre történő alkalmazása saját, korlátozott átviteli szabály; nem bizonyít egyetemes referenciaazonosságot.
+
+A tanári eredményrészlet `studentDisplayName` és `assignmentTitle` mezőt is ad, a tanárhoz tartozó tanuló ellenőrzésével. A válasz, pont, csillag és próbálkozástörténet nem változik a megjelenítési javítástól. A v2 portrécímke az adott körben látható1–5. pozíció, a v1 címke történeti marad.
+
+A002 migráció új verzió- és csillagmezőket ad; a külön003 migráció a frissítés közben még régi programból érkező v1 mentések eredeti csillagát INSERT előtt rögzíti. Csak v1 és mégNULL csillagú sorhoz nyúl, a v2 ismeretlen csillagállapotát nem változtatja meg. Meglévő migráció nem íródott át.
+
+## Történeti v1 szerződés és eredeti munkamegosztás
 
 Egy Node.js ESM alkalmazás + PostgreSQL, same-origin dist/ frontend a Railway hanna-memoria projektben. Nincs AMAkids-kapcsolat futáskor. Nincs emailküldés. A korábbi privát Sites-demo hozzáférése marad. Saját tesztadatok engedélyezettek.
 
