@@ -30,3 +30,5 @@ Nincs automatikus tanulói eredménytörlés és önkiszolgáló fióktörlés e
 A jelen verzió tanulói gyakorlásra szolgál, nem vizsgafelügyeleti rendszer. A futó játék feladata szükségszerűen a böngészőbe kerül. A szerveres pontozás megakadályozza az önkényes pontszám-beküldést, de nem állít csalásbiztos vizsgamódot.
 
 A jelszó-helyreállítás tanulónál tanári új aktiváló linken történik. Elfelejtett tulajdonosi jelszóhoz egyedi üzemeltetői helyreállítás kell; a setupkód önmagában már nem nyit új tulajdonosi fiókot.
+
+A 2026-09-10-i tiszta induló adatbázis kézi mentését külön ideiglenes PostgreSQL-adatbázisba sikeresen visszaállítottuk. A privát mentés helye a projekt `.local/backups/` könyvtára; a részletes kiadási bizonyíték a `RELEASE-VERIFICATION.md`. Ez a sikeres próba nem jelent automatikus napi mentést.

@@ -31,3 +31,5 @@ A tanári próbakörök nem rögzítenek tanulói eredményt. A tanulói körök
 ## Korábbi bemutatók
 
 Az eredeti `index.html` és `app-mockup.html` Montessori-koncepciók megmaradnak; nem részei a Railway alkalmazásnak. A korábbi Sites-változat kizárólag a `dist/` statikus állományait szolgálja ki. A mostani munka nem módosítja annak hozzáférési beállítását. Kutatási és tárgyalási jegyzetek nem kerülnek a kiadásba.
+
+Kiadási ellenőrzések és aktuális átadás: [docs/RELEASE-VERIFICATION.md](docs/RELEASE-VERIFICATION.md).

@@ -37,7 +37,7 @@ A korábbi négy terület (Subway, Bank, Shopping Mall, Hospital) hat azonosíto
 | Assortment | Szint1 sorrendfüggetlen, szint2 sorrendfüggő F | I: teljes magas szintű pontozás és levonás. S: limitált kiválasztás, ismétlés nem növel pontot, extra mezőt szerver elutasít. |
 | Storyboard | Szint1 felismerés, szint2 képsorrend F/B; Next a korábbi szint1 próbán B | I: minden nehézség pontos képkészlete, körvégi csillagképlet. S: 3–5 feladat/kör és saját, változatos tartalom. |
 | Szintfeloldás | Minden fenti szint most választható; teljes feloldási algoritmus és korábbi feltételek I | S: szabad gyakorlásban minden mód választható; tanári kiosztás rögzíti a módot. Fejlődésjelző 80% felett teljesített mód, nem mesterséges hozzáféréskorlát. |
-| Térkép / profil | Négy tematikus terület, kereső, rang és Personal Profile F | S: kereshető saját katalógus, témák, szerveres összesítés, csillagok és rang; térkép-grafika másolása nélkül. |
+| Térkép / profil | Négy tematikus terület, kereső, rang és Personal Profile F | S: kategóriák szerint szűrhető saját katalógus, témák, szerveres összesítés, csillagok és rang; térkép-grafika másolása nélkül. |
 
 ## Szerepkörök és folyamatok
 
