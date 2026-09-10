@@ -26,6 +26,32 @@
   box-shadow: 0 0 0 4px rgb(104 68 182 / 18%);
 }
 
+/* Reserve room for the header, instructions, timer and ready button. */
+.play-panel:has(.game-stage > :is(.scene-card, .scene-sequence)) {
+  min-height: 0;
+  padding-block: 20px;
+}
+.play-panel:has(.game-stage > :is(.scene-card, .scene-sequence)) :is(.phase-heading, .timer-wrap) {
+  margin-bottom: 16px;
+}
+.play-panel:has(.game-stage > :is(.scene-card, .scene-sequence)) .ready-row {
+  margin-top: 16px;
+}
+.game-stage > :is(.scene-card, .scene-sequence) {
+  --scene-room: calc(100svh - 430px);
+  width: min(100%, 420px, max(160px, var(--scene-room)));
+  min-height: 0;
+  margin-inline: auto;
+}
+.scene-sequence { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.scene-sequence > .scene-card { min-height: 0; }
+
+@media (max-width: 760px) {
+  .game-stage > :is(.scene-card, .scene-sequence) {
+    --scene-room: calc(100svh - 480px);
+  }
+}
+
 .code-pair select {
   max-width: 180px;
 }
