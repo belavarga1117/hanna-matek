@@ -1,0 +1,10 @@
+# Saját képek és eredet
+
+- `dist/assets/portraits.png`: az eredeti Memória Műhely saját generált12 portrés atlasza. Megmaradt, nem AMAkids-forrás.
+- `dist/assets/scenes.png`: 2026-09-10, a beépített, előfizetéshez kapcsolt OpenAI képgenerálóval készített saját4×4 jelenetkészlet. Két korábbi hálózati hiba után a harmadik próbálkozás sikerült. Külön API-kulcsos fallback nem futott.
+
+A négy család konyha, park, alkotóasztal és olvasósarok. Családonként négy megkülönböztethető változat szerepel. Az első képszint egy képet kér vissza, a második négy kép sorrendjét. A hatválasztásos első szint két további, ugyanabból a családból származó enyhe színváltozatot mutat; ez dokumentált saját tartalmi szabály.
+
+## Végső generálási prompt
+
+Use case: illustration-story. Asset type: one original sprite atlas for a children's visual memory game. Create one square image divided into exactly 4 columns and 4 rows of equal square tiles, no gutters, no borders, no text or numbers, no watermarks. Every tile is a polished friendly colorful illustration viewed straight on, with clear recognizable objects. Row 1: four nearly identical cozy kitchen scenes containing a table, red mug, bowl with two apples, blue teapot, window and potted plant. Across the four tiles vary the mug color or position and the number of apples, keeping the scene and camera otherwise identical. Row 2: four nearly identical sunny park scenes containing a bench, ball, small dog, tree, flower pot; vary ball color/position or flower color. Row 3: four nearly identical craft desk scenes containing scissors, pencil cup, notebook, toy blocks and desk lamp; vary notebook color/position or number of blocks. Row 4: four nearly identical reading nook scenes containing armchair, cushion, book, side table, lamp and cat; vary cushion color/position or book color. In each row all four variants must be visibly distinguishable while retaining the same composition. Fill each tile to its edges; exact 4 by 4 grid so software can crop each scene reliably. Soft warm illustrated style, high legibility at small size, original artwork, no people, no brand marks.

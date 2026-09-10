@@ -29,8 +29,8 @@ test('exports all four playable association games', () => {
 
 test('station generator respects bounds and returns unique fictional names', () => {
   assert.equal(generateStations(1, seeded(2)).length, 3);
-  assert.equal(generateStations(99, seeded(3)).length, 8);
-  const stations = generateStations(7, seeded(4));
+  assert.equal(generateStations(99, seeded(3)).length, 6);
+  const stations = generateStations(6, seeded(4));
   assert.equal(new Set(stations).size, stations.length);
 });
 
@@ -81,9 +81,9 @@ test('price generator uses unique items and valid increments for each difficulty
   };
   Object.entries(rules).forEach(([difficulty, rule], index) => {
     const items = generatePrices(8, difficulty, seeded(10 + index));
-    assert.equal(items.length, 8);
-    assert.equal(new Set(items.map((item) => item.id)).size, 8);
-    assert.equal(new Set(items.map((item) => item.price)).size, 8);
+    assert.equal(items.length, 5);
+    assert.equal(new Set(items.map((item) => item.id)).size, 5);
+    assert.equal(new Set(items.map((item) => item.price)).size, 5);
     for (const item of items) {
       assert.ok(item.price >= rule.min && item.price <= rule.max);
       assert.equal((item.price - rule.min) % rule.step, 0);

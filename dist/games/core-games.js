@@ -193,7 +193,7 @@ function mountDigits(ctx) {
       }
       input.disabled = true;
       check.disabled = true;
-      finish(scoreDigits(round.expected, input.value));
+      finish(scoreDigits(round.expected, input.value), { digits: input.value });
     };
     check.addEventListener('click', submit);
     input.addEventListener('keydown', (event) => {
@@ -271,7 +271,7 @@ function mountGrid(ctx) {
       }
       buttons.forEach((button) => { button.disabled = true; });
       check.disabled = true;
-      finish(scoreGrid(round.cells, [...selected]));
+      finish(scoreGrid(round.cells, [...selected]), { cells: [...selected] });
     });
     stack.append(note, check);
   });
@@ -357,7 +357,7 @@ function mountPath(ctx) {
       undo.disabled = true;
       clear.disabled = true;
       check.disabled = true;
-      finish(scorePath(round.expected, selected));
+      finish(scorePath(round.expected, selected), { cells: [...selected] });
     });
     controls.append(undo, clear, check);
     stack.append(note, controls);
@@ -411,7 +411,7 @@ function mountMissing(ctx) {
       button.setAttribute('aria-label', `${choice.label} választása`);
       button.addEventListener('click', () => {
         buttons.forEach((item) => { item.disabled = true; });
-        finish(scoreMissing(round.missing, choice));
+        finish(scoreMissing(round.missing, choice), { choiceId: choice.label });
       });
       choices.append(button);
       return button;

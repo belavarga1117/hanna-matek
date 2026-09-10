@@ -32,18 +32,40 @@ export function shuffle(array, rng = Math.random) {
 export function sample(array, count = 1, rng = Math.random) { return shuffle(array, rng).slice(0, Math.max(0, count)); }
 export function clamp(value, min, max, fallback) { const n = Number(value); return Number.isFinite(n) ? Math.min(max, Math.max(min, Math.round(n))) : fallback; }
 
-export const DEFAULTS = Object.freeze({ count: 5, seconds: 10, difficulty: 'normal', reverse: false });
+export const DEFAULTS = Object.freeze({
+  count: 5,
+  seconds: 10,
+  difficulty: 'normal',
+  reverse: false,
+  level: 1,
+  rounds: 3,
+  theme: 'stations',
+  symbolSet: 'objects',
+});
 export function normalizeSettings(raw = {}) {
   return {
     count: raw.count == null ? 5 : clamp(raw.count, 3, 8, 5),
-    seconds: raw.seconds == null ? 10 : clamp(raw.seconds, 3, 30, 10),
+    seconds: raw.seconds == null ? 10 : clamp(raw.seconds, 3, 180, 10),
     difficulty: ['easy', 'normal', 'hard'].includes(raw.difficulty) ? raw.difficulty : 'normal',
     reverse: raw.reverse === true || raw.reverse === '1',
+    level: raw.level == null ? 1 : clamp(raw.level, 1, 3, 1),
+    rounds: raw.rounds == null ? 3 : clamp(raw.rounds, 1, 5, 3),
+    theme: ['stations', 'streets'].includes(raw.theme) ? raw.theme : 'stations',
+    symbolSet: ['objects', 'abstract'].includes(raw.symbolSet) ? raw.symbolSet : 'objects',
   };
 }
 export function settingsQuery(settings) {
   const s = normalizeSettings(settings);
-  return new URLSearchParams({ count: String(s.count), seconds: String(s.seconds), difficulty: s.difficulty, reverse: s.reverse ? '1' : '0' }).toString();
+  return new URLSearchParams({
+    count: String(s.count),
+    seconds: String(s.seconds),
+    difficulty: s.difficulty,
+    reverse: s.reverse ? '1' : '0',
+    level: String(s.level),
+    rounds: String(s.rounds),
+    theme: s.theme,
+    symbolSet: s.symbolSet,
+  }).toString();
 }
 export function parseRoute(hash, validIds) {
   const [path, query = ''] = hash.replace(/^#\/?/, '').split('?');

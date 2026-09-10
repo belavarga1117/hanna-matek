@@ -1,0 +1,15 @@
+.git
+.local
+node_modules
+.env
+.env.*
+!.env.example
+.openai
+docs
+tests
+index.html
+app-mockup.html
+README.md
+AMAKIDS-*
+HANNA-*
+TARGYALASI-*

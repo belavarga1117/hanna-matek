@@ -7,6 +7,8 @@ async function walk(dir){const out=[];for(const e of await readdir(dir,{withFile
 const files=await walk(path.join(root,'dist'));for(const f of files.filter(f=>f.endsWith('.js')))execFileSync(process.execPath,['--check',f]);
 const html=await readFile(path.join(root,'dist/index.html'),'utf8');for(const [,asset]of html.matchAll(/(?:src|href)="(\.\/[^"#]+)"/g))await access(path.resolve(root,'dist',asset));
 await access(path.join(root,'dist/assets/portraits.png'));
+await access(path.join(root,'dist/assets/scenes.png'));
+for(const f of (await walk(path.join(root,'server'))).filter(f=>f.endsWith('.js')))execFileSync(process.execPath,['--check',f]);
 const libs={core:(await import('../dist/games/core-games.js')).coreGames,association:(await import('../dist/games/association-games.js')).associationGames,advanced:(await import('../dist/games/advanced-games.js')).advancedGames};
 if(games.length!==10||new Set(games.map(g=>g.id)).size!==10)throw new Error('Expected ten unique games');
 for(const g of games)if(typeof libs[g.module]?.[g.id]?.mount!=='function')throw new Error(`Missing game: ${g.id}`);
