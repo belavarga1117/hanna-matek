@@ -38,19 +38,13 @@
   margin-top: 16px;
 }
 .game-stage > :is(.scene-card, .scene-sequence) {
-  --scene-room: calc(100svh - 430px);
+  --scene-room: calc(100svh - 500px);
   width: min(100%, 420px, max(160px, var(--scene-room)));
   min-height: 0;
   margin-inline: auto;
 }
 .scene-sequence { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .scene-sequence > .scene-card { min-height: 0; }
-
-@media (min-width: 761px) and (max-width: 900px) {
-  .game-stage > :is(.scene-card, .scene-sequence) {
-    --scene-room: calc(100svh - 500px);
-  }
-}
 
 @media (max-width: 760px) {
   .game-stage > :is(.scene-card, .scene-sequence) {
