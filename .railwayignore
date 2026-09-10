@@ -7,7 +7,6 @@ node_modules
 .openai
 docs
 tests
-index.html
 app-mockup.html
 README.md
 AMAKIDS-*
