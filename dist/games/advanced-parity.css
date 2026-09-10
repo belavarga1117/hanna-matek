@@ -1,0 +1,166 @@
+/* ATM és Storyboard referencia-paritási kiegészítések.
+   A teljes képes megjegyzési nézet méretezését továbbra is variants.css kezeli. */
+
+.scene-feedback,
+.code-feedback {
+  min-height: 1.5em;
+}
+
+.sequence-recall {
+  display: grid;
+  gap: 22px;
+  width: min(100%, 820px);
+  margin-inline: auto;
+}
+
+.scene-drop-grid,
+.scene-palette {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.scene-drop {
+  aspect-ratio: 1;
+  min-width: 0;
+  padding: 5px;
+  border: 2px dashed #b9aacd;
+  border-radius: 17px;
+  background: #f8f6fb;
+  color: #765f91;
+}
+
+.scene-drop:not(:disabled):hover,
+.scene-drop:not(:disabled):focus-visible {
+  border-color: #6844b6;
+  background: #f1ebfa;
+}
+
+.scene-drop.is-filled {
+  border-style: solid;
+  border-color: #d7cce5;
+  background: white;
+}
+
+.scene-drop > .scene-card {
+  width: 100%;
+  min-height: 0;
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+.scene-drop-number {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  margin: auto;
+  border-radius: 50%;
+  background: #eee8f7;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.scene-palette .scene-card {
+  min-width: 0;
+  min-height: 100px;
+}
+
+.scene-palette .scene-card:disabled {
+  opacity: .38;
+  cursor: default;
+}
+
+.code-entry {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  outline: none;
+}
+
+.code-entry:focus-visible {
+  border-radius: 16px;
+  box-shadow: 0 0 0 4px rgb(104 68 182 / 15%);
+}
+
+.code-positions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.code-position {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 64px;
+  border: 2px solid #d9d1e4;
+  border-radius: 13px;
+  background: white;
+  color: #422675;
+  font-size: 1.75rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.code-position.is-active {
+  border-color: #6844b6;
+  box-shadow: 0 0 0 4px rgb(104 68 182 / 15%);
+}
+
+.code-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.code-navigation .game-note {
+  min-width: 112px;
+}
+
+.code-arrow {
+  min-width: 52px;
+  font-size: 1.25rem;
+}
+
+.code-keypad {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(48px, 1fr));
+  gap: 9px;
+  width: min(100%, 360px);
+}
+
+.code-key {
+  min-height: 48px;
+  border: 1px solid #d9d1e4;
+  border-radius: 12px;
+  background: #f8f6fb;
+  color: #422675;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.code-key:not(:disabled):hover,
+.code-key:not(:disabled):focus-visible {
+  border-color: #6844b6;
+  background: #eee8f7;
+}
+
+.code-pair .code-symbol {
+  min-width: 1.4em;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .sequence-recall { gap: 16px; }
+  .scene-drop-grid,
+  .scene-palette { gap: 6px; }
+  .scene-drop { padding: 3px; border-radius: 11px; }
+  .scene-drop > .scene-card { border-radius: 8px; }
+  .scene-palette .scene-card { min-height: 72px; }
+  .code-position { width: 48px; height: 55px; font-size: 1.45rem; }
+  .code-keypad { grid-template-columns: repeat(5, minmax(42px, 1fr)); gap: 7px; }
+}
