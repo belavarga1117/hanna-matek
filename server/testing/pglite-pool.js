@@ -1,4 +1,8 @@
+import pgUtils from 'pg/lib/utils.js';
+
 // Minimal node-postgres Pool compatibility for isolated PGlite tests.
+// Passing every parameter through prepareValue catches pg-specific encoding,
+// notably its PostgreSQL-array encoding of top-level JavaScript arrays.
 export function createPglitePool(db) {
   let tail = Promise.resolve();
   const acquire = async () => {
@@ -13,7 +17,8 @@ export function createPglitePool(db) {
       await db.exec(sql);
       return { rows: [], rowCount: 0 };
     }
-    const result = await db.query(sql, params);
+    const prepared = params?.map((value) => pgUtils.prepareValue(value));
+    const result = await db.query(sql, prepared);
     return { ...result, rowCount: result.rows.length || result.affectedRows || 0 };
   };
   return {

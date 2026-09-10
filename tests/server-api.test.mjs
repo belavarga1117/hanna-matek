@@ -143,6 +143,7 @@ test('complete school API flow enforces auth, ownership, CSRF and retry safety',
   assert.equal(reply.response.status, 200);
   assert.equal(reply.json.duplicate, false);
   assert.deepEqual({ correct: reply.json.result.correct, total: reply.json.result.total, percent: reply.json.result.percent }, { correct: 1, total: 2, percent: 50 });
+  assert.deepEqual(reply.json.result.details, [{ expected: [1, 2], answer: [1, 9] }]);
   const firstResultId = reply.json.result.id;
   reply = await request(`/api/attempts/${firstAttempt.id}/submit`, { method: 'POST', cookie: studentCookie, csrf: studentCsrf, body: { answer: { cells: [1, 9] } } });
   assert.equal(reply.json.duplicate, true);

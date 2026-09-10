@@ -59,6 +59,12 @@ function parseDueAt(value) {
   return date.toISOString();
 }
 
+function jsonb(value) {
+  const encoded = JSON.stringify(value);
+  if (encoded === undefined) throw badRequest('Érvénytelen JSON érték.', 'INVALID_INPUT');
+  return encoded;
+}
+
 function assignmentRow(row, steps = []) {
   return {
     id: row.id,
@@ -548,14 +554,14 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
             const id = randomUUID();
             await db.query(
               'INSERT INTO assignment_steps(id,assignment_id,position,game_id,settings,repetitions) VALUES($1,$2,$3,$4,$5,$6)',
-              [id, assignmentId, index, step.gameId, step.settings, step.repetitions],
+              [id, assignmentId, index, step.gameId, jsonb(step.settings), step.repetitions],
             );
             savedSteps.push({ id, ...step });
           }
           const response = { assignment: { ...assignmentRow(created.rows[0], savedSteps), studentIds: targetIds } };
           if (idempotencyKey) await db.query(
             "INSERT INTO idempotency_keys(teacher_id,scope,key,request_hash,response) VALUES($1,'assignment:create',$2,$3,$4)",
-            [user.id, idempotencyKey, requestHash, response],
+            [user.id, idempotencyKey, requestHash, jsonb(response)],
           );
           return response;
         });
@@ -702,7 +708,7 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
           const expiresAt = new Date(Date.now() + config.attemptHours * 3_600_000);
           await db.query(
             `INSERT INTO attempts(id,student_id,game_id,settings,seed,assignment_step_id,expires_at)
-             VALUES($1,$2,$3,$4,$5,$6,$7)`, [id, user.id, gameId, settings, seed, stepId, expiresAt],
+             VALUES($1,$2,$3,$4,$5,$6,$7)`, [id, user.id, gameId, jsonb(settings), seed, stepId, expiresAt],
           );
           return { attempt: { id, seed, gameId, settings, assignmentStepId: stepId, expiresAt: expiresAt.toISOString() } };
         });
@@ -751,7 +757,7 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
           const inserted = await db.query(
             `INSERT INTO results(id,attempt_id,student_id,assignment_id,assignment_step_id,game_id,settings,answer,answer_hash,correct,total,percent,summary,details,duration)
              VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) RETURNING *`,
-            [id, attemptId, user.id, assignmentId, attempt.assignment_step_id, attempt.game_id, attempt.settings, body.answer, answerHash, score.correct, score.total, percent, String(score.summary || ''), score.details ?? [], duration],
+            [id, attemptId, user.id, assignmentId, attempt.assignment_step_id, attempt.game_id, jsonb(attempt.settings), jsonb(body.answer), answerHash, score.correct, score.total, percent, String(score.summary || ''), jsonb(score.details ?? []), duration],
           );
           await db.query('UPDATE attempts SET submitted_at=now() WHERE id=$1', [attemptId]);
           return { result: resultRow(inserted.rows[0]), duplicate: false };
