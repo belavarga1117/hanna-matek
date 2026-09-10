@@ -34,3 +34,7 @@ Az első tanári fiókot a tulajdonos aktiválja: Railway → hanna-memoria → 
 Automatikus napi Railway-mentést a jelenlegi jogosultság elutasított, ezért nincs beállítva. A tulajdonosnak a Backups jogosultságát/csomaglehetőségét kell rendeznie; addig frissítés előtt kézi PostgreSQL-mentés szükséges.
 
 A régi Sites-demó nyilvános hozzáférése és tartalma változatlan. A tanulói adatokat a Railway-alkalmazás belépés mögött tárolja. A nyilvános GitHub távoli tárolóba nem történt feltöltés; a személyes kutatási jegyzetek nincsenek a kiadásban. Nincs emailküldés, teljes AMAkids-platformparitás, vizsgafelügyelet vagy automatikus adattörlés ebben a kiadásban.
+
+## Utólagos képméretjavítás – 2026-09-10
+
+Forrás: `0f0ef70c0699c747f506e457c93d3062c639f238`. A Képrészletek mindkét megjegyzési nézetében a teljes jelenet/képsor és a Készen állok gomb elfér a vizsgált képernyőkön:1440×900,1366×768,901×768,820×768,390×844,375×667. Tanári és tanulói nézetben végzett saját Chrome-próba; szint1 és szint2. A jelenet aránya és a képkivágás megmaradt. Végső Grok4.6 medium fixreview PASS. Élő felhasználói adatot ez a javítás nem módosított. Alacsony fekvő ablakban a lap továbbra is görgethető. A végső feltöltés részletei a privát `.local/release-evidence-2026-09-10/picture-fit-deployment.json` állományba kerülnek.
