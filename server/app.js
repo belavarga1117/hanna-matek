@@ -95,7 +95,11 @@ function resultRow(row, includeAnswer = false, includeStudent = false) {
     assignmentStepId: row.assignment_step_id,
   };
   if (includeAnswer) result.answer = row.answer;
-  if (includeStudent) result.studentId = row.student_id;
+  if (includeStudent) {
+    result.studentId = row.student_id;
+    if(row.student_display_name!==undefined)result.studentDisplayName=row.student_display_name;
+    if(row.assignment_title!==undefined)result.assignmentTitle=row.assignment_title;
+  }
   return result;
 }
 
@@ -623,7 +627,7 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
         const user = requireUser(context, 'teacher');
         const resultId = cleanId(params[0]);
         const found = await pool.query(
-          'SELECT r.* FROM results r JOIN users student ON student.id=r.student_id WHERE r.id=$1 AND student.created_by=$2',
+          'SELECT r.*,student.display_name AS student_display_name,a.title AS assignment_title FROM results r JOIN users student ON student.id=r.student_id LEFT JOIN assignments a ON a.id=r.assignment_id AND a.teacher_id=$2 WHERE r.id=$1 AND student.created_by=$2',
           [resultId, user.id],
         );
         if (!found.rowCount) throw notFound();

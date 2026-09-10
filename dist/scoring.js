@@ -20,11 +20,12 @@ export function awardStars(gameId, settings, score, version=2) {
     const symbols=settings.symbolSet||'objects';
     if(correct===3)stars=3;
     if(correct===0&&settings.level===2&&symbols==='abstract')stars=0;
-    if(correct===2&&((settings.level===3&&symbols==='objects')||(settings.level===1&&symbols==='abstract')))stars=1;
+    // All six level/symbol combinations were observed separately at 2/3.
+    if(correct===2)stars=1;
   }
   if(gameId==='picture'&&total===3) {
     if(correct===2&&(settings.level===2||settings.difficulty==='hard'))stars=1;
-    if(correct===3&&(settings.level===2||settings.difficulty!=='hard'))stars=3;
+    if(correct===3)stars=3;
   }
   if(gameId==='faces') {
     if(settings.level===1&&total===5)stars=({0:0,5:3})[correct];

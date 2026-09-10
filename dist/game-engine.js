@@ -117,7 +117,7 @@ function scoreCurrent(gameId,settings,seed,answer){
     exactObject(entry,['answers']);const entries=exactArray(entry.answers,faces.length,'answers');
     const ids=entries.map((entry,index)=>{exactObject(entry,['faceId',...fields],`answers[${index}]`);return integer(entry.faceId,`answers[${index}].faceId`,0,11);});unique(ids,'faceId');ensureAllowed(ids,faces.map(face=>face.id),'faceId');
     for(const field of fields){const values=entries.map(entry=>entry[field]);if(values.some(value=>typeof value!=='string'))invalid(`${field} szöveg legyen`);ensureAllowed(values,faces.map(face=>face[field]),field);}
-    const map=Object.fromEntries(entries.map(entry=>[entry.faceId,entry])),scored=scoreFaceAnswers(faces,map,settings.level),details=faces.flatMap(face=>fields.map(field=>({label:`${face.id+1}. portré – ${{name:'név',job:'szakterület',room:'rendelő'}[field]}`,expected:face[field],actual:map[face.id]?.[field]||'—',correct:map[face.id]?.[field]===face[field]})));
+    const map=Object.fromEntries(entries.map(entry=>[entry.faceId,entry])),scored=scoreFaceAnswers(faces,map,settings.level),details=faces.flatMap((face,faceIndex)=>fields.map(field=>({label:`${faceIndex+1}. portré – ${{name:'név',job:'szakterület',room:'rendelő'}[field]}`,expected:face[field],actual:map[face.id]?.[field]||'—',correct:map[face.id]?.[field]===face[field]})));
     return complete(scored,`${scored.correct} adat helyes ${scored.total}-ból.`,details);
     });
   }

@@ -27,11 +27,10 @@ const EXTRA_SCENE_LABELS=[
 ];
 const BASE_SCENE_X=[0.1,33.33,66.61,99.9];
 const BASE_SCENE_Y=[0.73,33.6,65.54,99.14];
-const EXTRA_SCENE_Y=[0,32.69,65.77,96.58];
 
 export const SCENE_ATLASES=Object.freeze({
   base:Object.freeze({src:'./assets/scenes.png',width:1254,height:1254,columns:4,rows:4,backgroundSize:'404% 424%',xPositions:Object.freeze(BASE_SCENE_X),yPositions:Object.freeze(BASE_SCENE_Y)}),
-  extra:Object.freeze({src:'./assets/scenes-extra-v2.png',width:887,height:1774,columns:2,rows:4,yBounds:Object.freeze([0,435,875,1285,1774]),backgroundSize:'200% 400%',xPositions:Object.freeze([0,100]),yPositions:Object.freeze(EXTRA_SCENE_Y)}),
+  extra:Object.freeze({src:'./assets/scenes-extra-v2.png',width:887,height:1774,columns:2,rows:4,yBounds:Object.freeze([0,435,875,1285,1774]),inset:4}),
 });
 
 const baseScenes=BASE_SCENE_LABELS.map((label,index)=>Object.freeze({
@@ -68,12 +67,16 @@ export function isWholePictureSequenceCorrect(expected,actual){
 }
 export function appendPictureAttempt(attempts,itemIds){return [...attempts,{itemIds:[...itemIds]}];}
 
+export function extraSceneCrop(item){
+  const atlas=SCENE_ATLASES.extra,cellWidth=atlas.width/atlas.columns,top=atlas.yBounds[item.atlasRow],height=atlas.yBounds[item.atlasRow+1]-top;
+  const size=Math.min(cellWidth,height)-2*atlas.inset;
+  return {x:item.atlasColumn*cellWidth+(cellWidth-size)/2,y:top+(height-size)/2,size};
+}
 function sceneStyle(item){
-  if(item.atlas==='extra')return {
-    backgroundImage:`url('${SCENE_ATLASES.extra.src}')`,
-    backgroundSize:SCENE_ATLASES.extra.backgroundSize,
-    backgroundPosition:`${SCENE_ATLASES.extra.xPositions[item.atlasColumn]}% ${SCENE_ATLASES.extra.yPositions[item.atlasRow]}%`,
-  };
+  if(item.atlas==='extra'){
+    const atlas=SCENE_ATLASES.extra,crop=extraSceneCrop(item);
+    return {backgroundImage:`url('${atlas.src}')`,backgroundSize:`${atlas.width/crop.size*100}% ${atlas.height/crop.size*100}%`,backgroundPosition:`${crop.x/(atlas.width-crop.size)*100}% ${crop.y/(atlas.height-crop.size)*100}%`};
+  }
   return {
     backgroundImage:`url('${SCENE_ATLASES.base.src}')`,
     backgroundSize:SCENE_ATLASES.base.backgroundSize,

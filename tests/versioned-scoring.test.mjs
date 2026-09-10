@@ -90,10 +90,19 @@ test('upgrade freezes historical stars, assignments, pending rounds and old brow
   const teacherDetail=await req(`/api/teacher/results/${submitted.json.result.id}`,'GET',undefined,teacherAuth);
   assert.deepEqual(teacherDetail.json.result.answer,raw);assert.deepEqual(teacherDetail.json.result.details,expected.details);
   assert.equal(teacherDetail.json.result.stars,expected.stars);
+  assert.equal(teacherDetail.json.result.studentDisplayName,'Teszt tanuló');
+  assert.equal(teacherDetail.json.result.assignmentTitle,'Mind a húsz aktív változat');
  }
  const freshLogin=await req('/api/auth/login','POST',{username:'version_student',password:'version-student-pass'});
  const freshAuth={cookie:freshLogin.cookie,csrf:freshLogin.json.csrfToken};
  const laterProgress=await req('/api/progress','GET',undefined,freshAuth);
  assert.equal(laterProgress.json.rounds,22,'all twenty v2 variants survive re-login beside historical results');
  const listed=await req('/api/results','GET',undefined,freshAuth);assert.equal(listed.json.results.filter(x=>x.rulesVersion===2).length,20);
+ // During Railway handover the retiring v1 binary can finish a save after 002.
+ // Its INSERT does not know the newly introduced version/star columns.
+ const rollingAttempt=randomUUID(),rollingResult=randomUUID();
+ await pool.query("INSERT INTO attempts(id,student_id,game_id,settings,seed,expires_at,submitted_at) VALUES($1,$2,'code',$3,18,now()+interval '1 hour',now())",[rollingAttempt,student,JSON.stringify(settings)]);
+ await pool.query("INSERT INTO results(id,attempt_id,student_id,game_id,settings,answer,answer_hash,correct,total,percent,summary,details,duration) VALUES($1,$2,$3,'code',$4,'{}','old-rolling',6,9,67,'Régi folyamat utolsó mentése','[]',2)",[rollingResult,rollingAttempt,student,JSON.stringify(settings)]);
+ assert.deepEqual((await pool.query('SELECT rules_version,stars,star_basis FROM results WHERE id=$1',[rollingResult])).rows[0],{rules_version:1,stars:2,star_basis:'legacy-v1'});
+ const rollingProgress=await req('/api/progress','GET',undefined,freshAuth);assert.equal(rollingProgress.json.stars,laterProgress.json.stars+2);
 });

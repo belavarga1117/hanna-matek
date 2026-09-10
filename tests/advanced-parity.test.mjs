@@ -5,6 +5,7 @@ import {
   CODE_SYMBOL_SETS,
   SCENE_ATLASES,
   SCENES,
+  extraSceneCrop,
   appendCodeAttempt,
   appendPictureAttempt,
   codeMaxAttempts,
@@ -50,10 +51,15 @@ test('az extra atlasz ellenőrizhető méret- és sorhatár-metaadatot ad',()=>{
     columns:2,
     rows:4,
     yBounds:[0,435,875,1285,1774],
-    backgroundSize:'200% 400%',
-    xPositions:[0,100],
-    yPositions:[0,32.69,65.77,96.58],
+    inset:4,
   });
+  for(const scene of SCENES.filter(x=>x.atlas==='extra')){
+    const {x,y,size}=extraSceneCrop(scene),atlas=SCENE_ATLASES.extra;
+    assert.ok(x>=scene.atlasColumn*atlas.width/2+atlas.inset);
+    assert.ok(x+size<=(scene.atlasColumn+1)*atlas.width/2-atlas.inset);
+    assert.ok(y>=atlas.yBounds[scene.atlasRow]+atlas.inset);
+    assert.ok(y+size<=atlas.yBounds[scene.atlasRow+1]-atlas.inset,'crop must not show the neighboring atlas row');
+  }
 });
 
 test('Storyboard L1 D1 négyet mintáz a hatból, D2 mind a hatot adja',()=>{

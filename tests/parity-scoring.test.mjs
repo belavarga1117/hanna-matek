@@ -15,6 +15,8 @@ test('Price Question uses all recorded star endpoints, including different stars
 test('game-specific recorded partial endpoints cannot share a percentage formula',()=>{
  for(const [gameId,settings,correct,total,stars] of [['code',{level:3},2,3,1],['picture',{level:2},2,3,1],['stations',{level:1},2,3,2],['shopping',{level:2,difficulty:'hard'},7,9,3]])assert.equal(awardStars(gameId,settings,{correct,total}).stars,stars);
  assert.equal(awardStars('stations',{level:2},{correct:4,total:5}).stars,null);
+ for(const level of [1,2,3])for(const symbolSet of ['objects','abstract'])assert.equal(awardStars('code',{level,symbolSet},{correct:2,total:3}).stars,1,`ATM L${level} ${symbolSet}: separate reference limit-result fixture`);
+ assert.equal(awardStars('picture',{level:1,difficulty:'hard'},{correct:3,total:3}).stars,3,'picture-l1-hard-perfect-saved');
  assert.equal(awardStars('prices',{level:2},{correct:5,total:6},1).stars,2,'historical v1 result retains v1 stars');
 });
 test('new controls normalize the actual game dimensions while legacy settings remain intact',()=>{

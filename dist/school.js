@@ -1,5 +1,6 @@
 import {ApiError, createApiClient} from './api-client.js';
 import {COMMON_GAME_SETTINGS, GAME_RULES, normalizeGameSettings} from './game-engine.js';
+import {resultDetailLabel} from './result-labels.js';
 
 const SCHOOL_PATHS = new Set([
   '/fiok', '/tanar', '/tanar/tanulok', '/tanar/csoportok',
@@ -638,7 +639,7 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
     if (usesDifficulty(game.id, level)) {
       const options = difficultyOptions(game.id);
       const selectedDifficulty = options.some(option => option.value === draft.difficulty) ? draft.difficulty : options[0].value;
-      fields.push(field(game.id === 'prices' ? 'Nehézség' : 'Képi nehézség', h('select', {name: 'difficulty'}, options.map(({value, label}) => h('option', {value, selected: value === selectedDifficulty}, label)))));
+      fields.push(field('Nehézség', h('select', {name: 'difficulty'}, options.map(({value, label}) => h('option', {value, selected: value === selectedDifficulty}, label)))));
     }
     if (Array.isArray(rule.themes) && level === 1) {
       const labels = {stations: 'Megállók', streets: 'Utcák'};
@@ -725,14 +726,26 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
 
   function drawResultDetail(result) {
     const details = Array.isArray(result.details) ? result.details : [];
+    const backQuery=new URLSearchParams();
+    if(result.studentId)backQuery.set('studentId',result.studentId);
+    if(result.assignmentId)backQuery.set('assignmentId',result.assignmentId);
+    const stars=Number.isInteger(result.stars)?`${result.stars} csillag · ${'★'.repeat(result.stars)}${'☆'.repeat(3-result.stars)}`:'Ehhez az eredményhez még nincs meghatározott csillagértékelés.';
     shell(h('div', {},
-      h('a', {className: 'back-link', href: '#/tanar/eredmenyek'}, '← Eredmények'),
+      h('a', {className: 'back-link', href: `#/tanar/eredmenyek${backQuery.size?`?${backQuery}`:''}`}, '← Eredmények'),
       h('section', {className: 'school-hero compact-school-hero'}, h('span', {className: 'eyebrow'}, formatDate(result.at)), h('h1', {}, `${gameName(result.gameId)} · ${result.percent}%`), h('p', {}, result.summary || `${result.correct} / ${result.total} helyes válasz`)),
+      h('section',{className:'school-card result-context'},h('h2',{},'A kör adatai'),h('dl',{className:'result-metadata'},
+        h('dt',{},'Tanuló'),h('dd',{},result.studentDisplayName||'Tanuló'),
+        h('dt',{},'Játékváltozat'),h('dd',{},`${result.settings?.level||1}. szint – ${levelName(result.gameId,result.settings?.level)}`),
+        h('dt',{},'Pontszám'),h('dd',{},`${result.correct} / ${result.total}`),
+        h('dt',{},'Csillag'),h('dd',{},stars),
+        h('dt',{},'Megjegyzési idő'),h('dd',{},`${result.settings?.seconds||10} mp`),
+        h('dt',{},'Feladatsor'),h('dd',{},result.assignmentId?h('a',{className:'text-link',href:`#/tanar/feladatsorok?id=${encodeURIComponent(result.assignmentId)}`},result.assignmentTitle||'A kiosztott feladatsor megnyitása'):'Szabad gyakorlás'),
+      ),result.rulesVersion===1?h('p',{className:'muted'},'Korábbi szabályokkal mentett kör.'):null),
       h('section', {className: 'school-card answer-review'},
         h('h2', {}, 'Válaszonkénti áttekintés'),
         details.length ? h('div', {className: 'answer-review-list'}, details.map((detail, index) => h('article', {className: `review-answer ${detail.correct ? 'correct' : 'incorrect'}`},
           h('span', {className: 'review-mark', 'aria-label': detail.correct ? 'Helyes' : 'Hibás'}, detail.correct ? '✓' : '×'),
-          h('div', {}, h('strong', {}, detail.label || `${index + 1}. válasz`), h('p', {}, `Válasz: ${displayValue(detail.actual)}`), detail.correct ? null : h('p', {}, `Helyes megoldás: ${displayValue(detail.expected)}`)),
+          h('div', {}, h('strong', {}, resultDetailLabel(result,detail,index)), h('p', {}, `Válasz: ${displayValue(detail.actual)}`), detail.correct ? null : h('p', {}, `Helyes megoldás: ${displayValue(detail.expected)}`)),
         ))) : h('p', {className: 'muted'}, 'Ehhez a körhöz nincs válaszonkénti részlet.'),
 
       ),
