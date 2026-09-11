@@ -32,6 +32,8 @@ test('decoder rejects truncated, wrong-version and wrong-resolution cortical dat
 
 test('each task has a cited anatomical selection and deep structures are not relabeled as cortical parcels',()=>{
   assert.equal(Object.keys(BRAIN_TASKS).length,7);
+  assert.equal(atlas.labels[42],'Medial_wall');
+  assert.deepEqual(BRAIN_REGIONS.cingulate.parcels.map(id=>atlas.labels[id]),['G_and_S_cingul-Ant']);
   for(const task of Object.values(BRAIN_TASKS)){
     assert.ok(task.sources.length);
     for(const [region,side] of task.regions){assert.ok(BRAIN_REGIONS[region]);assert.ok(['left','right','both'].includes(side));}

@@ -24,7 +24,7 @@ function css(){
   const link=document.createElement('link');link.rel='stylesheet';link.href=new URL('./brain-explorer.css',import.meta.url).href;link.dataset.brainExplorer='true';document.head.append(link);
 }
 
-export function createBrainExplorer({h,initialTask='spatial-span'}){
+export function createBrainExplorer({h,initialTask='spatial-span',onTaskChange}){
   css();
   let taskId=initialTask,disposed=false,viewer=null,loading=null,atlas=null,picked=null,currentView='left',hemisphere='both';
   const reduced=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
@@ -33,7 +33,7 @@ export function createBrainExplorer({h,initialTask='spatial-span'}){
   const regionList=h('div',{className:'bx-regions'}),detail=h('p',{className:'bx-method-note'});
   const sourceList=h('div',{className:'bx-sources'});
   const taskSelect=h('select',{'aria-label':'Feladat az agymodellen'},Object.entries(BRAIN_TASKS).map(([id,task])=>h('option',{value:id},task.title)));
-  taskSelect.addEventListener('change',()=>setTask(taskSelect.value));
+  taskSelect.addEventListener('change',()=>{setTask(taskSelect.value);onTaskChange?.(taskSelect.value);});
   const status=h('div',{className:'bx-load',role:'status'},h('span',{className:'bx-load-ring'}),h('strong',{},'Anatómiai felszín betöltése'),h('span',{},'Két félteke · valódi barázdák · atlasz szerinti területek'));
   const canvasHost=h('div',{className:'bx-canvas-host'}),tooltip=h('div',{className:'bx-tooltip',hidden:true});
   const orientation=h('span',{className:'bx-orientation'},'Bal oldal · mindkét félteke');

@@ -97,3 +97,18 @@ test('taxonomy mounts the trusted N-back link, source limitation and educational
   assert.match(brain,/prefers-reduced-motion: reduce/);
   assert.match(brain,/renderer\.dispose\(\)/);
 });
+
+
+test('the brain selector and task cards agree in both directions',async()=>{
+  const hub=renderCognitiveHub({h});await hub.ready;
+  const select=hub.element.querySelector('.bx-task-choice').querySelector('select');
+  const cards=hub.element.querySelector('.taxonomy-grid').children;
+  select.value='nback';select.dispatchEvent({type:'change'});
+  assert.equal(cards[6].querySelector('button').getAttribute('aria-pressed'),'true');
+  assert.equal(cards[0].querySelector('button').getAttribute('aria-pressed'),'false');
+  cards[2].querySelector('button').click();
+  assert.equal(select.value,'picture-place');
+  assert.equal(cards[2].querySelector('button').getAttribute('aria-pressed'),'true');
+  assert.equal(cards[6].querySelector('button').getAttribute('aria-pressed'),'false');
+  hub.dispose();
+});
