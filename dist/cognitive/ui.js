@@ -97,7 +97,7 @@ export function createActiveRecallBuilder({h,onChange=()=>{}}){
 }
 
 function eventId(){return globalThis.crypto?.randomUUID?.()||`10000000-0000-4000-8000-${Math.random().toString(16).slice(2).padEnd(12,'0').slice(0,12)}`;}
-function pointerMode(){if(globalThis.matchMedia?.('(pointer: coarse)').matches)return'touch';return'mouse';}
+function pointerMode(){if(globalThis.matchMedia?.('(pointer: coarse)').matches)return'coarse';if(globalThis.matchMedia?.('(pointer: fine)').matches)return'fine';return'none';}
 
 function createRecorder(plan){
   const startedAt=new Date().toISOString();let events=[],lastAt=0;

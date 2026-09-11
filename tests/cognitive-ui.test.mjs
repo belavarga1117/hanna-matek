@@ -71,7 +71,7 @@ test('active recall builder collects 1–20 private answer items and fixes the l
 
 test('mounted active recall records one raw response for a double click and permits an honest empty answer',async()=>{
   const mount=async({empty=false}={})=>{const root=new MiniNode('root'),done=[];const cleanup=cognitiveGames['active-recall'].mount({root,h,seed:7,settings:{mode:'assessment',inputModality:'keyboard',questions:[{questionId:'q1',question:'Mi a főváros?',learningExplanation:'Olvasd el: Budapest.'}],reviewRound:'initial',reviewDelayMinutes:60},phase(){},done:(_local,raw)=>done.push(raw)});await flush();button(root,'Elolvastam').click();await flush();const input=root.querySelector('textarea');input.value=empty?'':'Budapest';const submit=button(root,empty?'Nem tudom':'Válasz rögzítése');submit.click();submit.click();await flush();cleanup();return done[0];};
-  const answered=await mount();assert.equal(answered.events.filter(event=>event.type==='response').length,1);assert.equal(answered.events.find(event=>event.type==='response').value,'Budapest');
+  const answered=await mount();assert.equal(answered.events.filter(event=>event.type==='response').length,1);assert.equal(answered.events.find(event=>event.type==='response').value,'Budapest');assert.equal(answered.device.pointer,'coarse');assert.equal(answered.device.viewportBucket,'small');
   const empty=await mount({empty:true});assert.equal(empty.events.filter(event=>event.type==='response').length,1);assert.equal(empty.events.find(event=>event.type==='response').value,null);
 });
 
