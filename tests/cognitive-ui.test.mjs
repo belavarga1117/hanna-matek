@@ -31,7 +31,8 @@ async function flush(){await Promise.resolve();await Promise.resolve();await new
 class EventHub{constructor(){this.listeners=new Map();this.hidden=false;}addEventListener(type,listener){const list=this.listeners.get(type)||[];list.push(listener);this.listeners.set(type,list);}removeEventListener(type,listener){this.listeners.set(type,(this.listeners.get(type)||[]).filter(item=>item!==listener));}}
 const documentHub=new EventHub();
 globalThis.Node=MiniNode;
-globalThis.document=Object.assign(documentHub,{body:new MiniNode('body'),createElement:tag=>new MiniNode(tag),createElementNS:(_ns,tag)=>new MiniNode(tag),createTextNode:text=>new MiniNode('#text',String(text))});
+globalThis.document=Object.assign(documentHub,{body:new MiniNode('body'),head:new MiniNode('head'),querySelector:()=>null,createElement:tag=>new MiniNode(tag),createElementNS:(_ns,tag)=>new MiniNode(tag),createTextNode:text=>new MiniNode('#text',String(text))});
+globalThis.IntersectionObserver=class {observe(){} disconnect(){}};
 globalThis.innerWidth=390;
 globalThis.matchMedia=()=>({matches:true});
 Object.defineProperty(globalThis,'performance',{configurable:true,value:{now:()=>100}});
@@ -85,12 +86,14 @@ test('a kézi szünetet a háttérből visszatérés nem oldja fel',async()=>{
   cleanup();
 });
 
-test('taxonomy mounts the trusted N-back link, source limitation and exact educational brain disclaimer',async()=>{
+test('taxonomy mounts the trusted N-back link, source limitation and educational cortical atlas',async()=>{
   const hub=renderCognitiveHub({h});await hub.ready;
   assert.match(hub.element.textContent,/N-back Műhely/);
-  assert.match(hub.element.textContent,/Ez az ábra oktatási szemléltetés: nem a te személyes agyi aktivitásodat vagy agyi egészségedet méri\./);
+  assert.match(hub.element.textContent,/Nem aktivitáserősséget, és nem a te agyad mérését mutatják\./);
   assert.match(document.body.textContent,/nem személyes normák/i);
   hub.dispose();
-  const css=await readFile(new URL('../dist/cognitive/cognitive.css',import.meta.url),'utf8');
-  assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);assert.match(css,/\.brain-link,.brain-node\.active\{animation:none!important\}/);
+  assert.match(hub.element.textContent,/20 484 csúcsponttal/);
+  const brain=await readFile(new URL('../dist/cognitive/brain-explorer.js',import.meta.url),'utf8');
+  assert.match(brain,/prefers-reduced-motion: reduce/);
+  assert.match(brain,/renderer\.dispose\(\)/);
 });

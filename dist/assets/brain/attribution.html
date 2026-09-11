@@ -1,0 +1,79 @@
+<!doctype html><html lang="hu"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Az agymodell forrásai és licencei · Memória Műhely</title><style>body{font:16px/1.7 system-ui,sans-serif;max-width:960px;margin:4rem auto;padding:0 1.5rem;color:#203145;background:#f6f8fb}h1{line-height:1.2}h2{margin-top:3rem}a{color:#176c70}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.75 system-ui;background:#fff;border:1px solid #dee5ed;border-radius:12px;padding:1.5rem}code{overflow-wrap:anywhere;font-size:12px}li{margin-bottom:1.5rem}</style><main><a href="../../#/memoriaprobak">← Memóriapróbák</a><h1>Az interaktív agykéregmodell forrásai</h1><p>Ez a Memória Műhely által átalakított, böngészős oktatási változat. Nem az eredeti FreeSurfer szoftver, és nem egyéni agyi aktivitásmérés.</p><p>A FreeSurfer fsaverage5 két pial kérgi felszíne összesen 20 484 csúcspontot és 40 960 háromszöget tartalmaz. Az illesztett Destrieux annotációt a Nilearn hivatalos felületiatlasz-betöltője által használt NITRC-adatforrásból vettük át.</p><p>Az átalakítás a GIFTI és FreeSurfer annotáció böngészős bináris formátumba csomagolása. Az eredeti RAS koordináták, háromszögek, sulcalis mélységek és vertexenkénti atlaszcímkék megmaradnak. Megjelenítéskor merev koordináta-forgatás és eltolás, fények és saját oktatási színezés történik; nincs anatómiai újrarajzolás, simítás vagy kitalált tekervény.</p><p>A modell az agykérget mutatja; nincs rajta hippocampus, agytörzs vagy kisagy. A kiemelt teljes atlaszterület tágabb lehet egy tanulmányban vizsgált kisebb régiónál. A feladatoknál külön találhatók a kapcsolódó tudományos hivatkozások.</p><h2>Rögzített adatforrások</h2><ul><li><a href="https://raw.githubusercontent.com/nilearn/nilearn/e5faab66dc2fe72d2cb50a8aaf2f44813aba4a51/nilearn/datasets/data/fsaverage5/pial_left.gii.gz">pial_left.gii.gz</a><br><code>SHA-256 1e76fe43ac194c15fd272643f7ae7995621e2a496b3102b2d6175f0f8e6d7fc8</code></li><li><a href="https://raw.githubusercontent.com/nilearn/nilearn/e5faab66dc2fe72d2cb50a8aaf2f44813aba4a51/nilearn/datasets/data/fsaverage5/pial_right.gii.gz">pial_right.gii.gz</a><br><code>SHA-256 fdfae008bc10acf7cba82737ea5db9a7298948c41884a2d3330a785783a60a91</code></li><li><a href="https://raw.githubusercontent.com/nilearn/nilearn/e5faab66dc2fe72d2cb50a8aaf2f44813aba4a51/nilearn/datasets/data/fsaverage5/sulc_left.gii.gz">sulc_left.gii.gz</a><br><code>SHA-256 bd0f87e0cba153e9d5c5281edc7267f631b1967e5883d4027924766c8430eb62</code></li><li><a href="https://raw.githubusercontent.com/nilearn/nilearn/e5faab66dc2fe72d2cb50a8aaf2f44813aba4a51/nilearn/datasets/data/fsaverage5/sulc_right.gii.gz">sulc_right.gii.gz</a><br><code>SHA-256 97afe76225903205a16b88f88cd796945f2a27011328e98decaa9128ff063afb</code></li><li><a href="https://www.nitrc.org/frs/download.php/9343/lh.aparc.a2009s.annot">left.annot</a><br><code>SHA-256 c2401d6137949f33788283a4926cb61cb3b0bfe5bda1b368c22aa921ea06d38d</code></li><li><a href="https://www.nitrc.org/frs/download.php/9342/rh.aparc.a2009s.annot">right.annot</a><br><code>SHA-256 99c028f9f9d8dce617e9f29a5ebdc2f1b187d83650b68128fae53c3669588da7</code></li><li><a href="https://raw.githubusercontent.com/nilearn/nilearn/e5faab66dc2fe72d2cb50a8aaf2f44813aba4a51/LICENSE">nilearn-license.txt</a><br><code>SHA-256 7bdcb1442000ee469e39ebf695986d6ff59fd27eac118c5948e69f76df389ea5</code></li><li><a href="https://registry.npmjs.org/three/-/three-0.186.0.tgz">three.tgz</a><br><code>SHA-256 61eeff9d7616005c9a481c796f52287d81fbbbc0d55eaca5565322924252c1aa</code></li><li><a href="https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferSoftwareLicense">FreeSurfer Software License Agreement</a><br><code>SHA-256 0d6c8754c3d49802981a0e5188b8d7a7c9a06df7f2e0260a1df763a57c2d0dfb</code></li></ul><p>Attribúció: FreeSurfer / The General Hospital Corporation; Destrieux és munkatársai, 2010; Nilearn közreműködők; Three.js közreműködők. A Nilearn csomag BSD-licence nem helyettesíti az eredeti FreeSurfer adatlicencet. A kutatók és az intézmények nem támogatói vagy hitelesítői ennek a terméknek.</p><h2>FreeSurfer · adat és felszín</h2><pre>All or portions of this licensed product (such portions are the &quot;Software&quot;) have been obtained under license from The General Hospital Corporation and are subject to the following terms and conditions:
+
+== PART B. DOWNLOADING AGREEMENT ==
+=== License from MGH with Right to Sublicense (&quot;Software License&quot;) ===
+
+ 1. As used in this Software License, &quot;you&quot; means the individual downloading and/or using, reproducing, modifying, displaying and/or distributing the Software and the institution or entity which employs or is otherwise affiliated with such individual in connection therewith.  The General Hospital Corporation, Boston MA, USA (&quot;MGH&quot;) hereby grants you, with right to sublicense, with respect to MGH&#x27;s rights in the software, and data, if any, which is the subject of this Software License (collectively, the &quot;Software&quot;), a royalty-free, non-exclusive license to use, reproduce, make derivative works of, display and distribute the Software, provided that: (a) you accept and adhere to all of the terms and conditions of this Software License; (b) in connection with any copy of or sublicense of all or any portion of the Software, all of the terms and conditions in this Software License shall appear in and shall apply to such copy and such sublicense, including without limitation all source and executable forms and on any user documentation, prefaced with the following words: &quot;All or portions of this licensed product (such portions are the &quot;Software&quot;) have been obtained under license from The General Hospital Corporation and are subject to the following terms and conditions:&quot; (c) you preserve and maintain all applicable attributions, copyright notices and licenses included in or applicable to the Software; (d) modified versions of the Software must be clearly identified and marked as such, and must not be misrepresented as being the original Software; and (e) you consider making, but are under no obligation to make, the source code of any of your modifications to the Software freely available to others on an open source basis.
+
+ 2. The license granted in this Software License includes without limitation the right to (i) incorporate the Software into proprietary programs (subject to any restrictions applicable to such programs), (ii) add your own copyright statement to your modifications of the Software, and (iii) provide additional or different license terms and conditions in your sublicenses of modifications of the Software; provided that in each case your use, reproduction or distribution of such modifications otherwise complies with the conditions stated in this Software License.
+
+ 3. This Software License does not grant any rights with respect to third party software, except those rights that MGH has been authorized by a third party to grant to you, and accordingly you are solely responsible for (i) obtaining any permissions from third parties that you need to use, reproduce, make derivative works of, display and distribute the Software, and (ii) informing your sublicensees, including without limitation your end-users, of their obligations to secure any such required permissions.
+
+ 4. The Software has been designed for research purposes only and has not been reviewed or approved by the Food and Drug Administration or by any other agency. YOU ACKNOWLEDGE AND AGREE THAT CLINICAL APPLICATIONS ARE NEITHER RECOMMENDED NOR ADVISED. Any commercialization of the Software is at the sole risk of the party or parties engaged in such commercialization. You further agree to use, reproduce, make derivative works of, display and distribute the Software in compliance with all applicable governmental laws, regulations and orders, including without limitation those relating to export and import control.
+
+ 5. The Software is provided &quot;AS IS&quot; and neither MGH nor any contributor to the software (each a &quot;Contributor&quot;) shall have any obligation to provide maintenance, support, updates, enhancements or modifications thereto. MGH AND ALL CONTRIBUTORS SPECIFICALLY DISCLAIM ALL EXPRESS AND IMPLIED WARRANTIES OF ANY KIND INCLUDING, BUT NOT LIMITED TO, ANY WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL MGH OR ANY CONTRIBUTOR BE LIABLE TO ANY PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, EXEMPLARY OR CONSEQUENTIAL DAMAGES HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY ARISING IN ANY WAY RELATED TO THE SOFTWARE, EVEN IF MGH OR ANY CONTRIBUTOR HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. TO THE MAXIMUM EXTENT NOT PROHIBITED BY LAW OR REGULATION, YOU FURTHER ASSUME ALL LIABILITY FOR YOUR USE, REPRODUCTION, MAKING OF DERIVATIVE WORKS, DISPLAY, LICENSE OR DISTRIBUTION OF THE SOFTWARE AND AGREE TO INDEMNIFY AND HOLD HARMLESS MGH AND ALL CONTRIBUTORS FROM AND AGAINST ANY AND ALL CLAIMS, SUITS, ACTIONS, DEMANDS AND JUDGMENTS ARISING THEREFROM.
+
+ 6. None of the names, logos or trademarks of MGH or any of MGH&#x27;s affiliates or any of the Contributors, or any funding agency, may be used to endorse or promote products produced in whole or in part by operation of the Software or derived from or based on the Software without specific prior written permission from the applicable party.
+
+ 7. Any use, reproduction or distribution of the Software which is not in accordance with this Software License shall automatically revoke all rights granted to you under this Software License and render Paragraphs 1 and 2 of this Software License null and void.
+
+ 8. This Software License does not grant any rights in or to any intellectual property owned by MGH or any Contributor except those rights expressly granted hereunder.
+
+== PART C. MISCELLANEOUS ==
+
+This Agreement shall be governed by and construed in accordance with the laws of The Commonwealth of Massachusetts without regard to principles of conflicts of law. This Agreement shall supercede and replace any license terms that you may have agreed to previously with respect to FreeSurfer.</pre><h2>Nilearn · BSD-3-Clause</h2><pre>License for nilearn
+===================
+
+New BSD License
+
+Copyright (c) 2007 - 2022 The nilearn developers.
+All rights reserved.
+
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+  a. Redistributions of source code must retain the above copyright notice,
+     this list of conditions and the following disclaimer.
+  b. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in the
+     documentation and/or other materials provided with the distribution.
+  c. Neither the name of the nilearn developers nor the names of
+     its contributors may be used to endorse or promote products
+     derived from this software without specific prior written
+     permission.
+
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGE.
+</pre><h2>Three.js 0.186.0 · MIT</h2><pre>The MIT License
+
+Copyright © 2010-2026 three.js authors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the &quot;Software&quot;), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+</pre></main></html>

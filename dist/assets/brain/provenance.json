@@ -1,0 +1,60 @@
+{
+  "surfaceCommit": "e5faab66dc2fe72d2cb50a8aaf2f44813aba4a51",
+  "sources": [
+    {
+      "name": "pial_left.gii.gz",
+      "url": "https://raw.githubusercontent.com/nilearn/nilearn/e5faab66dc2fe72d2cb50a8aaf2f44813aba4a51/nilearn/datasets/data/fsaverage5/pial_left.gii.gz",
+      "bytes": 200168,
+      "sha256": "1e76fe43ac194c15fd272643f7ae7995621e2a496b3102b2d6175f0f8e6d7fc8"
+    },
+    {
+      "name": "pial_right.gii.gz",
+      "url": "https://raw.githubusercontent.com/nilearn/nilearn/e5faab66dc2fe72d2cb50a8aaf2f44813aba4a51/nilearn/datasets/data/fsaverage5/pial_right.gii.gz",
+      "bytes": 200202,
+      "sha256": "fdfae008bc10acf7cba82737ea5db9a7298948c41884a2d3330a785783a60a91"
+    },
+    {
+      "name": "sulc_left.gii.gz",
+      "url": "https://raw.githubusercontent.com/nilearn/nilearn/e5faab66dc2fe72d2cb50a8aaf2f44813aba4a51/nilearn/datasets/data/fsaverage5/sulc_left.gii.gz",
+      "bytes": 38996,
+      "sha256": "bd0f87e0cba153e9d5c5281edc7267f631b1967e5883d4027924766c8430eb62"
+    },
+    {
+      "name": "sulc_right.gii.gz",
+      "url": "https://raw.githubusercontent.com/nilearn/nilearn/e5faab66dc2fe72d2cb50a8aaf2f44813aba4a51/nilearn/datasets/data/fsaverage5/sulc_right.gii.gz",
+      "bytes": 39026,
+      "sha256": "97afe76225903205a16b88f88cd796945f2a27011328e98decaa9128ff063afb"
+    },
+    {
+      "name": "left.annot",
+      "url": "https://www.nitrc.org/frs/download.php/9343/lh.aparc.a2009s.annot",
+      "bytes": 85260,
+      "sha256": "c2401d6137949f33788283a4926cb61cb3b0bfe5bda1b368c22aa921ea06d38d"
+    },
+    {
+      "name": "right.annot",
+      "url": "https://www.nitrc.org/frs/download.php/9342/rh.aparc.a2009s.annot",
+      "bytes": 85260,
+      "sha256": "99c028f9f9d8dce617e9f29a5ebdc2f1b187d83650b68128fae53c3669588da7"
+    },
+    {
+      "name": "nilearn-license.txt",
+      "url": "https://raw.githubusercontent.com/nilearn/nilearn/e5faab66dc2fe72d2cb50a8aaf2f44813aba4a51/LICENSE",
+      "bytes": 1587,
+      "sha256": "7bdcb1442000ee469e39ebf695986d6ff59fd27eac118c5948e69f76df389ea5"
+    },
+    {
+      "name": "three.tgz",
+      "url": "https://registry.npmjs.org/three/-/three-0.186.0.tgz",
+      "bytes": 4648491,
+      "sha256": "61eeff9d7616005c9a481c796f52287d81fbbbc0d55eaca5565322924252c1aa"
+    },
+    {
+      "name": "FreeSurfer Software License Agreement",
+      "url": "https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferSoftwareLicense",
+      "sha256": "0d6c8754c3d49802981a0e5188b8d7a7c9a06df7f2e0260a1df763a57c2d0dfb"
+    }
+  ],
+  "conversion": "scripts/build-brain-atlas.py",
+  "license": "attribution.html"
+}
