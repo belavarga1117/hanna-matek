@@ -41,3 +41,12 @@ Helyi valódi Chrome UAT saját tesztfiókokkal: Bevásárlólista L1 tanulói t
 Kiadás: `c8b9267`, Railway deployment `2075c4a3-1509-45d2-8434-feea56195d55` SUCCESS. 94/94 nyilvános fájl és 111/111 futó forrásfájl egyezett a kiadás manifestjével; health OK. Az élő oldalon a Bevásárlólista L1 tanári előnézetében mind a kilenc termék és a kész gomb látszott 1365×768, 375×667 és 390×844 tényleges CSS-pixeles viewportban. A helyi és az élő origin böngészőnagyítása eltér; a beállított override helyett minden esetben a mért `innerWidth/innerHeight` az igazolás alapja. A hibásan 250×445-re és 910×512-re állított első éles méretpróba túlcsordult; ezek nem sikeres ellenőrzések. A dokumentált 375×667 vagy nagyobb próbák sikeresek. Az override a végén visszaállt. Az élő tanári előnézet tanulói eredményt nem ír; éles tanulói mentést ez a megjelenítési javítás nem tesztelt újra.
 
 Grok 4.6 medium statikus review: PASS, a végleges két runtime fájl diffjét vizsgálta, külön körben, tool/web/subagent nélkül. A valódi böngészős próbát a root végezte.
+
+
+## Tanári Memóriaprofil jogosultsági hiba
+
+A `#/memoriaprofil` minden bejelentkezett szerepkörnél a tanulói `/api/results` végpontot használta, ezért tanárként 403-as hibát mutatott. A tanári nézet most a meglévő, saját tanulókra korlátozott `/api/teacher/students` és a kiválasztott tanulóra szűrt `/api/teacher/results?studentId=…` végpontot használja. Kiválasztás előtt nincs eredménykérés; több tanuló eredménye soha nem kerül közös profilba. Tanulóként továbbra is a saját `/api/results` töltődik. A tanári előnézetek nem válnak mentett tanulói eredménnyé. A hub és a körvégi gomb tanárként Tanulói profilok feliratot kap.
+
+Külön kezeli az üres tanulólistát, a betöltési hibát és újrapróbát, a gyors tanulóváltást és az oldal elhagyását. Az utolsó kéréshez tartozó válasz jelenhet csak meg. Négy célzott regressziós teszt készült ezekre és a szerepkör szerinti API-kiválasztásra. 14/14 releváns UI/kognitív integráció/iskolai folyamat teszt, továbbá a 94 nyilvános fájl szintaxis/asset ellenőrzése PASS.
+
+Valódi helyi Chrome, saját tesztfiókok: tanári tanulóválasztás után a meglévő Hallott számsor gyakorlási adat és egy adatpont megjelent; kijelentkezés és tanulói belépés után ugyanaz a saját adat betöltődött, tanulóválasztó nélkül. Visszalépés a hubra a Tanulói profilok hivatkozást adta. 375×667 CSS-pixeles mobil-emulációban nincs vízszintes túlcsordulás. Grok4.6 medium statikus záró review PASS, tool/web/subagent nélkül. Bizonyíték: `.local/teacher-profile/`.

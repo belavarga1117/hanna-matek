@@ -11,3 +11,5 @@
 /* The cognitive stylesheet also owns its teacher-builder layout so the school shell stays unchanged. */
 .step-settings.cognitive-step-settings{display:block;grid-column:1/-1}.cognitive-step-settings>.cognitive-settings{grid-template-columns:repeat(2,minmax(0,1fr));align-items:end}.cognitive-step-settings .active-recall-builder{grid-column:1/-1}
 @media(max-width:480px){.cognitive-step-settings>.cognitive-settings{grid-template-columns:1fr}}
+
+.profile-student-picker{display:flex;flex-wrap:wrap;gap:1rem 2rem;align-items:center;padding:1.25rem;margin-bottom:1.5rem;border:1px solid #dbe7e8;border-radius:1.25rem;background:white}.profile-student-picker label{display:grid;gap:.5rem;flex:1 1 260px;min-width:0;font-weight:700}.profile-student-picker select{width:100%;min-width:0;min-height:48px}.profile-student-picker p{flex:1 1 260px;color:var(--muted);font-size:.9rem}.profile-student-title{margin:1.5rem 0}.profile-empty p{margin:.6rem 0 1rem}

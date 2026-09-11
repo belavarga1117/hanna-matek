@@ -68,3 +68,8 @@ A Grok mobil- és Safari/iOS-megjegyzései lefedettségi korlátok, nem bizonyí
 ## Bevásárlólista és Árcédulák megjegyzési rácsa – 2026-09-11
 
 Grok 4.6 medium, egyedi `review-20260911-shopping-r1`, statikus/tool/web/subagent nélkül: PASS. A CSS-szelektorok elsőbbségét, a háromoszlopos rácsot és a felidézési nézet érintetlenségét vizsgálta. Root Chrome UAT: L1 shopping9/9 saját helyi tanulói mentéssel, L2 shopping9/9 és L2 prices10/10 tanári előnézet. 19/19 érintett teszt PASS; élő DOM-mérés és kiadási fájlegyezés a UI-AUDIO-FIXES jelentésben.
+
+
+## Tanári Memóriaprofil – 2026-09-11
+
+Grok 4.6 medium, egyedi `review-20260911-teacher-profile-r1`, statikus/tool/web/subagent nélkül: PASS. Szerepkör szerinti végpontok, saját tanuló kiválasztása, adatok elkülönítése, késői válaszok eldobása, dispose és üres/hiba állapotok ellenőrizve. Root saját helyi tanári és tanulói Chrome-próbája külön igazolja a ténylegesen mentett profil betöltését.

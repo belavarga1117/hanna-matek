@@ -39,7 +39,7 @@ Object.defineProperty(globalThis,'performance',{configurable:true,value:{now:()=
 
 const {h}=await import('../dist/core.js');
 const {cognitiveGames,createActiveRecallBuilder,renderCognitiveHub}=await import('../dist/cognitive/ui.js');
-const {groupComparableResults,createCognitiveProfile}=await import('../dist/cognitive/profile.js');
+const {groupComparableResults,createCognitiveProfile,createSchoolCognitiveProfile}=await import('../dist/cognitive/profile.js');
 
 test('profile keeps practice and assessment separate and only joins identical comparability keys',()=>{
   const result=(id,mode,key,value,qualityFlags=[])=>({id,gameId:'spatial-span',at:`2026-09-${10+id}T08:00:00Z`,metrics:{familyId:'spatial-span',mode,comparabilityKey:key,comparable:qualityFlags.length===0,qualityFlags,primaryMetric:{name:'forwardSpanScore',value,unit:'items'}}});
@@ -140,4 +140,47 @@ test('digit audio restart cannot paint a cancelled round over the new playback p
     assert.equal(button(root,'Számsor lejátszása').disabled,false);
     assert.equal(button(root,'Válasz rögzítése'),undefined);
   }finally{cleanup?.();globalThis.Audio=previousAudio;}
+});
+
+
+const profileStudents=[{id:'student-a',username:'anna',displayName:'Anna',active:true},{id:'student-b',username:'bence',displayName:'Bence',active:true}];
+const profileResult=(studentId,value)=>({id:studentId,studentId,gameId:'recognition',at:'2026-09-11T08:00:00Z',metrics:{familyId:'recognition',mode:'assessment',comparabilityKey:'same',comparable:true,qualityFlags:[],primaryMetric:{name:'balancedAccuracy',value,unit:'percent'}}});
+
+test('teacher profile uses teacher APIs and only loads the selected student',async()=>{
+  const calls=[];
+  const view=createSchoolCognitiveProfile({h,school:{supported:true,user:{role:'teacher'},api:async path=>{calls.push(path);if(path==='/api/teacher/students')return {students:profileStudents};return {results:[profileResult('student-a',71),profileResult('student-b',92)]};}}});
+  await view.ready;
+  assert.deepEqual(calls,['/api/teacher/students']);
+  const select=view.element.querySelector('select');
+  select.value='student-a';select.dispatchEvent({type:'change'});await view.ready;
+  assert.deepEqual(calls,['/api/teacher/students','/api/teacher/results?studentId=student-a']);
+  assert.match(view.element.querySelector('.profile-content').textContent,/Anna memóriaprofilja/);
+  assert.match(view.element.textContent,/71 %/);assert.doesNotMatch(view.element.textContent,/92 %/);
+  select.value='not-in-owned-list';select.dispatchEvent({type:'change'});await view.ready;
+  assert.equal(calls.length,2);assert.doesNotMatch(view.element.textContent,/71 %/);
+  view.dispose();
+});
+
+test('student profile keeps using own results without a teacher request',async()=>{
+  const calls=[];const view=createSchoolCognitiveProfile({h,school:{supported:true,user:{role:'student'},api:async path=>{calls.push(path);return {results:[profileResult('student-a',71)]};}}});
+  await view.ready;assert.deepEqual(calls,['/api/results']);assert.equal(view.element.querySelector('select'),null);assert.match(view.element.textContent,/71 %/);view.dispose();
+});
+
+test('switching students and leaving profile discard stale result responses',async()=>{
+  const pending=new Map();const view=createCognitiveProfile({h,teacher:true,loadStudents:async()=>({students:profileStudents}),loadResults:id=>new Promise(resolve=>pending.set(id,resolve))});
+  await view.ready;const select=view.element.querySelector('select');
+  select.value='student-a';select.dispatchEvent({type:'change'});
+  select.value='student-b';select.dispatchEvent({type:'change'});
+  pending.get('student-b')({results:[profileResult('student-b',92)]});await view.ready;
+  pending.get('student-a')({results:[profileResult('student-a',71)]});await flush();
+  assert.match(view.element.querySelector('.profile-content').textContent,/Bence memóriaprofilja/);assert.doesNotMatch(view.element.textContent,/71 %/);
+  select.value='student-a';select.dispatchEvent({type:'change'});view.dispose();
+  pending.get('student-a')({results:[profileResult('student-a',71)]});await view.ready;
+  assert.doesNotMatch(view.element.textContent,/71 %/);
+});
+
+test('teacher without students gets an actionable empty state and can retry list errors',async()=>{
+  let attempts=0;const view=createCognitiveProfile({h,teacher:true,loadStudents:async()=>{if(++attempts===1)throw new Error('Próba hálózati hiba');return {students:[]};},loadResults:()=>assert.fail('No student result request without a student')});
+  await view.ready;assert.match(view.element.textContent,/Próba hálózati hiba/);button(view.element,'Újrapróbálom').click();await view.ready;
+  assert.match(view.element.textContent,/Még nincs tanulód/);assert.match(view.element.textContent,/Tanulók kezelése/);assert.equal(view.element.querySelector('select').disabled,true);view.dispose();
 });

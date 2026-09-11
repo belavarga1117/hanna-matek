@@ -51,12 +51,50 @@ function modeSection(h,title,intro,families){
   return h('section',{className:'profile-mode'},h('div',{className:'section-title'},h('div',{},h('span',{className:'eyebrow'},title.toLocaleUpperCase('hu')),h('h2',{},title)),h('p',{},intro)),cards.length?h('div',{className:'profile-grid'},cards):h('div',{className:'profile-empty'},h('span',{'aria-hidden':'true'},'○'),h('h3',{},`Még nincs ${title.toLocaleLowerCase('hu')} adat.`),h('p',{},'Egy befejezett feladat után itt a tényleges mutató és mértékegység jelenik meg.')));
 }
 
-export function createCognitiveProfile({h,loadResults}){
-  const status=h('div',{className:'profile-loading',role:'status'},'A saját eredmények betöltése…');
-  const element=h('div',{className:'cognitive-profile'},h('a',{className:'back-link',href:'#/memoriaprobak'},'← Memóriapróbák'),h('section',{className:'profile-hero'},h('span',{className:'eyebrow'},'SAJÁT ADATOK, AZONOS FELTÉTELEK'),h('h1',{},'Memória',h('em',{},'profil')),h('p',{},'Csak azonos összehasonlíthatósági kulcsú alkalmakat kötünk össze. A gyakorlás és a rögzített próba külön marad.')),status);
-  const ready=Promise.resolve().then(()=>loadResults()).then(payload=>{
-    const results=Array.isArray(payload)?payload:Array.isArray(payload?.results)?payload.results:[];const grouped=groupComparableResults(results);
-    status.replaceWith(h('div',{className:'profile-content'},modeSection(h,'Rögzített próbák','Azonos protokoll és beállítás mellett értelmezhető saját idősor.',grouped.assessment),modeSection(h,'Gyakorlás','A gyakorlókörök külön sorozatban segítenek visszanézni a feladatot.',grouped.practice),h('aside',{className:'profile-note'},h('strong',{},'Mit nem mond ez a profil?'),h('p',{},'Nem hasonlít más emberekhez, nem ad percentilist, IQ-t, „agyéletkort” vagy agyi egészségértéket.'))));
-  }).catch(error=>{status.replaceWith(h('div',{className:'profile-empty error-state',role:'alert'},h('h2',{},'Most nem tudtuk betölteni a profilt'),h('p',{},error?.message||'Próbáld újra később.')));});
-  return {element,ready};
+export function createSchoolCognitiveProfile({h,school}){
+  const teacher=school?.supported&&school.user?.role==='teacher';
+  return createCognitiveProfile({h,teacher,
+    loadStudents:()=>school.api('/api/teacher/students'),
+    loadResults:studentId=>school?.supported?school.api(teacher?`/api/teacher/results?studentId=${encodeURIComponent(studentId)}`:'/api/results'):Promise.resolve({results:[]}),
+  });
+}
+
+export function createCognitiveProfile({h,loadResults,teacher=false,loadStudents}){
+  let disposed=false,requestId=0,students=[],ready;
+  const content=h('div',{className:'profile-content','aria-live':'polite'});
+  const select=h('select',{'aria-label':'Tanuló',disabled:true,onChange:()=>{ready=showResults(select.value);}});
+  const chooser=h('section',{className:'profile-student-picker'},h('label',{},'Tanuló',select),h('p',{},'A tanári próbakörök nem mentődnek. Itt a kiválasztott tanuló saját eredményeit látod.'));
+  const element=h('div',{className:'cognitive-profile'},h('a',{className:'back-link',href:'#/memoriaprobak'},'← Memóriapróbák'),h('section',{className:'profile-hero'},h('span',{className:'eyebrow'},teacher?'TANÁRI NÉZET · TANULÓNKÉNTI EREDMÉNYEK':'SAJÁT ADATOK, AZONOS FELTÉTELEK'),h('h1',{},'Memória',h('em',{},'profil')),h('p',{},teacher?'Válassz tanulót a memóriapróbák és az N-back eredményeinek áttekintéséhez. Azonos feladat és beállítás mellett mutatjuk a változást.':'Azonos feladat és beállítás mellett mutatjuk a saját eredményeid változását. A gyakorlás és a rögzített próba külön marad.')),teacher?chooser:null,content);
+  function loading(text){content.replaceChildren(h('div',{className:'profile-loading',role:'status'},text));}
+  function empty(title,text,link){content.replaceChildren(h('div',{className:'profile-empty'},h('h2',{},title),h('p',{},text),link));}
+  function failed(error,retry){content.replaceChildren(h('div',{className:'profile-empty error-state',role:'alert'},h('h2',{},'Most nem tudtuk betölteni a profilt'),h('p',{},error?.message||'Próbáld újra később.'),h('button',{className:'secondary-button',onClick:()=>{ready=retry();}},'Újrapróbálom')));}
+  async function showResults(studentId){
+    if(disposed)return;
+    const ticket=++requestId,student=teacher?students.find(item=>item.id===studentId):null;
+    if(teacher&&!student){empty('Válassz tanulót','A kiválasztott tanuló eredményei külön profilban jelennek meg.');return;}
+    loading(teacher?`${student.displayName} eredményeinek betöltése…`:'A saját eredmények betöltése…');
+    try{
+      const payload=await loadResults(studentId);
+      if(disposed||ticket!==requestId)return;
+      const results=Array.isArray(payload)?payload:Array.isArray(payload?.results)?payload.results:[];
+      const grouped=groupComparableResults(teacher?results.filter(result=>result.studentId===studentId):results);
+      content.replaceChildren(...(teacher?[h('h2',{className:'profile-student-title'},`${student.displayName} memóriaprofilja`)]:[]),modeSection(h,'Rögzített próbák','Azonos protokoll és beállítás mellett értelmezhető saját idősor.',grouped.assessment),modeSection(h,'Gyakorlás','A gyakorlókörök külön sorozatban segítenek visszanézni a feladatot.',grouped.practice),h('aside',{className:'profile-note'},h('strong',{},'Mit nem mond ez a profil?'),h('p',{},'Nem hasonlít más emberekhez, nem ad percentilist, IQ-t, „agyéletkort” vagy agyi egészségértéket.')));
+    }catch(error){if(!disposed&&ticket===requestId)failed(error,()=>showResults(studentId));}
+  }
+  async function initialize(){
+    if(disposed)return;
+    if(!teacher)return showResults();
+    const ticket=++requestId;select.disabled=true;loading('A tanulók betöltése…');
+    try{
+      const payload=await loadStudents();
+      if(disposed||ticket!==requestId)return;
+      students=Array.isArray(payload?.students)?payload.students:[];
+      select.replaceChildren(h('option',{value:''},'Válassz tanulót…'),...students.map(student=>h('option',{value:student.id},`${student.displayName} (${student.username})${student.active===false?' · inaktív':''}`)));
+      select.value='';select.disabled=students.length===0;
+      if(!students.length){empty('Még nincs tanulód','Tanuló felvétele után itt követheted a mentett memóriapróbáit.',h('a',{className:'secondary-button',href:'#/tanar/tanulok'},'Tanulók kezelése'));return;}
+      return showResults('');
+    }catch(error){if(!disposed&&ticket===requestId)failed(error,initialize);}
+  }
+  ready=Promise.resolve().then(initialize);
+  return {element,get ready(){return ready;},dispose(){disposed=true;requestId++;}};
 }
