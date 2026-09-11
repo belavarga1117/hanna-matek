@@ -16,3 +16,5 @@ A felhasználó által később észlelt UI-hiba: az új lépés első frame-je 
 A hang perceptuális minőségének hiányát a kódtesztek és a statikus reviewer nem tárta fel; a felhasználói próba hozta felszínre. Mind a 12 beszédet a felhasználó ElevenLabs-felvételeire cseréltük; a teljes sor ASR-je egyezett. Nem állítjuk, hogy az ASR önmagában helyettesít emberi halláspróbát.
 
 A privát, egyedi nevű promptok/verdict-ek és futási bizonyítékok a `.local/nback-execution` alatt maradnak, nem kerülnek nyilvános repóba.
+
+5. forduló – Grok 4.6 medium, 42k karakter, df65aa0: **PASS** a kezdő frame és a fix sormagasság javítására. A 0 px mérések öt módban tényleges böngészős adatok. Nagyon keskeny nézetben hosszú visszajelzés több sorba törhet; a játéktér feletti rövid állapotszöveg a vizsgált 375 px nézetben egy sorban elfér.
