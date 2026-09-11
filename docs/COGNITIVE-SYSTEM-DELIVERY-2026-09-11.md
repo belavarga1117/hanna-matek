@@ -1,6 +1,6 @@
 # Memóriapróbák – megvalósítási és kiadási bizonyíték
 
-Készült: **2026. szeptember 11.** Alap: `095d3a454829027e8df3ccf49b2909861ce85978`. Az első teljes review-jelölt `55cf87a5017194df778fc623860aeedf5e241c44`, a minden findinget lezáró exact kódjelölt `791ed24f2214e5ed22057f79a27f6c468a11354a`. A közös protokoll- és adatszerződés: [COGNITIVE-SYSTEM-CONTRACT.md](COGNITIVE-SYSTEM-CONTRACT.md). A számszerű forráskutatás: [COGNITIVE-NORMS-RESEARCH-2026-09-11.md](COGNITIVE-NORMS-RESEARCH-2026-09-11.md).
+Készült: **2026. szeptember 11.** Alap: `095d3a454829027e8df3ccf49b2909861ce85978`. Az első teljes review-jelölt `55cf87a5017194df778fc623860aeedf5e241c44`, a minden findinget lezáró exact kódjelölt `791ed24f2214e5ed22057f79a27f6c468a11354a`, a kiadott dokumentált jelölt `d852e80702675e643c8077c2446f3c173acfe8a0`. A közös protokoll- és adatszerződés: [COGNITIVE-SYSTEM-CONTRACT.md](COGNITIVE-SYSTEM-CONTRACT.md). A számszerű forráskutatás: [COGNITIVE-NORMS-RESEARCH-2026-09-11.md](COGNITIVE-NORMS-RESEARCH-2026-09-11.md).
 
 ## Követelményenkénti állapot
 
@@ -24,7 +24,7 @@ Készült: **2026. szeptember 11.** Alap: `095d3a454829027e8df3ccf49b2909861ce85
 - Az ingerterv ugyanabból a `gameId + settings + uint32 seed` hármasból bájtszinten azonos. Ismeretlen beállítás, eseménytípus, próbán kívüli index, nem véges idő, túl sok esemény vagy ellentmondó ismételt válasz elutasított.
 - A kliens nem küld elfogadott pontszámot. A szerver a kanonikus motort és aktív felidézésnél a külön őrzött tanári válaszkulcsot használja. A tanulói attempt- és assignment-API nem adja vissza a kulcsot.
 - Üres válasz és duplikált kattintás nem termel pontot. Felismerésnél a „minden régi” kézi negatív kontroll 50%-ot és 0% újkép-pontosságot adott. A no-go kattintási negatív kontroll 42%-ot és 0% visszatartást adott.
-- A meglévő nullable `results.metrics` tárolást használjuk. A `005_cognitive_assessments.sql` csak az opcionális egész életkort, a privát assignment/attempt beállítást és a szerveres elérhetőségi időt adja hozzá.
+- A meglévő nullable `results.metrics` tárolást használjuk. A `005_cognitive_assessments.sql` az opcionális egész életkort, a privát assignment/attempt beállítást és a szerveres elérhetőségi időt adja hozzá; a `006_delay_checkpoint.sql` a szerveren ellenőrzött kép–hely checkpoint idejét és hashét őrzi.
 - Nincs személyes percentilis, közös „memóriaindex”, IQ, agyéletkor, hippocampus-százalék vagy diagnosztikus állítás.
 
 ## Kvantitatív kutatási eredmény
@@ -75,7 +75,25 @@ A CUA tabváltása nem állította a dokumentumot `hidden` állapotba, ezért a 
 - Javítás `791ed24`: a jelzős pontok egyedi sorozata; valódi monotón reakcióidő; teljes azonnali nyers választ, rögzített bemutatási időt, checkpoint-időt és -hash-t ellenőrző szerverkapu; újrakezdéskor új 60 másodperc; kézi szünet megőrzése; utolsó legacy eredmény szerinti folytatás. Célzott 30/30 és teljes 153/153 PASS.
 - Grok 4.6 medium fix-scoped exact-snapshot review (`791ed24`): **PASS**, mind az öt finding lezárva, új blokkoló nélkül.
 - Friss production Postgres dump: **PASS**. SHA-256 `ddbf746dcbca6c2b41af5bd57a72d6119a77a87e2d478162ef46646869714b24`, 34 285 bájt; eldobható adatbázisba visszaállt, az eredeti 4 felhasználó, 5 eredmény, 1 feladatsor, 7 attempt és 4 migráció olvasható volt; az ideiglenes adatbázis törölve.
-- Railway production deployment és élő saját-QA ellenőrzés: **KIADÁS ELŐTT**.
+- Railway production deployment: **SUCCESS**, azonosító `c9514bdf-4147-4429-9693-1630b860fb4f`, image digest `sha256:a3e36147d46930729e7674f1b9b0b9bbab8400adcc8f6d75e497ec936d5d0852`. A futó konténer 90/90 gitkövetett fájlja és a nyilvánosan kiszolgált 73/73 fájl bájtszinten egyezik a `d852e80` jelölttel; `/api/health` OK.
+
+## Élő production ellenőrzés
+
+A friss nyilvános oldalt a [production Memóriapróbák nézetben](https://memoria-web-production-a86b.up.railway.app/?release=d852e80#/memoriaprobak) újratöltöttük. A hét paradigma, a gyakorlás/rögzített próba kettéválasztása, az oktatási agyhálózati disclaimer, az aktív felidézés és a forrásfiók látható. A fiók 9 elsődleges rekordot mutat; a számszerű eCorsi, CPAL, gyermek N-back, MemTrax és PEBL adatok mellett közvetlen forrás és protokollkorlát áll.
+
+Két új, elkülönített saját QA-fiókkal az élő szerveren végigment:
+
+- rögzített térbeli próba 100%-os szerveres nyersválasz-pontozással, csillag nélkül és összehasonlíthatósági kulccsal;
+- tanári aktív felidézés → első 2/2 válasz → korai újranyitás szerveres tiltása → csak a saját QA-sor időigazítása → friss újrabelépés → későbbi 2/2 válasz → tanári 2/2 progress és nyers válaszrészlet;
+- azonos válasz ismételt beküldése ugyanazt az eredményt adta;
+- kép–hely próba: korai checkpoint tiltása, teljes azonnali válasz elfogadása, változatlan checkpoint idempotenciája, korai késleltetett beküldés tiltása, majd szerveres késleltetett pontozás;
+- a tanulói progress 4 kognitív, 0 legacy kört és 0 csillagot adott.
+
+A próba után mindkét saját fiók inaktív lett, négy saját munkamenet törlődött, a hitelesítő fájl megsemmisült. A négy eredeti felhasználói rekord hashlenyomata változatlan; a négy saját QA-eredmény auditbizonyítékként megmaradt. A futó adatbázis mind a hat migrációt alkalmazta.
+
+## Tényleges végrehajtási idő
+
+A controller végrehajtása 2026. szeptember 11-én **09:55–11:45 CEST**, összesen **1 óra 50 perc** volt az interfészszerződéstől a production saját-fiókos ellenőrzés és takarítás lezárásáig. A kutatási, motor- és felületi sáv párhuzamosan futott; ez az idő nem becslés, hanem a verziózott végrehajtási dokumentum és a záró élő bizonyíték időbélyege közötti idő.
 
 ## Megmaradó módszertani korlátok
 
