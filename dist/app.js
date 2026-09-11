@@ -136,7 +136,9 @@ async function startGame(game,rawSettings,assignment=null){
       if(disposed)return;countdown?.cancel();timerWrap.hidden=false;ready.hidden=!allowSkip;pause.hidden=false;
       countdown=createCountdown(settings.seconds,{onTick:left=>{timerText.textContent=`${Math.ceil(left)} mp`;timerFill.style.width=`${Math.max(0,left/settings.seconds*100)}%`;onProgress?.(Math.min(1,Math.max(0,1-left/settings.seconds)));},onDone:()=>{if(disposed)return;countdown=null;timerWrap.hidden=true;ready.hidden=true;pause.hidden=true;overlay.hidden=true;root.inert=false;phaseTitle.focus({preventScroll:true});callback();}});
       if(document.hidden)setPaused(true);
-    },done(result,answer){if(disposed||token!==generation)return;const scored=scoreAttempt(game.id,settings,localSeed,answer,rulesVersion);const normalized=cognitive?{...scored,gameId:game.id}:normalizeResult({...scored,gameId:game.id});const entry={...normalized,gameId:game.id,at:new Date().toISOString(),settings,duration:Math.round((performance.now()-started)/1000)};dispose();active=null;
+    },done(result,answer){if(disposed||token!==generation)return;const completedAt=new Date().toISOString();
+      if(attempt&&game.id==='active-recall'){dispose();active=null;const pending={attemptId:attempt.id,gameId:game.id,settings,answer,userId,assignment,at:completedAt};storePending(pending);submitPending(pending);return;}
+      const scored=scoreAttempt(game.id,settings,localSeed,answer,rulesVersion);const normalized=cognitive?{...scored,gameId:game.id}:normalizeResult({...scored,gameId:game.id});const entry={...normalized,gameId:game.id,at:completedAt,settings,duration:Math.round((performance.now()-started)/1000)};dispose();active=null;
       if(attempt){const pending={attemptId:attempt.id,gameId:game.id,settings,answer,userId,assignment,at:entry.at};storePending(pending);submitPending(pending);return;}
       if(teacherPreview){renderResult(game,settings,entry,false);return;}
       history=[...history,entry].slice(-200);let saved=true;try{saveHistory(localStorage,history);}catch{saved=false;}renderResult(game,settings,entry,saved);}};
