@@ -57,7 +57,7 @@ A források elveihez saját böngészős tanító játékokat készítettünk; a
 
 ## Kiadási zárás
 
-- Játszható cím: [Hanna Módszer](https://memoria-web-production-a 86 b.up.railway.app/?release=a353d0b#/hanna-modszer).
+- Játszható cím: [Hanna Módszer](https://memoria-web-production-a86b.up.railway.app/?release=a353d0b#/hanna-modszer).
 - Kiadott forrás: `a353d0b9cbe458d9e2eb1eea647462895e5a9102`; Railway deployment: `c24fb090-2be2-418a-8598-a22847c01ece`, SUCCESS.
 - Friss mentés és külön adatbázisos visszaállítás: 2026-09-11 15:12:42 UTC, PASS. A meglévő adatokra nem futott visszaállítás.
 - Publikus fájlegyezés: **101/101**; futó konténer forrás/migráció/csomag egyezés: **120/120**; API health PASS. `.local/hanna-method/public-assets-proof.json`, `runtime-source-proof.json`.
@@ -65,7 +65,7 @@ A források elveihez saját böngészős tanító játékokat készítettünk; a
 - Éles eredményazonosítók: `f6f3362a-24ad-4f26-becb-d24f8485a014`, `cdedb476-c26e-4020-8e22-8e2802e95cf7`. Feladatsor: `67c203fb-8c0f-4b07-b7d8-0185210cb6e6`.
 - Az éles próba előtti **6 fiók és 9 eredmény tartalmi ujjlenyomata változatlan**. Csak külön saját QA-fiókok kaptak új adatot; a próba végén inaktiváltuk őket, eredményeiket megőriztük. A régebbi N-back QA-fiókok már inaktívak voltak; nem állítottuk vissza őket és nem módosítottuk jelszavukat.
 - Publikus böngészőben a teljes menü és 15 tevékenység betöltött, console error nincs; `uat-public-hub.png`. A teljes játékcsaládos UAT és célzott negatív tesztek a jelölt lokális, saját adatbázisos példányán futottak; az éles fájlegyezés és adatfolyam külön igazolt.
-- Végleges regresszió: **245/245 PASS**; forrás/assetellenőrzés PASS. Független Claude Opus 5 medium R 4, R 5, R 6: **PASS**, tényleges first-party modellroutinggal. A korábbi CHANGES_REQUIRED körök hibái javítva; részletek `MODEL-EVAL.md`.
+- Végleges regresszió: **245/245 PASS**; forrás/assetellenőrzés PASS. Független Claude Opus 5 medium R4, R5, R6: **PASS**, tényleges first-party modellroutinggal. A korábbi CHANGES_REQUIRED körök hibái javítva; részletek `MODEL-EVAL.md`.
 
 ### Fennmaradó korlátok
 
