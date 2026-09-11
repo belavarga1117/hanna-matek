@@ -2,8 +2,8 @@ import {normalizeSettings} from './core.js';
 import * as legacy from './legacy/v1/game-engine.js';
 import {awardStars} from './scoring.js';
 import {normalizeConfig as normalizeNbackConfig,generateSession as generateNbackSession,scoreSession as scoreNbackSession} from './nback/engine.js';
-import {isCognitiveGame,normalizeCognitiveSettings,scoreCognitiveAttempt,cognitiveComparabilityIdentity} from './cognitive/engine.js';
-export {cognitiveComparabilityIdentity};
+import {isCognitiveGame,normalizeCognitiveSettings,generateCognitiveAssessment,scoreCognitiveAttempt,cognitiveComparabilityIdentity} from './cognitive/engine.js';
+export {cognitiveComparabilityIdentity,generateCognitiveAssessment};
 export const CURRENT_RULES_VERSION = 2;
 export function normalizeSettingsForVersion(gameId, raw, version=2) {
   if(gameId==='nback'){

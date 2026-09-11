@@ -938,7 +938,11 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
             if (completed.rows[0].count >= step.rows[0].repetitions) throw conflict('Ezt a lépést már teljesítetted.', 'REPETITIONS_COMPLETE');
           }
           const duration = Math.max(0, Math.round(Date.now() - new Date(attempt.created_at).valueOf()));
-          if (attempt.game_id === 'picture-place' && duration < attempt.settings.delayedMinimumMs) throw conflict('A késleltetett felidézés ideje még nem telt le.', 'DELAY_NOT_COMPLETE');
+          if (attempt.game_id === 'picture-place') {
+            const plan = typeof engine.generateCognitiveAssessment === 'function' ? engine.generateCognitiveAssessment(attempt.game_id, attempt.settings, Number(attempt.seed)) : null;
+            const delayedStart = plan ? Math.min(...plan.trials.filter((trial) => trial.phase === 'delayed').map((trial) => trial.onsetMs)) : attempt.settings.delayedMinimumMs;
+            if (!Number.isFinite(delayedStart) || duration < delayedStart) throw conflict('A késleltetett felidézés ideje még nem telt le.', 'DELAY_NOT_COMPLETE');
+          }
           let score;
           try { score = engine.scoreAttempt(attempt.game_id, attempt.settings, Number(attempt.seed), body.answer, attempt.rules_version, {
             privateSettings: attempt.private_settings ?? null,
