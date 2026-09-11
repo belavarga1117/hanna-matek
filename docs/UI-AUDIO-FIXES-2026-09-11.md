@@ -22,3 +22,11 @@ A tényleges böngészős újrakezdési próba korábbi hibát talált: a megsza
 Bizonyítékok: `.local/ui-contrast-nav/`. Natív iOS/Android eszközpróba és a hang érthetőségének emberi értékelése nincs ezzel az automatizálással igazolva. A források számjegyhez rendelése a tulajdonos megerősítését követi.
 
 Kiadás: a `4e8d0e2` runtime a `04b5a98a-e564-4988-8bac-1ada4beb77dc` Railway deploymentben SUCCESS állapotú. 94/94 nyilvános fájl és 111/111 futó forrásfájl SHA-256 értéke egyezik; health OK. A kiadás előtt készült PostgreSQL-mentés külön ideiglenes adatbázisba sikeresen visszaállt. A helyi tanulói mentési próba nem helyettesít éles, autentikált tanári–tanulói teljes folyamatot.
+
+## Utólag jelzett kódkártya-átfedés
+
+A Titkos kód szerkesztőjének 207 px széles kártyáiba korábban egyetlen vízszintes sorba próbált beférni a szám, az ikon és a 180 px széles választó. A szélső elemek kilógtak a szomszédos kártyákra. A `0a95389` elrendezés felül a számot és a jelet, alul a teljes szélességű választót mutatja; a rács a rendelkezésre álló szélességhez alkalmazkodik.
+
+Valódi Chrome-próba: mindkét jelhalmaz, a „fényképezőgép” és „borostyán háromszög” hosszú címke, párosításcsere tíz egyedi jellel. Desktopon és 390 CSS-pixeles mobil-emulációban mind a 30 gyermekelem a tíz kártyán belül maradt; a dokumentum nem szélesebb a viewportnál. A megjegyzési szakasz és a visszafejtési képernyőre lépés működik. Az érintett 11 teszt és a syntax/asset ellenőrzés PASS; Grok 4.6 medium statikus review PASS. Játékszabály, időzítés és pontozás nem változott. Bizonyítékok: `.local/code-layout/`.
+
+A kódkártya-javítás kiadása: `febc6c4b-e83f-437f-854c-98e9e266e34b`, Railway SUCCESS, runtime `0a95389`. 94/94 publikus fájl és 111/111 futó forrásfájl pontos lenyomategyezés, health OK. Az éles vendégnavigáció ellenőrizve; az éles játékhoz belépés kell. Az interaktív játékteszt saját helyi QA-fiókon futott, azonos kiadott fájlokkal. A friss éles Memóriapróbák oldal megnyitva.

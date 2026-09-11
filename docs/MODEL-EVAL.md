@@ -57,3 +57,9 @@ A Grok mobil- és Safari/iOS-megjegyzései lefedettségi korlátok, nem bizonyí
 - Root hibatalálat: a hangos kör újrakezdésekor a régi aszinkron ág felülírta az új lejátszóképernyőt. A `4e8d0e2` javítás megszakítja a hangot, eldobja az elavult kör folytatásait és szünet alatt sem enged további számjegyet lejátszani. A hiba javítását ugyanazzal a böngészős lépéssorral és külön késői callback/aktív hang/köztes csend/szünet tesztekkel ellenőrizte.
 - Grok 4.6 medium, egyedi `review-20260911-ui-digits-r2`, végleges `4e8d0e2`: PASS. A teljes végleges diffet, a hangmodult, a közös fejlécet és a köréletciklust vizsgálta; további blokkoló hibát nem jelzett.
 - 162/162 integrált teszt és a 94 nyilvános állomány szintaxis/asset ellenőrzése PASS. A hangbankok dekódolása és manifest-hash egyezése ellenőrizve. Emberi érthetőségi hallgatóteszt és fizikai mobileszköz vizsgálata nem lett modellellenőrzésként állítva.
+
+## Titkos kód kártyaátfedés – 2026-09-11
+
+- Root Chrome-próba: a 207 px széles kártyából a szám balra, a 180 px-es select jobbra kilógott. A globális flex elrendezésben a szám+jel+select együttes minimumszélessége nagyobb volt a kártyánál.
+- `0a95389`: csak a kártya elrendezése változott. Felül szám és jel, alul teljes szélességű select; auto-fit rács és zsugorítható mezők. Emoji és ábrás készlet, hosszú címkék, párosításcsere, tíz egyedi jel, megjegyzési szakasz és továbblépés valódi böngészőben ellenőrizve. Desktopon és 390 CSS-pixeles Chrome-emulációban mind a 30 gyermekelem a saját tíz kártyáján belül marad, nincs vízszintes túlcsordulás.
+- Grok 4.6 medium, statikus/tool/web/subagent nélkül, egyedi `review-20260911-code-layout-r1`: PASS, blokkoló CSS-hiba nélkül. 11/11 érintett advanced-mount/parity teszt és syntax/asset check PASS. CSS-t tükröző új egységteszt nem készült; az elrendezést tényleges DOM-geometriával és képernyőképpel ellenőriztük.
