@@ -238,7 +238,7 @@ function resourceEditor(h, resource, handlers) {
     finally { saving = false; if (active) save.disabled = false; }
   } }, original ? 'Módosítások mentése' : 'Eszköz létrehozása');
   renderBody();
-  replaceContent(element, 
+  replaceContent(element,
     h('header', {}, h('button', { type: 'button', className: 'hanna-link-button', onClick: () => { active = false; handlers.close(); } }, '← Eszközlista'), h('span', { className: 'hanna-kicker' }, original ? 'SZERKESZTÉS' : 'ÚJ SAJÁT ESZKÖZ'), h('h2', {}, original?.title || 'Új eszköz')),
     h('div', { className: 'hanna-resource-meta' }, field(h, 'Típus', kind), field(h, 'Név', title)), body, status,
     h('div', { className: 'hanna-editor-actions' }, save, original ? h('button', { type: 'button', className: 'hanna-danger-button', onClick: () => handlers.remove(original) }, 'Eszköz archiválása') : null),
@@ -252,7 +252,7 @@ function routeReadiness(h, resource, handlers) {
   const answers = locations.map((_, index) => ({ index, value: '' }));
   let revealed = false;
   function render() {
-    replaceContent(element, 
+    replaceContent(element,
       h('header', {}, h('button', { type: 'button', className: 'hanna-link-button', onClick: handlers.close }, '← Vissza'), h('span', { className: 'hanna-kicker' }, 'ÚTVONALTESZT'), h('h2', {}, resource.title),
         h('p', {}, 'A sorrend most rejtve marad. Idézd fel a helyeket index szerint; 90%-tól lesz kész a palota.')),
       revealed ? h('ol', { className: 'hanna-route-study' }, ...locations.map((location, index) => h('li', {}, h('span', {}, String(index + 1)), h('div', {}, h('strong', {}, location.name), location.description ? h('p', {}, location.description) : null)))) : null,
@@ -320,7 +320,7 @@ export function createHannaWorkspace({ h, school, onStart = () => {} } = {}) {
     if (disposed) return;
     viewDispose?.(); viewDispose = null;
     generation++; mode = 'list'; selected = null;
-    replaceContent(element, 
+    replaceContent(element,
       h('div', { className: 'hanna-section-heading' }, h('div', {}, h('span', { className: 'hanna-kicker' }, 'SAJÁT ERŐFORRÁSOK'), h('h2', {}, 'A saját módszertárad'), h('p', {}, 'Szerkeszd bátran: a korábban tanult anyag és eredményed megmarad.')),
         h('button', { type: 'button', className: 'primary-button', onClick: () => openEditor(null) }, '+ Új eszköz')),
       resources.length ? h('div', { className: 'hanna-resource-grid' }, ...resources.map((resource) => h('article', { className: 'hanna-resource-card' },
@@ -393,7 +393,7 @@ function discoveryView(h, school, onStart) {
     const activity = ACTIVITY_BY_ID.get(selected);
     editor?.dispose?.();
     editor = selected === 'review' ? null : createHannaSettings({ h, school, compact: true, value: { activity: selected }, onChange() {} });
-    replaceContent(element, 
+    replaceContent(element,
       h('div', { className: 'hanna-discovery-hero' }, h('div', {}, h('span', { className: 'hanna-kicker' }, '15 KÜLÖNBÖZŐ TANULÁSI HELYZET'), h('h1', {}, 'Találd meg a technikát, ami ma segít'),
         h('p', {}, 'Mindegyik modul saját tanítással indul. Egy rövid kör nem képességvizsga: azt mutatja meg, hogyan működött most a választott stratégia.')),
         h('div', { className: 'hanna-daily-orbit', 'aria-hidden': 'true' }, h('span', {}, '10'), h('small', {}, '–15 perc'), h('i', {}))),
@@ -544,7 +544,7 @@ export function createHannaHub({ h, school, onStart = () => {}, initialView='dis
   }
   function render() {
     if (disposed) return;
-    replaceContent(element, 
+    replaceContent(element,
       h('header', { className: 'hanna-hub-header' }, h('a', { href: '#/hanna-modszer', className: 'hanna-wordmark' }, h('span', {}, 'H'), h('div', {}, h('strong', {}, 'Hanna Módszer'), h('small', {}, 'emlékezz a saját képeiddel'))),
         h('div', { className: 'hanna-hub-promise' }, h('span', { 'aria-hidden': 'true' }, '◷'), h('p', {}, h('strong', {}, 'Napi 10–15 perc'), ' · tanítás, gyakorlás, valódi ismétlés'))),
       nav(), teacherSelector(),

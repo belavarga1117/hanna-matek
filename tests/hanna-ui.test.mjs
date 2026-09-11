@@ -380,3 +380,21 @@ test('invalid resource settings revert visibly and deselecting material restores
  const count=editor.element.querySelector('[data-setting="itemCount"]');count.value=10;count.dispatchEvent({type:'change'});assert.equal(editor.element.querySelector('[data-setting="itemCount"]').value,5);assert.equal(editor.getValue().itemCount,5);assert.ok(editor.element.querySelector('[data-hanna-validation="true"]').textContent);
  resource=editor.element.querySelector('[data-setting="resourceIds"]');resource.value='';resource.dispatchEvent({type:'change'});assert.equal(editor.getValue().contentLevel,'concrete');assert.equal(editor.getValue().resourceIds.length,0);generateHannaSession(editor.getValue(),5);editor.dispose();
 });
+
+
+test('order cards support local drag, reorder, return, pause guard and tap fallback', async()=>{
+  resetClock(); document.hidden=false;
+  const settings=normalizeHannaSettings({activity:'chain',itemCount:5,adaptive:false}),plan=generateHannaSession(settings,73),root=new MiniNode('root');let saved;
+  const cleanup=hannaGames['hanna-method'].mount({root,h,settings,seed:73,phase(){},done:(_score,answer)=>{saved=answer;},async prepareHannaRecall(){return {availableAt:null};}});
+  button(root,'Tanulás indítása').click();completeEncoding(root,plan);await flush();advance(10050);
+  const start=(node)=>node.dispatchEvent({type:'dragstart',dataTransfer:{setData(){}}});
+  const drop=(node)=>node.dispatchEvent({type:'drop'});
+  const pool=()=>root.querySelector('.hanna-order-pool'),selected=()=>root.querySelector('.hanna-order-selected');
+  let first=pool().querySelectorAll('button')[0];const firstLabel=first.textContent;start(first);drop(selected());assert.ok(selected().textContent.includes(firstLabel));
+  let second=pool().querySelectorAll('button')[0];const secondLabel=second.textContent;start(second);drop(selected().querySelector('button'));assert.ok(selected().querySelectorAll('button')[0].textContent.includes(secondLabel));
+  start(selected().querySelectorAll('button')[0]);drop(pool());assert.equal(selected().querySelectorAll('button').length,1);
+  start(pool().querySelectorAll('button')[0]);const staleTarget=selected();button(root,'Szünet').click();drop(staleTarget);button(root,'Folytatás').click();assert.equal(selected().querySelectorAll('button').length,1);
+  for(const choice of [...selected().querySelectorAll('button')])choice.click();
+  for(const value of plan.recallTrials[0].expected){const choice=pool().querySelectorAll('button').find(node=>node.textContent===value);assert.ok(choice);choice.click();}
+  button(root,'Sorrend rögzítése').click();assert.ok(saved);assert.equal(scoreHannaAttempt(settings,73,saved).percent,100);cleanup();
+});

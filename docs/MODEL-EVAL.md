@@ -92,3 +92,10 @@ R1 verdict CHANGES_REQUIRED; `.local/hanna-method/review-engine-r1.json`. Konkr�
 - R4 statikus javító verdict **PASS**: `.local/hanna-method/review-fixes-r4.json`. Canonical model `claude-opus-5`, provider `firstParty`, effort medium, Claude Code safe-mode és tools tiltva. Megerősítette a kezdőteszt részpontozását, a peg/hely ütközések megszüntetését, az értelmes beállításokat és a saját tananyag validációját.
 - R4 külön jelezte, hogy e csomagban a szerveres review-kiosztás nem ellenőrizhető. Controller ellenőrzés két kapcsolódó javítást végzett: a tanári kiosztás létrehozása még nem generál tanulói esedékes tartalmat; a tanuló indításkor csak saját esedékes emlékeit kapja. Tanár által kiosztott review esetén is privát maradnak a régi saját tartalom konkrét válaszai.
 - Az új integrációs próba: kiosztás esedékesség előtt létrejön, indítás409; esedékesség után régi tartalommal teljesíthető,1/1teljesítés, tanári válaszredakció és dupla mentés igazolva. Teljes regresszió244/244PASS. R5 külön szerveres záróreview folyamatban; az éles kiadás még nem igazolt.
+
+### Hanna Módszer – végleges R5/R6 PASS
+
+- R5 szerverreview: **PASS**, `.local/hanna-method/review-final-server-r5.json`, tényleges `claude-opus-5` / `firstParty`, medium. A nem blokkolónak sorolt kisebb esedékes készlet melletti félbehagyott kör folytatását a controller ennek ellenére javította.
+- R6: **PASS**, `.local/hanna-method/review-final-r6.json`, ugyanaz a hiteles modell/provider/effort. A függő kör ugyanazzal a foglalással folytatódik, továbbá a húzásos rendezés és a koppintás alternatívája helyes.
+- R6 kért kiegészítő ellenőrzése megtörtént: `adaptHannaSettings` csak itemCountot módosít; `prepareHannaReview` itemCountot és reviewSnapshotot állít, reviewIds-t nem ír át. A DOM helper az aria-labelt attribútumként adja át.
+- A végleges regresszió245/245PASS, `check` PASS; valódi böngészős drag→koppintás→8/8mentés igazolva. Opcionális kényelmi nitek nem blokkoló hibák; a statikus review nem helyettesíti a kiadási bizonyítékokat.

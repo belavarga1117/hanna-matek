@@ -205,7 +205,7 @@ export function createHannaSettings({ h, value = {}, onChange = () => {}, school
       onChange: (event) => emit({ ...current, recallMode: event.target.value }),
     }, ...recallModes.map((mode) => h('option', { value: mode }, RECALL_LABELS[mode] || mode)));
 
-    replaceContent(element, 
+    replaceContent(element,
       h('div', { className: 'hanna-settings-heading' },
         h('span', { className: 'hanna-kicker' }, compact ? 'HANNA FELADAT' : 'KÖR BEÁLLÍTÁSA'),
         h('strong', {}, activity.title),
@@ -891,11 +891,31 @@ export const hannaGames = {
           const originalPool = trial.choices?.length ? trial.choices : (trial.expected || []).map((value) => ({ value, label: value }));
           const pool=shuffleHannaChoices(originalPool,(Number(ctx.seed)>>>0)^Number(trial.index||0));
           const selected = [];
+          let dragged = null;
           const board = h('div', { className: 'hanna-order-board' });
+          const move = (choice, destination, before = null) => {
+            if (phase !== 'recall' || disposed || !choice) return;
+            const source = pool.includes(choice) ? pool : selected.includes(choice) ? selected : null;
+            if (!source || before === choice) return;
+            source.splice(source.indexOf(choice), 1);
+            const position = before ? destination.indexOf(before) : destination.length;
+            destination.splice(position < 0 ? destination.length : position, 0, choice);
+            dragged = null; redraw();
+          };
+          const dropProps = (destination, before = null) => ({
+            onDragOver: event => { if (dragged && phase === 'recall') event.preventDefault(); },
+            onDrop: event => { event.preventDefault(); event.stopPropagation?.(); move(dragged, destination, before); },
+          });
+          const dragProps = choice => ({
+            draggable: true,
+            onDragStart: event => { if (phase !== 'recall') { event.preventDefault(); return; } dragged = choice; event.dataTransfer?.setData('text/plain', String(choice.label)); },
+            onDragEnd: () => { dragged = null; },
+          });
           const redraw = () => {
             board.replaceChildren(
-              h('div', { className: 'hanna-order-selected' }, selected.length ? selected.map((choice, index) => h('button', { type: 'button', onClick: () => { pool.push(choice); selected.splice(index, 1); redraw(); } }, h('span', {}, String(index + 1)), choice.label)) : h('p', {}, 'Rendezd sorba a felkínált elemeket. Itt a sorrendet gyakoroljuk.')),
-              h('div', { className: 'hanna-order-pool' }, ...pool.map((choice, index) => h('button', { type: 'button', onClick: () => { selected.push(choice); pool.splice(index, 1); redraw(); } }, choice.label))),
+              h('p', {}, 'Húzd a kártyákat a sorrendbe, vagy koppints rájuk egymás után. A kijelölt kártyára kattintva visszateheted.'),
+              h('div', { className: 'hanna-order-selected', ...dropProps(selected), 'aria-label':'A felidézett sorrend' }, selected.length ? selected.map((choice, index) => h('button', { type: 'button', ...dragProps(choice), ...dropProps(selected, choice), onClick: () => move(choice, pool) }, h('span', {}, String(index + 1)), choice.label)) : h('p', {}, 'Ide kerül a sorrended. A felkínált elemek sorrendjét gyakoroljuk.')),
+              h('div', { className: 'hanna-order-pool', ...dropProps(pool), 'aria-label':'Felkínált elemek' }, ...pool.map(choice => h('button', { type: 'button', ...dragProps(choice), onClick: () => move(choice, selected) }, choice.label))),
               h('button', { type: 'button', className: 'primary-button', disabled: selected.length !== trial.expected.length, onClick: () => submit(selected.map((choice) => String(choice.value))) }, 'Sorrend rögzítése'),
             );
           };

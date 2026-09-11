@@ -155,6 +155,18 @@ test('Hanna Method 15 activities, owned resources, assignment snapshots, delay g
     must(await student.req(`/api/hanna/resources/${palace.id}`,'DELETE',{}),200);
     assert.equal(must(await student.req('/api/hanna/resources'),200).resources.some(resource=>resource.id===palace.id),false);
     assert.equal((await pool.query('SELECT count(*)::int count FROM hanna_review_cards WHERE student_id=$1',[studentId])).rows[0].count,before.rowCount,'archiving never deletes learned snapshots');
+    // Requested review size can exceed actual due cards. Reopening must reuse the reservation.
+    await pool.query("UPDATE hanna_review_cards SET due_at=now()+interval '1 day' WHERE student_id=$1",[second.student.id]);
+    for(const assigned of [false,true]){
+      await pool.query("UPDATE hanna_review_cards SET due_at=now()-interval '1 minute' WHERE id IN (SELECT id FROM hanna_review_cards WHERE student_id=$1 AND reserved_attempt_id IS NULL AND due_at>now() ORDER BY id LIMIT 2)",[second.student.id]);
+      let body={clientRulesVersion:2,gameId:'hanna-method',settings:{activity:'review',itemCount:5,adaptive:false}};
+      if(assigned){const a=must(await teacher.req('/api/teacher/assignments','POST',{clientRulesVersion:2,title:'Rövidebb esedékes kör folytatása',studentIds:[second.student.id],steps:[{gameId:'hanna-method',settings:body.settings,repetitions:1}]}),201).assignment;body={clientRulesVersion:2,assignmentStepId:a.steps[0].id};}
+      const first=must(await other.req('/api/attempts','POST',body),201).attempt;
+      assert.equal(first.settings.itemCount,2);
+      const resumed=must(await other.req('/api/attempts','POST',body),201).attempt;
+      assert.equal(resumed.id,first.id);assert.deepEqual(resumed.settings.reviewSnapshot,first.settings.reviewSnapshot);
+    }
+
   } finally {await running.close();await db.close();}
 });
 

@@ -39,3 +39,9 @@
 - A Sol high záró scope-audit további két problémája javítva: névleges, hatás nélküli nehézségválasztó eltávolítása; tevékenységenkénti tartalmi szint és saját fogalom/kulcsszó alkalmasság ellenőrzése. Valós nehézségi paraméterek megmaradnak.
 - Friss teljes regresszió: 244/244 PASS; forrás/assetellenőrzés PASS. Bizonyíték: `.local/hanna-method/regression-r6.txt`, `check-r6.txt`.
 - R4 Opus 5 medium célzott javító review folyamatban. Kiadás még nem történt, éles PostgreSQL ellenőrzés hátravan.
+
+## Utolsó megszakítási és vezérlési ellenőrzés – 2026-09-11 15:11 UTC
+
+- R4 és R5 Opus 5 medium PASS. R5 külön meglévő review-folytatási hibát jelzett kisebb esedékes készletnél; javítva. Azonos pending kör visszaadása a kért/valós darabszám eltérésénél, saját és kiosztott review esetén is integrációs teszttel igazolva.
+- A sorrendezés natív drag-and-dropot is kapott a koppintás/billentyűzet mellé. Böngészőben tényleges húzás után8/8kör mentve; újrarendezés/visszarakás és szünet alatti védelem célzott UI teszten PASS.
+- Végleges teljes regresszió245/245PASS, forrásellenőrzés PASS. R6 csak e két utolsó változás független ellenőrzése; utána kiadás.

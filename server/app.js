@@ -897,7 +897,7 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
           if(gameId==='hanna-method'){
             await db.query('SELECT pg_advisory_xact_lock(hashtext($1),hashtext($2))',[user.id,'hanna-method']);
             if(!stepId){const resolved=await resolveHannaResources(db,user.id,body.settings||{},engine);const split=splitHannaPrivateSettings(resolved);settings=split.settings;privateSettings=split.privateSettings;}
-            const identity=value=>{const {resourceSnapshot,reviewSnapshot,itemCount,...rest}=value;return stableStringify({...rest,...(!value.adaptive?{itemCount}:{})});};
+            const identity=value=>{const {resourceSnapshot,reviewSnapshot,itemCount,...rest}=value;return stableStringify({...rest,...(!value.adaptive&&value.activity!=='review'?{itemCount}:{})});};
             const pending=await db.query("SELECT * FROM attempts WHERE student_id=$1 AND game_id='hanna-method' AND assignment_step_id IS NOT DISTINCT FROM $2::uuid AND submitted_at IS NULL AND expires_at>now() ORDER BY created_at DESC FOR UPDATE",[user.id,stepId]);
             const matching=pending.rows.find(row=>identity(row.settings)===identity(settings));
             if(matching)return {attempt:publicAttempt(matching)};

@@ -8,12 +8,12 @@ Külön **Hanna Módszer** menüpont. Négy belső nézet: Felfedezés, Napi tr�
 
 ## Játékok és saját böngészős bizonyíték
 
-A fájlok a helyi `.local/hanna-method/` bizonyítékmappában találhatók. Az eredmények automatizált UI-kezeléssel születtek; a válaszidőket nem emberi képességként értelmezzük. A tanári előnézet nem készít tanulói rekordot.
+A fájlok a helyi `.local/hanna-method/` bizonyítékmappában találhatók. Az eredmények saját böngészős UI-kezeléssel születtek (natív kattintás, gépelés és húzás); a válaszidőket nem emberi képességként értelmezzük. A tanári előnézet nem készít tanulói rekordot.
 
 | Tevékenység | Működés | Böngészős ellenőrzés |
 |---|---|---|
 | Startteszt | Szó/kép/szám, azonnali és késleltetett begépelt felidézés | Saját tanári kiosztás → diák18/18 →100%,1/1kör; külön üres és téves válaszokkal6/18mentve (`uat-baseline-partial-r3fix.png`); `uat-assigned-baseline-result.png` |
-| Láncsztori | Szomszédos képpárok, saját történet, sorrend/szabad/random |8elem helyes sorrend; `uat-chain-result.png` |
+| Láncsztori | Szomszédos képpárok, saját történet, sorrend/szabad/random |8elem helyes sorrend; `uat-chain-result.png`; végleges húzás+koppintás8/8: `uat-drag-and-tap-chain-result.png` |
 | Képkapcsoló |30másodperc saját asszociációs bemelegítés, páros felidézés |Saját begépelt kapcsolat és3/3pár; `uat-association-result.png` |
 | Memóriaútvonal |Stabil vizuális szoba, betanítás, új tárgyak helyekhez kötése |Útvonalteszt után5/5; `uat-loci-result.png` |
 | Saját palota |Rendezhető helyek, leírás/fotó, mentés,90%readykapu |Saját5helyes palota létrehozás/ready/reload/játék5/5; `uat-palace-result.png` |
