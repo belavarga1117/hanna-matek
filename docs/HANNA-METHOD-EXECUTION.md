@@ -8,7 +8,7 @@
 - Tervezett függőségek: adatkontraktus → motor/tartalom és UI párhuzamosan → integráció/szerver/ismétlés és kész UI párhuzamosan → egységes regresszió, böngészős UAT, stabil review → javítás → kiadás.
 - Megőrzendő idegen változások: módosított `docs/FEATURE-MATRIX.md`; untracked `AMAKIDS-FELMERES-2026-09-10.md`, `HANNA-UJRABECSLES-ES-FEATURE-MATCH-2026-09-10.md`, `TARGYALASI-FELKESZITO-2026-09-10.md`, `docs/FINAL-PARITY-REPORT-2026-09-10.md`, `docs/REFERENCE-AUDIT-2026-09-10.md`.
 - Bizonyítékok: `.local/hanna-method/`; nincs titok vagy személyes tesztadat tracked dokumentumban.
-- Állapot: szerződés elkészült, controller indítása következik. A teljesítés még nincs igazolva.
+- Aktuális állapot: teljesítve, Railway kiadás és valódi mentés-visszaolvasás igazolva. Az alábbi napló időrendben őrzi a köztes állapotokat.
 
 ## Első hullám – 2026-09-11 13:18 UTC
 
@@ -45,3 +45,10 @@
 - R4 és R5 Opus 5 medium PASS. R5 külön meglévő review-folytatási hibát jelzett kisebb esedékes készletnél; javítva. Azonos pending kör visszaadása a kért/valós darabszám eltérésénél, saját és kiosztott review esetén is integrációs teszttel igazolva.
 - A sorrendezés natív drag-and-dropot is kapott a koppintás/billentyűzet mellé. Böngészőben tényleges húzás után8/8kör mentve; újrarendezés/visszarakás és szünet alatti védelem célzott UI teszten PASS.
 - Végleges teljes regresszió245/245PASS, forrásellenőrzés PASS. R6 csak e két utolsó változás független ellenőrzése; utána kiadás.
+
+## Kiadási lezárás – 2026-09-11 15:19:51 UTC
+
+- Kiadott commit `a353d0b9cbe458d9e2eb1eea647462895e5a9102`, Railway `c24fb090-2be2-418a-8598-a22847c01ece` SUCCESS. 101/101 publikus és 120/120 runtime fájlegyezés.
+- Valódi éles PostgreSQL: két ismétlés, külön seed, 5/5 + 5/5, párhuzamos beküldés idempotens, relogin és tanári részlet PASS, 10 ismétlőkártya. Privát eszköz CRUD és tulajdonosi határ PASS. 6 korábbi user/9 result ujjlenyomata változatlan. Saját QA-fiókok deaktiválva, bizonyítékadat megőrizve.
+- A teljes 15 család saját böngészős UAT-ja, negatív választesztek, mobil, saját erőforrások, tanári folyamat és regresszió lezárt. Független R4/R5/R6 Opus5 medium PASS.
+- Tényleges eltelt idő: 2 óra 9 perc 27 másodperc. Jelentés: `HANNA-METHOD-DELIVERY.md`. A subagentből történő in-app látható nyitás nem támogatott; a játszható URL rootnak átadva a végső megnyitáshoz. A publikus Chrome nézet már ellenőrzött.
