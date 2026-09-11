@@ -10,8 +10,8 @@ import {
   normalizeHannaResource,
   normalizeHannaSettings,
   scoreHannaAttempt,
-} from '../dist/hanna/engine.js';
-import {HANNA_ACTIVITIES,HANNA_OBJECTS,HANNA_PEGS,HANNA_TEXTS,HU_MAJOR_DIGITS,HU_MAJOR_WORDS} from '../dist/hanna/content.js';
+} from '../dist/hanna/engine-v1.js';
+import {HANNA_ACTIVITIES,HANNA_OBJECTS,HANNA_PEGS,HANNA_TEXTS,HU_MAJOR_DIGITS,HU_MAJOR_WORDS} from '../dist/hanna/content-v1.js';
 
 const SEED=20260911;
 

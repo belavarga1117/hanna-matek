@@ -1,7 +1,7 @@
 import {normalizeConfig as normalizeNbackConfig} from './nback/engine.js';
 
 export function h(tag, props = {}, ...children) {
-  const svgTags = new Set(['svg','g','path','circle','ellipse','rect','line','polyline','polygon','defs','linearGradient','radialGradient','stop','text','tspan','clipPath','mask']);
+  const svgTags = new Set(['svg','g','path','circle','ellipse','rect','line','polyline','polygon','defs','linearGradient','radialGradient','stop','text','tspan','clipPath','mask','title']);
   const node = svgTags.has(tag) && document.createElementNS ? document.createElementNS('http://www.w3.org/2000/svg',tag) : document.createElement(tag);
   for (const [key, value] of Object.entries(props || {})) {
     if (value === null || value === undefined || value === false) continue;

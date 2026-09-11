@@ -52,3 +52,58 @@
 - Valódi éles PostgreSQL: két ismétlés, külön seed, 5/5 + 5/5, párhuzamos beküldés idempotens, relogin és tanári részlet PASS, 10 ismétlőkártya. Privát eszköz CRUD és tulajdonosi határ PASS. 6 korábbi user/9 result ujjlenyomata változatlan. Saját QA-fiókok deaktiválva, bizonyítékadat megőrizve.
 - A teljes 15 család saját böngészős UAT-ja, negatív választesztek, mobil, saját erőforrások, tanári folyamat és regresszió lezárt. Független R4/R5/R6 Opus5 medium PASS.
 - Tényleges eltelt idő: 2 óra 9 perc 27 másodperc. Jelentés: `HANNA-METHOD-DELIVERY.md`. A subagentből történő in-app látható nyitás nem támogatott; a játszható URL rootnak átadva a végső megnyitáshoz. A publikus Chrome nézet már ellenőrzött.
+
+## Újranyitott eredeti scope — 2026-09-11 15:40:36 UTC
+
+- Tulajdon: ugyanaz az egyetlen hanna_method_controller; root nem ír a fába. Alap60774e8; fagyasztási/interfészcommit6555ee6. Az eredeti Hanna-koncepció és root tételes audit a mérce, nem a V1 leegyszerűsített szerződése. Elfogadási mátrix:HANNA-METHOD-ORIGINAL-SCOPE-ACCEPTANCE.md.
+- Futó két natív Sol high sáv: hanna_v2_engine a /Users/vargabela/.codex/worktrees/hanna-v2-engine-20260911 munkafán, engine-v2/content-v2/engine-teszt; hanna_v2_design a /Users/vargabela/.codex/worktrees/hanna-v2-design-20260911 munkafán, ui-v2/visuals/CSS/assets/UI-teszt. Közösflow/API:HANNA-METHOD-V2-INTERFACE.md.
+- Controller szerveres többkapus késleltetés, V1/V2 router, saját korábbi tanultanyag, tartós mastery, napirotáció, profil és ownworkspace integráció. Additív008migration.
+- ImageGen siker: részletes szobajelenet és24sajátgeneráltportré; design sáv illeszti a vizuális rendszerbe. Új kötelező ElevenLabs0.
+- Első célzott controllerellenőrzések: fázisprefix,5mindelay,korábbikapu,restartidempotencia, saját eszközrevision/masteryscope,napirotáció; profilnull/mértékegység/comparability/24hminimum. A kiadás és teljes UAT még nem kész.
+
+## V2 integráció és első új böngészős próba — 2026-09-11 16:36 UTC
+
+- Harmadik motorpillanatkép integrálva. A vezérlő friss futtatása 38/38 célzott ellenőrzést teljesített: V2 motor, teljes saját API-folyamat, többfázisú kapuk, V1-kompatibilitás és tízdimenziós profil. A korábbi időszakos ismétlőkártya-hiba okát javítottuk: az ordered/set/digits/rubric/verbatim értékelési típus és a teljes megtanult válasz megmarad az ismétlésben. Ez még nem teljes regresszió vagy kiadási lezárás.
+- Saját tanulói böngészőben egy tényleges ötelemű lánc: páronként saját történet → tíz másodperc → rendezés → szóbank nélküli szabad felidézés → pozíció és előtte/utána kérdések → szerveres 15/15 → mentés → saját készségtérkép visszaolvasása. A felület közben talált nyers angol metrikacímkéit, túl hosszú eredményoldalát, ismételt címeit és üres distractorát a design sáv javítja. A képek és a végleges mobil UAT még nyitott.
+- User vizuális korrekció: a generált, zsúfolt egyetlen szoba ELUTASÍTVA. Nem számít elfogadott assetnek. A helyszín új specifikációja hat természetes helyiség, helyiségenként öt fix állomással, közös közlekedővel. A motor új helyazonosítókat és `route:builtin-six-rooms-v3:n30` tanulási scope-ot használ; a felület ugyanennek a tervnek megfelelő tudatos SVG tereket készít. Az abszurd tananyagtörténet nem indokol véletlenszerű lakáselrendezést.
+- A motor sáv független eredetiscope-ellenőrzést végez; a design sáv folytatja a felismerhető tárgyillusztrációk, terek, eredmények és vezérlés javítását. Teljes UAT, Opus 5 medium review, kiadás továbbra is hátravan.
+
+## V2 mély UAT és auditjavítások — 2026-09-11 17:35 UTC
+
+- A végigjátszás nem lezárási formalitás: a saját palota tanulásában hiányzó saját jelenet, a random n-edik kérdés képi válaszszivárgása és a három pár után idő előtt véget érő asszociációs sprint új, konkrét hibaként nyitva maradt. A két sáv ezek javításán dolgozik. A négyképes választó és a szünetablak 390×844 nézetben sem tekinthető elfogadottnak a friss geometriamérés alapján.
+- Mentett saját próbakörök: lánc15/15, kezdőteszt18/18, szó szerinti szöveg első27/28 és második28/28, nyolc számjegy8/8, asszociáció3/3; valódi tíz percnél későbbi visszahívás1/1. Ezek mechanikai rész-bizonyítékok, nem a végleges vizuális jelölt teljes elfogadása. A saját öthelyes palota CRUD és13/13hely-szomszéd readiness teljesült; új palotajáték még javítás alatt.
+- Név–arc javítás: a személyes tény most külön megjelenik a semleges arcvonás mellett, három másodperces arc–név megfigyelés után. A húszportrés név+tény teljes kör folyamatban.
+- Az aktuális szerver megőrzi a régi global rulesVersion2 / hannaVersion1 köröket, az új többfázisú checkpointok szerveridővel védettek, a saját nyers történetek nem kerülnek a nyilvános köradatokba. A review a megtanult teljes láncot egyszer tárolja, nem ugyanazon anyag minden felidézési fázisából készít duplikátumot.
+- Friss tényleges PostgreSQL mentés és izolált SQL visszaállítás sikeres16:45 UTC-kor. Kiadás még nem történt; az eredeti scope szerinti teljes böngészős ellenőrzés, Opus5 medium review és éles mentés-visszaolvasás kapuja nyitott.
+
+## Tanári folyamat és friss név–arc próba — 2026-09-11 17:50 UTC
+
+- Saját tanári böngészőből kiosztott ötelemű lánc: tanulói új belépés, négy saját történet, tényleges tíz másodperces késleltetés, rendezés/szabad lista/random, 17/17 szerveres eredmény, Feladataim1/1 teljesítés, Haladásom saját készségtérkép-link. Új tanári belépés után ugyanaz a17/17 és a három külön szakasz látszik. Assignment `ed7b4966-9cce-4696-8115-221a8118c900`; result `66e3f32b-872c-4c46-a8a3-3401d5c30535`. Saját helyi QA-adat, nem éles user.
+- A tanári részletből a tanuló teljes profiljára vezető link hibásan saját tanári dashboardra mutatott. Server már támogatja a tulajdonolt tanuló studentId-s profilját; a felület bekötése folyamatban. Ezt a hiányt nem nevezzük kész profilnak.
+- Húsz külön portré három másodperces névmegfigyeléssel, saját történettel és külön személyes információval:40/40 mentve (`f7abb8cf-2a55-4105-8d20-93d3bd60e5e5`). Kulcsszóhíd két irány6/6, Major10szám–hang betanítás20próba és10kétszámjegyes szó20felidézés20/20. A Major/Kulcsszó/Fogalom korábbi helyőrző-vizuális hibái javítva, friss vizuális UAT alatt.
+- A sajátpalota új változatában az állomás tényleges címkéje, a tárgy képe és a saját jelenet mező megjelenik; öt kapcsolatot már a javított nézeten rögzítettem. Előtte15vezetettállomáskattintás és13rejtetthely/szomszédpróba, mindhárom járásiránnyal.
+
+## V2 független review és visszamért javítások — 2026-09-11 18:44 UTC
+
+- Opus 5 medium, firstParty, saját Claude Code előfizetés: motor/szerver R1 és UI R1 egyaránt `CHANGES_REQUIRED`. A modell tényleges routingja a JSON `modelUsage` mezőben igazolt. Az R1 állítások között volt kontextushiányból eredő téves pozitív is (fagyasztott V1 modulok és a review SQL-kulcs), ezeket konkrét forrással külön kezeltük. Bizonyíték: `.local/hanna-v2/opus-engine-r1/`, `opus-ui-r1/`. Nem a review színét, hanem a reprodukált hibát tekintjük mércének.
+- Motorjavítás: stabil asszociációs párok a 30/60 másodperces sprintben; ugyanazon lánc többszöri felidézésének külön provenance; mondatonként kezelt tagadás a szerkesztett rubrikákban; valódi saját horogpozíciók és palota-részútvonalak; háromszavas saját Major-készlet; kézi időadatok őszinte jelölése. A kirívóan gyors kliensválasz nem lesz sebességadat. A saját integráció egy további, nem aktivált asszociációs ismétlőkártyára mutató hibát reprodukált és javíttatott. Friss controller célzott motor/szerver/profil sor:68/68 PASS.
+- UI javító sáv fut: aktív késleltetés szünet után, fókuszmegőrzés, válaszszivárgás nélküli harmadik támpont, újrakezdéskor tiszta saját asszociációk, mobil stratégiamagyarázat és működő bejárási kontrollok. A kézzel választott mennyiséget felülíró rejtett adaptáció és a részleges saját szótár beállítás-visszaállítása a böngészős próba közben nyílt meg; még javítás alatt.
+- A controller a saját eszközök mentetlen módosításaira kilépési védelmet, stabil palota-átrendezést és hiányos adatokra védett listát készített. A profil a válaszidő növekedését „lassabb”, csökkenését „gyorsabb” szöveggel közli.20/20 külön UI/profil regresszió PASS.
+- Tényleges mély böngészős körök további bizonyítéka: sajátpalota15/15 (`33696143-80c5-440f-8bc6-42699ed178a1`); ugyanebből a tanult anyagból nyolc közvetlen/szomszéd/kétpozíciós/kategória-kérdés10/10 (`9c3dd53c-d46f-4a7c-9128-6130cf6b13c4`); választott módszertől függő Boss15/15 (`a249b26a-907f-4b49-bd23-db215e8da4f9`, további hint-védelem azóta javult); természetes előszoba előre/hátra/kevert bejárás15/15 (`59df72f1-a8d8-4d71-8d6e-5dfe0534522f`); tíz memóriahorog kétirányú betanítás, tíz saját kapcsolat, előre/vissza/szám szerinti felidézés30/30 (`c36f84ec-010b-4e20-94e0-ff15076f0f76`). Automatizált böngészős kezelés, nem emberi reakcióidő-mérés.
+- Sajátpalota-szerkesztés új R2 verzióval, readiness visszazárása és saját háromelemű számképszótár mentése/újratöltése igazolt. Tanári új belépés → korábbi kiosztás eredménye → „Tanuló teljes készségtérképe” ténylegesen a megfelelő QA-tanuló profiljára vezet. Kép: `.local/hanna-v2/screenshots/teacher-student-profile.png`; mobil saját módszertár szélesség390px, vízszintes túlcsordulás nélkül.
+- Minden családból létezik helyi mentett kör, de ez önmagában nem zárja le a kiadást. Friss mély mobil/határérték/szünet UAT, végleges Opus fix-review és éles SQL mentés-visszaolvasás még nyitott. V2 még nincs kiadva.
+
+## 2026-09-11 20:08 UTC – mély UAT és végső javító kör
+
+- 40 elemű lánc:40 rendezés+40 szabad+13 random helyes; 10 elemű külön körben8 kimaradó egység mentve20/28.
+- Saját Major02/04/07: teljes kétirányú alapozás után6/6 mentett játék. Saját palota R3 fotófeltöltés, mentés és újratöltés igazolt.
+- 30 hely végigjátszása után friss szobahatár-ellenőrzés:6.kanapé/nappali,11.hűtő/konyha,16.ágy/háló,21.fürdőajtó,26.dolgozóajtó; hibás hely korrekciója nem léptet.
+- 390×844 mobil rendezés:frame720px, belsőstage567/567px, folytatáskorframeTop−0.32px. Újrakezdéskor saját történet üres, új bevezető.
+- A teljes384/384 regresszió zöld volt, az új motor/UI delták után megismétlendő. Opus engineR8 és UIR5 konkrét hibáit javítjuk; engineR9 fut, UIexecutor utolsó fókusz/keyup/resize javítást készít.
+- Mentés/izolált visszaállítás19:33:26UTC PASS; még nincs V2 éles kiadás.
+
+## 2026-09-11 20:22 UTC – release candidate
+
+- MotorR9/R10, UIR6 és külön vizuálisR2 Opus5medium PASS; minden blocking/major reprodukált finding javítva. A nem blokkoló segítőtechnológiai fókusz- és katalóguskozmetikai észrevételek dokumentáltak.
+- Végleges mobil10elemű lánc30/30 mentve, háromfelidézési fázis és valódi sortörések.389/389 teljes regresszió; katalógusCSS után célzott57/57+check, kiadáselőtt ismételt teljesfutás.
+- V2 kiadási QA saját2fiók előkészítve, előző8felhasználó/11eredmény ujjlenyomata rögzítve. Következő: commit, Railwaykiadás, publikusforrás-egyezés, ténylegesSQLmentés/visszaolvasás, sajátQAinaktiválás.

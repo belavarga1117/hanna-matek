@@ -2,6 +2,36 @@
 
 Állapot: **V1 történeti kiadás; a teljes eredeti scope audit után újranyitva**. A lent dokumentált konkrét tesztek és kiadás megtörténtek, de a „nem maradt kötelező funkcióhiány” minősítés túl erős volt. Az eredeti koncepcióhoz hiányzó mély tanítási mechanikák és vizuális rendszer elfogadási mátrixa: `HANNA-METHOD-ORIGINAL-SCOPE-ACCEPTANCE.md`. V1 indítás:2026-09-11 13:10:24UTC, kiadási lezárás:15:19:51UTC, eltelt2óra9perc27másodperc. Új hullám indulása:15:40:36UTC.
 
+
+## V2 – az eredeti koncepció mély megvalósítása
+
+Állapot: **kiadási ellenőrzés alatt**. A V2 a tizenöt tevékenységet közös, többfázisú tanítási és felidézési motorral, hat rendezett szobával, saját módszertárral és tízdimenziós készségtérképpel valósítja meg. A tételes eredeti követelmény → megvalósítás → saját bizonyíték mátrix a [HANNA-METHOD-ORIGINAL-SCOPE-ACCEPTANCE.md](HANNA-METHOD-ORIGINAL-SCOPE-ACCEPTANCE.md) dokumentum; a régi V1 táblázatok alább történeti állapotot írnak le.
+
+Fontos helyesbítés: a 90%-os sajátpalota-kapu és a Major95%/1,5mp, illetve peg2mp cél **Hanna eredeti kéréséből** származik. Az alábbi V1 szöveg tévesen mindet saját találmánynak nevezte. Az adaptáció konkrét lépcsői, intervallumlétra és peg-pontossági küszöb továbbra saját termékdöntés, nem kutatási norma.
+
+| Kért rész | Hol érhető el | Konkrét V2 bizonyíték |
+|---|---|---|
+| 15 vezetett játék | Hanna Módszer → Játékok | Mindegyikből tényleges böngészős kör;40 elemű lánc93/93,30 hely68/68,20 arc+tény40/40,30 számjegy szándékos hibával29/30. Részletek az elfogadási mátrixban. |
+| Saját palota, horgok,00–99 szótár, tananyag | Saját eszközök | Szerkesztés, sorrend, revízió, readiness, saját fotó feltöltés és visszaolvasás; saját Major3elemű teljes6/6 kör. |
+| Azonos anyag többféle felidézése | Lánc/palota/peg → Random Recall | Sorrend → szóbank nélküli lista → konkrét/szomszéd/több pozíció/kategória; korábbi mentett palotából10/10. |
+| Aktív és későbbi felidézés | Mai útvonal, Későbbi visszahívás | Ténylegesen kivárt10 perces későbbi kör; napos/hetes intervallumok idővezérelt adatbázispróbán. |
+| Készségtérkép | Fejlődésem, tanárnál tanulói profil | Valódi saját eredmények, külön mértékegységek, azonos beállítású idősor; hiányzó tartós adat nem0. |
+| Tanári/tanulói teljes folyamat | Tanári feladatsorok és eredmények | Saját böngészős kiosztás →17/17 tanulói mentés →új tanári belépés →helyes tanulói részlet/profil. Éles SQL bizonyíték alább kerül rögzítésre. |
+| Mobil és nyugodt tér | Minden játék saját vezérlése |390×844 CSSpx,100% nagyítás: végső rendező720px keret/566px tartalom túlcsordulás nélkül; teljes tárgyképek, nagy válaszgombok, valódi sortöréses szabad lista és30/30 mentés. |
+| Független ellenőrzés | MODEL-EVAL.md | Saját Claude Code előfizetés, tényleges Opus5 medium / firstParty. MotorR9/R10 és UIR6 PASS, előző hibák reprodukcióval javítva. |
+
+A V2 hangigénye **0 új kötelező klip**. Meglévő ElevenLabs bankok változatlanok; nincs új gépi TTS. Az illusztrációk előre elkészültek; a saját asszociáció írása és a tanuló képzeleti képe nem futásidejű AI-generálás.
+
+A böngészős QA saját tesztfiókokkal, agent által kezelt felületen történt: funkciót és mentést igazol, nem emberi emlékezeti teljesítményt. A mobil méret szimulált, nem fizikai iOS/Android. A háttér/blur logikát célzott UItesztek fedik; az automatizált böngészőben az OS-háttérváltás nem adott külön hiteles bizonyítékot. A szünet és újrakezdés tényleges UIpróbája sikeres.
+
+A szerkesztett szövegrubrika elfogadott megfogalmazásokat, kulcsgondolatokat és konkrét ellentmondásokat kezel; **nem teljes nyelvi jelentéselemző**. Ismeretlen vagy összetett parafrázist tanári/önellenőrzéssel kell megerősíteni. Nincs IQ, agyéletkor, populációs percentilis vagy személyes agyi aktivitásmérés. Többnapos emberi hatásvizsgálat nem történt. A runtime AI-segítő és diktálás későbbi bővítés, nem aktív funkció.
+
+### V2 kiadási bizonyíték
+
+Folyamatban; éles kiadási és mentési állítást csak a lenti végleges azonosítók igazolnak.
+
+---
+
 ## Hol található
 
 Külön **Hanna Módszer** menüpont. Négy belső nézet: Felfedezés, Napi tréning, Saját eszközeim, Fejlődésem; tanárnál Tanulói fejlődés. A korábbi AMAkids, N-back és Memóriapróbák külön maradnak.

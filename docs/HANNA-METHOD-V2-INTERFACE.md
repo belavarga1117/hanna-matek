@@ -51,3 +51,21 @@ Dashboard bővítés controller: `learnedSources:[{resultId,activity,title,itemC
 ## Kiadási kapu
 
 Knownsequence/ellenpélda/V1fagyasztás, finalintegrált npmtest+check, mély15családUAT, sajátteacherstudentSQLflow, desktop390mobile/designkritika, stableoriginalscopeOpus5mediumreview+fixloop, backuprestore→Railway→asset/sourceegyezés→sajátQAmentés/reread→oldrecordfingerprints. Egyik kapu sem helyettesíthető darabszámmal vagy saját szerződés átírásával.
+
+## Eredetiscope-audit utáni interfészpontosítás — 2026-09-11 16:45 UTC
+
+- `hannaActivityCapabilities(activity)` az aktív választókat és valódi recallMode-okat adja. A többfázisú lánc/loci/palace/peg beépített teljes fázissorát nem egy hatástalan selector állítja. A canonical alapmezők és URL-re szerializált értékek visszanormalizálhatók.
+- `bindHannaRecallSupport(plan, answerEncoding)` immutábilis kötés: a saját lépéshez és kiválasztott stratégiához tartozó horog/hely/saját kapcsolat adja a cue/hint tartalmát. A felület ebből jelenít, a szerver a nyers encodingból újra köti.
+- Ismétlőkártya `encodingStepIds` és opcionális `encoding` snapshot megőrzi a saját asszociációt; a szerver által célmaszkolt korábbi hintet a generikus fallback nem írja felül. `assessment: exact|set|ordered|digits|rubric|verbatim`; rendezett vagy halmazválasz egyben marad.
+- `metrics.completion` megkülönbözteti a `complete` és `training-incomplete` állapotot. Utóbbi `percent:null`; a submit API befejezett eredmény helyett `TRAINING_NOT_READY` hibát ad. Rész-checkpoint ettől még validálható.
+- `training.phases`: vezetett tanulás → rejtett próba, hibajavítással. `completionPolicy.requiresPass:true`; újrapróbáláskor azonos trialId válasza felülíródik, nincs dupla nyers válasz. A szerveres küszöb az autoritatív kapu.
+- Random kötelező kérdésmagja: sorszám, előtte, utána, két érvényes pozíció együtt, kategória. Saját, már megtanult anyagból; önálló történetbeírás opcionális, a teljesen üres körből nem készül learned snapshot.
+- Saját Major-szótár részlegesen is használható: a 10 számhang betanítása után a valóban kitöltött szóképekből tanít; a szótár mérete nem mesterséges új tízszavas kapu.
+
+## Review során pontosított provenance és kliensszerződés
+
+- A V2 eseménynapló a `start`, `complete`, `encoding-commit`, `association-choice`, `association-time`, `recall-response`, `location-select`, `gate-prepare` típusokat is őrzi. A `stepId`, `roundId`, `trialId`, `gateId` tervhez validált hivatkozás; nem üres általános `phase` esemény.
+- Ugyanazon anyag újabb körön belüli találkozását `repeatExposure`, `repeatIndex`, asszociációban `connectionId` jelöli. A szóbank nélküli gépelés önálló válaszadási mód marad, de nem első találkozásból mért baseline. Az eredmény külön tárolja a megismételt expozíciót.
+- `metrics.timingEvidence={source:'browser-monotonic-clock',serverVerified:false}`. A szerver a helyes választ és a megtartási kapu idejét ellenőrzi; az emberi válaszidőt a böngésző jelenti. A túl gyors (<80ms) recall nem veszti el pontosságát, de nem kerül a sebességmutatóba. A <100ms betanítási esemény nem teljesíti az automatizálási kaput.
+- A `cue.visualHintOnly` csak harmadik segítség után jelenhet meg. A vizuális cue megengedhetősége és a felirat válaszadó tartalma külön vizsgálandó: az arckép lehet kérdés, a személy neve nem lehet harmadik támpontba rejtett teljes válasz.
+- A saját eszköztár `canLeave()` metódusa mentetlen változásnál megakadályozhatja a lapváltást. A hub továbbadja, az alkalmazás a hash-navigáció előtt ellenőrzi; a `dispose()` nem kér utólag jóváhagyást.

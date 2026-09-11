@@ -10,6 +10,8 @@ const ORIGIN='http://hanna-method-test.local';
 function client(base) {
   let cookie='',csrf='';
   return {async req(path,method='GET',body,extra={}) {
+    if(body?.gameId==='hanna-method'&&body.settings)body={...body,settings:{hannaVersion:1,...body.settings}};
+    if(body?.steps)body={...body,steps:body.steps.map(step=>step.gameId==='hanna-method'?{...step,settings:{hannaVersion:1,...step.settings}}:step)};
     const response=await fetch(base+path,{method,headers:{origin:ORIGIN,...(cookie?{cookie}:{}),...(!['GET','HEAD'].includes(method)&&csrf?{'x-csrf-token':csrf}:{}),...(body===undefined?{}:{'content-type':'application/json'}),...extra},body:body===undefined?undefined:JSON.stringify(body)});
     const data=await response.json();const setCookie=response.headers.get('set-cookie');if(setCookie)cookie=setCookie.split(';')[0];if(data.csrfToken)csrf=data.csrfToken;
     return {status:response.status,json:data};
@@ -174,6 +176,6 @@ test('Hanna Method 15 activities, owned resources, assignment snapshots, delay g
 test('daily progress follows saved results and Budapest midnight, with no empty review start',()=>{
   const rows=[{settings:{activity:'chain'},created_at:'2026-09-11T21:59:00Z'},{settings:{activity:'association'},created_at:'2026-09-11T22:01:00Z'}];
   const plan=hannaDailyPlan(rows,0,new Date('2026-09-11T22:05:00Z'));
-  assert.equal(plan.find(x=>x.activity==='chain').completed,false);assert.equal(plan.find(x=>x.activity==='association').completed,true);
+  assert.equal(plan[1].completed,false);assert.equal(plan.find(x=>x.activity==='association').completed,true);
   assert.equal(plan.find(x=>x.activity==='review').available,false);assert.equal(hannaDailyPlan(rows,1).find(x=>x.activity==='review').available,true);
 });

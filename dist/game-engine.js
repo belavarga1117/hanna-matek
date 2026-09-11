@@ -1,5 +1,5 @@
-import {normalizeHannaSettings,generateHannaSession,scoreHannaAttempt,normalizeHannaResource,nextHannaReview,evaluatePalaceReadiness} from './hanna/engine.js';
-export {normalizeHannaSettings,generateHannaSession,scoreHannaAttempt,normalizeHannaResource,nextHannaReview,evaluatePalaceReadiness};
+import {normalizeHannaSettings,generateHannaSession,scoreHannaAttempt,normalizeHannaResource,nextHannaReview,evaluatePalaceReadiness,createHannaLearnedSnapshot,createPalaceReadinessTrials,hannaTrainingScope,hannaActivityCapabilities,bindHannaRecallSupport} from './hanna/engine.js';
+export {normalizeHannaSettings,generateHannaSession,scoreHannaAttempt,normalizeHannaResource,nextHannaReview,evaluatePalaceReadiness,createHannaLearnedSnapshot,createPalaceReadinessTrials,hannaTrainingScope,hannaActivityCapabilities,bindHannaRecallSupport};
 import {normalizeSettings} from './core.js';
 import * as legacy from './legacy/v1/game-engine.js';
 import {awardStars} from './scoring.js';
@@ -26,7 +26,7 @@ import {generateStationsRound,scoreStationOrder,generateFaces,scoreFaceAnswers,g
 import {generatePictureRounds,generateCodeRound} from './games/advanced-games.js';
 
 export const GAME_RULES=Object.freeze({
-  'hanna-method':{hannaVersion:1,activities:15},
+  'hanna-method':{hannaVersion:2,activities:15},
   digits:{levels:[1],count:[3,8]},grid:{levels:[1],count:[3,8]},path:{levels:[1],count:[3,8]},missing:{levels:[1],count:[3,8]},
   stations:{levels:[1,2],count:[3,6],themes:['stations','streets'],level2Count:5},faces:{levels:[1,2,3],fixedCount:5},
   prices:{levels:[1,2],count:[3,5]},shopping:{levels:[1,2],fixedCount:9},picture:{levels:[1,2],rounds:[3,5]},

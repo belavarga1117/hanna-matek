@@ -1,0 +1,40 @@
+{
+  "version": 3,
+  "createdAt": "2026-09-11",
+  "generator": "OpenAI built-in image generation plus authored semantic SVG",
+  "runtimeGeneration": false,
+  "assets": {
+    "rooms": {
+      "files": ["room-01-entry.svg", "room-02-living.svg", "room-03-kitchen.svg", "room-04-bedroom.svg", "room-05-bathroom.svg", "room-06-study.svg"],
+      "route": "route:builtin-six-rooms-v3:n30",
+      "layout": "six rooms, five stable semantic locations per room",
+      "purpose": "Calm walkable home route with hotspots only on recognizable furniture and fixtures"
+    },
+    "portraitAtlas": {
+      "sourceArchive": ".local/reports/hanna-v2-sources/portrait-atlas.png",
+      "grid": "6x4",
+      "count": 24,
+      "sha256": "f8edb2879a42b438a7a2b06eed43019884e6d440e5e8a18166d43702d73d69d5"
+    },
+    "portraits": {"directory": "./portraits", "count": 24, "format": "webp", "width": 256, "height": 256},
+    "objectAtlases": {
+      "sourceArchive": ".local/reports/hanna-v2-sources/object-atlas-01.png through object-atlas-05.png",
+      "gridEach": "6x4",
+      "count": 120,
+      "hashes": ["4ec8ef1323babcec9098bb11634af565b60f8ed0126c9cdfdf9130a3d07f5220", "59cb416aca601df06b054597779039631046dbee787ef3f67a8b99c733c409cb", "40d5708394272922d23d2788352f3e3599143b714ceab899096dee8e11475070", "e2255f7eb2d0e8eb004e1a69b9aa1df443f51b049aa542f64a93ef45dcd746dd", "1471885680833f33cdb060edcfc4a2b2d5f0877110c203a422e4a1dab8f92495"]
+    },
+    "objects": {"directory": "./objects", "count": 120, "format": "119 webp plus authored inga.svg", "width": 256, "height": 256},
+    "pegAtlas": {"sourceArchive": ".local/reports/hanna-v2-sources/peg-atlas.png", "grid": "6x4", "usedCells": 20, "sha256": "7c9bfb1b0453a8e1a6d7367ff78a81fdfacaa0e655c18faa2d961292dc137cf1"},
+    "pegs": {"directory": "./pegs", "count": 20, "format": "webp", "width": 256, "height": 256}
+  },
+  "prompts": {
+    "portraits": "Twenty-four original distinct fictional adult portrait headshots; exact 6 by 4 contact sheet; differentiated face shapes, ages, hair, glasses, facial hair and skin tones; consistent editorial cut-paper and soft clay style; no text, celebrity likeness, emoji, logos or watermark.",
+    "objects": "Five exact 6 by 4 atlases covering all 120 named HANNA_OBJECTS in row-major order; one centered, recognizable object per cell; warm editorial clay and cut-paper illustration; no text, logo, emoji or watermark.",
+    "pegs": "Exact 6 by 4 atlas; first twenty cells contain the explicit 1-20 mnemonic peg objects from candle through target; four decorative filler stars; no text or digits."
+  },
+  "provenance": {
+    "rooms": "Authored SVG. The discarded generated single-room draft is not shipped or referenced.",
+    "bitmapArt": "Generated once with the built-in image generation tool, then cropped to stable static assets.",
+    "claim": "Curated static learning illustrations; the application does not generate images at runtime."
+  }
+}

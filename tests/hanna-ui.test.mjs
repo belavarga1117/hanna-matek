@@ -106,9 +106,9 @@ globalThis.clearTimeout = clearFakeTimeout;
 Object.defineProperty(globalThis, 'performance', { configurable: true, value: { now: () => now } });
 
 const { h } = await import('../dist/core.js');
-const { HANNA_ACTIVITIES } = await import('../dist/hanna/content.js');
-const { generateHannaSession, normalizeHannaSettings, scoreHannaAttempt } = await import('../dist/hanna/engine.js');
-const { createHannaSettings, hannaGames, renderHannaResult } = await import('../dist/hanna/ui.js');
+const { HANNA_ACTIVITIES } = await import('../dist/hanna/content-v1.js');
+const { generateHannaSession, normalizeHannaSettings, scoreHannaAttempt } = await import('../dist/hanna/engine-v1.js');
+const { createHannaSettings, hannaGames, renderHannaResult } = await import('../dist/hanna/ui-v1.js');
 const { createHannaHub, createHannaWorkspace } = await import('../dist/hanna/workspace.js');
 
 async function flush() { await Promise.resolve(); await Promise.resolve(); await new Promise((resolve) => setImmediate(resolve)); }
@@ -252,8 +252,11 @@ test('workspace uses exact API shapes, hides an unready route, and passes the se
   assert.equal(starts.length, 1); assert.equal(starts[0].resourceIds[0], major.id); assert.strictEqual(starts[0].resourceSnapshot[0], major, 'the server object is not reserialized or normalized by the workspace');
   assert.ok(button(workspace.element, 'Teszt után használható').disabled);
   button(workspace.element, 'Útvonalteszt').click();
-  assert.doesNotMatch(workspace.element.textContent, /Hely 1/, 'route names stay hidden during recall');
-  assert.match(workspace.element.textContent, /Rejtett útvonal ellenőrzése/);
+  assert.match(workspace.element.textContent, /Hely 1/, 'guided learning shows the actual first location');
+  for (let i=0;i<4;i++) button(workspace.element, 'Következő hely').click();
+  button(workspace.element, 'Jöhet a rejtett útvonalpróba').click();
+  assert.doesNotMatch(workspace.element.textContent, /Hely 1/, 'the correct route name stays hidden in the independent position question');
+  assert.match(workspace.element.textContent, /FELIDÉZÉS/);
   assert.deepEqual(calls[0], ['/api/hanna/resources', { method: 'GET' }]);
   workspace.dispose();
 });
@@ -351,7 +354,7 @@ test('pause blocks hint and encoding actions, preserves associations and records
 });
 
 test('ordered pools have independent seeded permutations rather than cyclic answer order',async()=>{
-  const {shuffleHannaChoices}=await import('../dist/hanna/ui.js');const source=Array.from({length:10},(_,i)=>i);let cyclic=0;
+  const {shuffleHannaChoices}=await import('../dist/hanna/ui-v1.js');const source=Array.from({length:10},(_,i)=>i);let cyclic=0;
   for(let seed=1;seed<=200;seed++){const out=shuffleHannaChoices(source,seed);assert.deepEqual([...out].sort((a,b)=>a-b),source);if(out.slice(1).every((n,i)=>(n-out[i]+10)%10===1)||out.slice(1).every((n,i)=>(n-out[i]+10)%10===9))cyclic++;assert.deepEqual(out,shuffleHannaChoices(source,seed));}
   assert.equal(cyclic,0);
 });
@@ -397,4 +400,14 @@ test('order cards support local drag, reorder, return, pause guard and tap fallb
   for(const choice of [...selected().querySelectorAll('button')])choice.click();
   for(const value of plan.recallTrials[0].expected){const choice=pool().querySelectorAll('button').find(node=>node.textContent===value);assert.ok(choice);choice.click();}
   button(root,'Sorrend rögzítése').click();assert.ok(saved);assert.equal(scoreHannaAttempt(settings,73,saved).percent,100);cleanup();
+});
+
+test('own-tool navigation guards unsaved work, palace reorder follows its station and empty peg data is safe',async()=>{
+ resetClock();const palace=palaceResource();const calls=[];const oldConfirm=globalThis.confirm;globalThis.confirm=()=>false;
+ const school={user:{id:'owner',role:'student'},async api(path,options){calls.push([path,options]);return {resources:[palace,{id:'empty-peg',kind:'peg',title:'Üres horgok',revision:1,data:null}]};}};
+ const workspace=createHannaWorkspace({h,school});await flush();assert.match(workspace.element.textContent,/Üres horgok/);
+ buttons(workspace.element,'Szerkesztés')[0].click();const input=workspace.element.querySelector('.hanna-location-fields input');input.value='Saját ajtó';input.dispatchEvent({type:'input'});
+ assert.equal(workspace.canLeave(),false);button(workspace.element,'← Eszközlista').click();assert.match(workspace.element.textContent,/Nem mentett módosítások/);
+ button(workspace.element,'↓').click();assert.equal(workspace.element.querySelector('.hanna-location-fields input').value,'Saját ajtó');
+ globalThis.confirm=()=>true;assert.equal(workspace.canLeave(),true);button(workspace.element,'← Eszközlista').click();assert.match(workspace.element.textContent,/A saját módszertárad/);workspace.dispose();globalThis.confirm=oldConfirm;
 });

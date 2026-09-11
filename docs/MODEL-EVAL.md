@@ -99,3 +99,43 @@ R1 verdict CHANGES_REQUIRED; `.local/hanna-method/review-engine-r1.json`. Konkr�
 - R6: **PASS**, `.local/hanna-method/review-final-r6.json`, ugyanaz a hiteles modell/provider/effort. A függő kör ugyanazzal a foglalással folytatódik, továbbá a húzásos rendezés és a koppintás alternatívája helyes.
 - R6 kért kiegészítő ellenőrzése megtörtént: `adaptHannaSettings` csak itemCountot módosít; `prepareHannaReview` itemCountot és reviewSnapshotot állít, reviewIds-t nem ír át. A DOM helper az aria-labelt attribútumként adja át.
 - A végleges regresszió245/245PASS, `check` PASS; valódi böngészős drag→koppintás→8/8mentés igazolva. Opcionális kényelmi nitek nem blokkoló hibák; a statikus review nem helyettesíti a kiadási bizonyítékokat.
+
+## Hanna Módszer V2 — az eredeti scope újranyitása, 2026-09-11
+
+Az előző V1-zárás nem a teljes eredeti Hanna-koncepció teljesülését bizonyította. A V2 külön, eredeti követelményeket és konkrét forrásfát vizsgáló review-sor. A user kifejezett választása: saját Claude Code Max előfizetés, `claude-opus-5`, `medium`, `firstParty`; Grok nem futott ebben a hullámban. A CLI listaár-becslése nem külön API-számla.
+
+| Review | Tényleges modell | Eredmény | Idő | Bizonyíték |
+|---|---|---|---|---|
+| opus-engine-r1 | claude-opus-5 | CHANGES_REQUIRED | 627.0 s | `.local/hanna-v2/opus-engine-r1/result.json` és az adott könyvtár `manifest.json` |
+| opus-engine-r2 | claude-opus-5 | CHANGES_REQUIRED | 385.8 s | `.local/hanna-v2/opus-engine-r2/result.json` és az adott könyvtár `manifest.json` |
+| opus-engine-r3 | claude-opus-5 | CHANGES_REQUIRED | 428.5 s | `.local/hanna-v2/opus-engine-r3/result.json` és az adott könyvtár `manifest.json` |
+| opus-engine-r4 | nincs befejezett modellválasz | megszakított, új UAT-hiba miatt felülírt jelölt | 261.6 s | `.local/hanna-v2/opus-engine-r4/result.json` és az adott könyvtár `manifest.json` |
+| opus-ui-r1 | claude-opus-5 | CHANGES_REQUIRED | 358.5 s | `.local/hanna-v2/opus-ui-r1/result.json` és az adott könyvtár `manifest.json` |
+| opus-ui-r2 | claude-opus-5 | CHANGES_REQUIRED | 533.6 s | `.local/hanna-v2/opus-ui-r2/result.json` és az adott könyvtár `manifest.json` |
+
+A motor R1/R2 megállapításainak tételes diszpozíciója: `.local/hanna-v2/engine-review-fix-report-r2.md`; UI R1: `.local/hanna-v2/design-review-fix-report-r1.md`. Az újabb review-kból valódi hibák is reprodukálhatók voltak: aktív szünetidő, helyhez kötött szobakép, privát segítség, ellenőrzött válaszidőből számolt tartós ismétlési intervallum, tagmondati tagadás, szerkesztett saját eszközök kiválasztása. A fix-review önmagában nem kiadási vagy böngészős PASS.
+
+### V2 javító review-k folytatása – 2026-09-11 20:08 UTC
+
+| Review | Verdict | Tényleges főmodell / provider | Futási idő | Megjegyzés |
+|---|---|---|---|---|
+| opus-engine-r5 | PASS | claude-opus-5 / firstParty | 168.6 s | Korábbi motorjelölt PASS, későbbi böngészős ellenpéldák miatt újranyitva. |
+| opus-engine-r6 | CHANGES_REQUIRED | claude-opus-5 / firstParty | 351.2 s | Többtagmondatos helyes parafrázis téves elutasítása; szerverjavításokat megerősítette. |
+| opus-engine-r7 | érvénytelen, nincs verdict | claude-opus-5 / firstParty | 302.9 s | Nincs végső verdict: a modell nem létező eszközhívásokat írt ki. Érvénytelen review, nem PASS. |
+| opus-engine-r8 | CHANGES_REQUIRED | claude-opus-5 / firstParty | 168.3 s | Előrehozott tagadás és nulla önálló próba profiljelölése; javítva, R9 ellenőrzi. |
+| opus-ui-r3 | CHANGES_REQUIRED | claude-opus-5 / firstParty | 386.6 s | Fázisváltási fókusz, billentyűismétlés, választómező fókusza és téves helyjelzés. |
+| opus-ui-r4 | megszakított / érvénytelen | nincs befejezett válasz / — | 50.9 s | Megszakítva: a tesztfájl átadás közben változott, a végleges pillanatképre R5 indult. |
+| opus-ui-r5 | CHANGES_REQUIRED | claude-opus-5 / firstParty | 313.4 s | R3 javításait megerősíti; elveszett keyup után beragadt billentyűkorlát, további kisebb fókuszhibák javítása. |
+
+Minden kör bemenete és SHA256-forrásjegyzéke a `.local/hanna-v2/<review>/` könyvtárban. A CLI safe-mode, tools/MCP nélkül, explicit medium efforttel futott. A kiadási jelöltet a későbbi végleges ellenőrzés nevezi meg.
+
+### V2 végleges motor/UI javító PASS
+
+- `opus-engine-r9`: **PASS**, tényleges `claude-opus-5` / `firstParty`, explicit medium, 147.342s. Többtagmondatos és előrehozott tagadás; önálló metrika termelő és fogyasztó. Forráshash és teljes válasz az adott privát reviewmappában.
+- `opus-engine-r10`: **PASS**, tényleges `claude-opus-5` / `firstParty`, explicit medium, 38.159s. Felismeréses kör adaptációja null önálló adattal, külön pontos indokkal. Forráshash és teljes válasz az adott privát reviewmappában.
+- `opus-ui-r6`: **PASS**, tényleges `claude-opus-5` / `firstParty`, explicit medium, 162.623s. R5 fókusz/keyup/breakpoint/képkivágás javításai; host overlay és képernyőváltás. Forráshash és teljes válasz az adott privát reviewmappában.
+
+Nem blokkoló maradványok: ritka segítőtechnológiai keyup-vesztéskor egy első gombnyomás elveszhet, a következő feloldja; forgatáskor a láblécgomb fókusza a rendezőbe kerülhet. Ismeretlen parafrázisoknál a szerkesztett rubrika nem teljes szemantikai értékelés. A dekoratív katalógustérkép képarányát a controller UIR6m5 alapján javította, külön vizuális fix-review ellenőrzi.
+
+- `opus-visual-final`: CHANGES_REQUIRED,149.455s; az összes30 jelölő és a hat természetes szoba SVG-jét elfogadta, a katalógus rögzített keretén levágást talált.
+- `opus-visual-final-r2`: **PASS**,81.700s, tényleges `claude-opus-5` / `firstParty`, medium. A katalógus kerete követi az5:3 képet. FrissDOMmérés: nagy képen552×331.20 és362.66×217.59, mobilon130×78; mindkét szobakép teljesen a saját keretében.

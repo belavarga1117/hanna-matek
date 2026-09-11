@@ -15,6 +15,7 @@ import {
   verifyPassword,
 } from './security.js';
 import { createRateLimiter } from './rate-limit.js';
+import {isHannaV2,prepareHannaV2Context,checkpointHannaV2,validateHannaV2Completion,saveHannaV2Mastery} from './hanna-v2.js';
 import {handleHannaRoute,resolveHannaResources,adaptHannaSettings,prepareHannaReview,reserveHannaReview,hannaCheckpointHash,validateHannaCompletion,saveHannaLearning,splitHannaPrivateSettings} from './hanna.js';
 
 const SESSION_SECONDS = 7 * 24 * 60 * 60;
@@ -104,12 +105,23 @@ function resultRow(row, includeAnswer = false, includeStudent = false) {
     assignmentId: row.assignment_id,
     assignmentStepId: row.assignment_step_id,
   };
+  if(row.game_id==='hanna-method'){
+    const {resourceSnapshot,reviewSnapshot,learnedSnapshot,trainingMastery,...scalarSettings}=result.settings||{};
+    result.settings=scalarSettings;
+  }
   if (includeAnswer) result.answer = row.answer;
   if (includeStudent && row.game_id==='hanna-method') {
-    const {resourceSnapshot,reviewSnapshot,...safeSettings}=result.settings||{};
+    const {resourceSnapshot,reviewSnapshot,learnedSnapshot,trainingMastery,...safeSettings}=result.settings||{};
     result.settings=safeSettings;
+    if(result.metrics?.schemaVersion===2&&result.metrics.subscales?.training){
+      const {scopeKey,coverage,evidence,...training}=result.metrics.subscales.training;
+      result.metrics={...result.metrics,subscales:{...result.metrics.subscales,training:{...training,
+        ...(coverage?{coverage:{required:coverage.requiredIds?.length||0,mastered:coverage.masteredIds?.length||0,tested:coverage.testedIds?.length||0}}:{}),
+        evidence:(evidence||[]).map(({direction,correct,rtMs})=>({direction,correct,rtMs})),
+      }}};
+    }
     // Own tools stay private even when the teacher can inspect practice performance.
-    if (!row.assignment_id || row.settings?.activity==='review') {
+    if (!row.assignment_id || ['review','random'].includes(row.settings?.activity)) {
       result.details=(result.details||[]).map((detail,index)=>({label:`${index+1}. felidézési egység`,correct:detail.correct,actual:detail.correct?'Helyes':'Nem helyes',expected:'Saját tananyag'}));
       delete result.answer;
     } else if(result.answer) {
@@ -645,7 +657,7 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
           if (!Number.isInteger(step.repetitions) || step.repetitions < 1 || step.repetitions > 10) throw badRequest('Az ismétlésszám 1–10 lehet.', 'INVALID_STEPS');
           try {
             let incomingSettings=step.gameId==='nback'?{...(step.settings||{}),lowScoreCount:0}:step.settings||{};
-            if(step.gameId==='hanna-method'){const {resourceSnapshot,reviewSnapshot,customContent,...safe}=incomingSettings;incomingSettings=safe;}
+            if(step.gameId==='hanna-method'){const {resourceSnapshot,reviewSnapshot,learnedSnapshot,trainingMastery,customContent,...safe}=incomingSettings;incomingSettings=safe;}
             let privateSettings = null;
             if (step.gameId === 'active-recall') {
               const split = splitActiveRecallSettings(incomingSettings);
@@ -677,7 +689,7 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
           ) : { rows: [] };
           const targetIds = [...new Set([...studentIds, ...members.rows.map((row) => row.student_id)])];
           if (!targetIds.length) throw badRequest('Legalább egy tanulót vagy nem üres csoportot válassz.', 'NO_RECIPIENTS');
-          for(const step of steps)if(step.gameId==='hanna-method'){const resolved=await resolveHannaResources(db,user.id,step.settings,engine,{assignment:true});try{if(resolved.activity!=='review')engine.generateHannaSession(resolved,0);}catch(error){throw badRequest(error.message||'Ezekkel az eszközökkel nem osztható ki a kör.','INVALID_GAME_SETTINGS');}const split=splitHannaPrivateSettings(resolved);step.settings=split.settings;step.privateSettings=split.privateSettings;}
+          for(const step of steps)if(step.gameId==='hanna-method'){const resolved=await resolveHannaResources(db,user.id,step.settings,engine,{assignment:true});try{if(!['review','random'].includes(resolved.activity))engine.generateHannaSession(resolved,0);}catch(error){throw badRequest(error.message||'Ezekkel az eszközökkel nem osztható ki a kör.','INVALID_GAME_SETTINGS');}const split=splitHannaPrivateSettings(resolved);step.settings=split.settings;step.privateSettings=split.privateSettings;}
           const assignmentId = randomUUID();
           const created = await db.query(
             'INSERT INTO assignments(id,teacher_id,title,instructions,due_at) VALUES($1,$2,$3,$4,$5) RETURNING *',
@@ -897,11 +909,12 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
           if(gameId==='hanna-method'){
             await db.query('SELECT pg_advisory_xact_lock(hashtext($1),hashtext($2))',[user.id,'hanna-method']);
             if(!stepId){const resolved=await resolveHannaResources(db,user.id,body.settings||{},engine);const split=splitHannaPrivateSettings(resolved);settings=split.settings;privateSettings=split.privateSettings;}
-            const identity=value=>{const {resourceSnapshot,reviewSnapshot,itemCount,...rest}=value;return stableStringify({...rest,...(!value.adaptive&&value.activity!=='review'?{itemCount}:{})});};
+            const identity=value=>{const {resourceSnapshot,reviewSnapshot,learnedSnapshot,trainingMastery,itemCount,...rest}=value;return stableStringify({...rest,...(!value.adaptive&&value.activity!=='review'?{itemCount}:{})});};
             const pending=await db.query("SELECT * FROM attempts WHERE student_id=$1 AND game_id='hanna-method' AND assignment_step_id IS NOT DISTINCT FROM $2::uuid AND submitted_at IS NULL AND expires_at>now() ORDER BY created_at DESC FOR UPDATE",[user.id,stepId]);
             const matching=pending.rows.find(row=>identity(row.settings)===identity(settings));
             if(matching)return {attempt:publicAttempt(matching)};
             settings=await adaptHannaSettings(db,user.id,settings,stepId,engine);
+            if(isHannaV2(settings))settings=await prepareHannaV2Context(db,user.id,settings,engine);
             if(settings.activity==='review'){const prepared=await prepareHannaReview(db,user.id,settings,engine);const split=splitHannaPrivateSettings(prepared);settings=split.settings;privateSettings={...(privateSettings||{}),...(split.privateSettings||{})};}
           }
           if(gameId==='nback'){
@@ -946,6 +959,7 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
           if(attempt.game_id!=='hanna-method')throw badRequest('Ez nem Hanna Módszer kör.', 'INVALID_DELAY_GATE');
           if(attempt.submitted_at)throw conflict('A kör már elkészült.', 'ATTEMPT_ALREADY_SUBMITTED');
           if(new Date(attempt.expires_at)<=new Date())throw conflict('A kör lejárt.', 'ATTEMPT_EXPIRED');
+          if(isHannaV2(attempt.settings))return checkpointHannaV2(db,attempt,body,engine);
           if(attempt.settings.activity==='review')return {availableAt:null};
           const checkpointHash=hannaCheckpointHash(attempt.settings,Number(attempt.seed),body.answer,engine);
           const elapsed=Date.now()-new Date(attempt.created_at).valueOf();
@@ -1035,7 +1049,7 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
             if (!attempt.available_at) throw conflict('A késleltetett felidézés még nem kezdődött el.', 'DELAY_NOT_STARTED');
             if (new Date(attempt.available_at) > new Date()) throw conflict('A késleltetett felidézés ideje még nem telt le.', 'DELAY_NOT_COMPLETE');
           }
-          if(attempt.game_id==='hanna-method')validateHannaCompletion(attempt,body.answer,engine);
+          if(attempt.game_id==='hanna-method'){if(isHannaV2(attempt.settings))await validateHannaV2Completion(db,attempt,body.answer,engine);else validateHannaCompletion(attempt,body.answer,engine);}
           let score;
           try { score = engine.scoreAttempt(attempt.game_id, attempt.settings, Number(attempt.seed), body.answer, attempt.rules_version, {
             privateSettings: attempt.private_settings ?? null,
@@ -1046,6 +1060,10 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
             delayCheckpointAt: attempt.delay_checkpoint_at ? new Date(attempt.delay_checkpoint_at).toISOString() : null,
           }); }
           catch (error) { throw badRequest(error.message || 'Érvénytelen válasz.', 'INVALID_ANSWER'); }
+          if (attempt.game_id==='hanna-method' && isHannaV2(attempt.settings) && score?.metrics?.completion && score.metrics.completion.status!=='complete') {
+            const encodingIncomplete=score.metrics.completion.status==='encoding-incomplete';
+            throw conflict(encodingIncomplete?'Még nem készítettél kapcsolatot ebben a körben. Indíts új kört, és dolgozz fel legalább egy képpárt.':'Előbb teljesítsd a technika betanító próbáját. A felidézés csak ezután menthető befejezett körként.',encodingIncomplete?'ENCODING_NOT_READY':'TRAINING_NOT_READY');
+          }
           if (!score || !Number.isInteger(score.correct) || !Number.isInteger(score.total) || score.total < 1 || score.correct < 0 || score.correct > score.total) {
             throw new Error('A scoreAttempt érvénytelen eredményt adott.');
           }
@@ -1059,8 +1077,8 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
           let metrics=(attempt.game_id==='nback'||attempt.game_id==='hanna-method'||isCognitiveGame(attempt.game_id))?score.metrics:null;
           if(attempt.game_id==='nback'&&(!metrics||metrics.version!==1||!usableNbackAdaptation({settings:attempt.settings,metrics,percent})))throw new Error('Az N-back motor érvénytelen metrikát adott.');
           if(attempt.game_id==='hanna-method'){
-            if(stars!==null||starBasis!=='hanna-method-no-stars'||!metrics||metrics.schemaVersion!==1||metrics.familyId!=='hanna-method')throw new Error('Érvénytelen Hanna Módszer metrika.');
-            const {resourceSnapshot,reviewSnapshot,...identity}=attempt.settings;
+            if(stars!==null||starBasis!=='hanna-method-no-stars'||!metrics||metrics.schemaVersion!==(isHannaV2(attempt.settings)?2:1)||metrics.familyId!=='hanna-method')throw new Error('Érvénytelen Hanna Módszer metrika.');
+            const {resourceSnapshot,reviewSnapshot,learnedSnapshot,trainingMastery,...identity}=attempt.settings;
             metrics={...metrics,comparabilityKey:sha256(stableStringify({...identity,...(metrics.sourceTextId?{sourceTextId:metrics.sourceTextId}:{}),resources:(resourceSnapshot||[]).map(resource=>({id:resource.id,revision:resource.revision})),...(attempt.settings.activity==='review'?{reviewItems:(reviewSnapshot||[]).map(item=>item.id)}:{})}))};
           }
           if(isCognitiveGame(attempt.game_id)){
@@ -1073,7 +1091,7 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
              VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19) RETURNING *`,
             [id, attemptId, user.id, assignmentId, attempt.assignment_step_id, attempt.game_id, jsonb(attempt.settings), jsonb(body.answer), answerHash, score.correct, score.total, percent, String(score.summary || ''), jsonb(score.details ?? []), duration, attempt.rules_version, stars, starBasis, metrics===null?null:jsonb(metrics)],
           );
-          if(attempt.game_id==='hanna-method')await saveHannaLearning(db,{attempt,result:inserted.rows[0],score:{...score,metrics},answer:body.answer,engine});
+          if(attempt.game_id==='hanna-method'){await saveHannaLearning(db,{attempt,result:inserted.rows[0],score:{...score,metrics},answer:body.answer,engine});await saveHannaV2Mastery(db,{attempt,answer:body.answer,engine});}
           await db.query('UPDATE attempts SET submitted_at=now() WHERE id=$1', [attemptId]);
           return { result: resultRow(inserted.rows[0]), duplicate: false };
         });

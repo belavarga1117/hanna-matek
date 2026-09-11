@@ -1,7 +1,8 @@
 import {renderHannaProgress} from './progress.js';
+import {renderHannaSkillMap} from './profile.js';
 function replaceContent(node,...children){node.replaceChildren(...children.flat(Infinity).filter(child=>child!==null&&child!==undefined&&child!==false));}
 import { HANNA_ACTIVITIES } from './content.js';
-import { normalizeHannaSettings } from './engine.js';
+import { normalizeHannaSettings,createPalaceReadinessTrials } from './engine.js';
 import { createHannaSettings, renderHannaResult } from './ui.js';
 
 const ACTIVITY_BY_ID = new Map(HANNA_ACTIVITIES.map((activity) => [activity.id, activity]));
@@ -13,6 +14,7 @@ const SUBTABS = Object.freeze([
 ]);
 
 function loadCssOnce() {
+  if(typeof document!=='undefined'&&!document.querySelector?.('link[data-hanna-workspace-v2]')){const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('./workspace-v2.css',import.meta.url).href;style.dataset.hannaWorkspaceV2='true';document.head?.append(style);}
   if (typeof document === 'undefined' || document.querySelector?.('link[data-hanna-css]')) return;
   const link = document.createElement('link');
   link.rel = 'stylesheet'; link.href = new URL('./hanna.css', import.meta.url).href; link.dataset.hannaCss = 'true';
@@ -69,7 +71,8 @@ function cleanMaterial(data = {}) {
     ...(String(data.text || '').trim() ? { text: String(data.text).slice(0, 10000) } : {}),
     ...(Array.isArray(data.rubric) && data.rubric.length ? { rubric: data.rubric.slice(0, 100).map((entry, index) => ({
       id: text(entry.id) || `kulcs-${index + 1}`, label: text(entry.label),
-      accepted: (Array.isArray(entry.accepted) ? entry.accepted : String(entry.accepted || '').split(',')).map(text).filter(Boolean).slice(0, 20),
+      accepted: (Array.isArray(entry.accepted) ? entry.accepted : String(entry.accepted || '').split(';')).map(text).filter(Boolean).slice(0, 20),
+      contradictions: (Array.isArray(entry.contradictions) ? entry.contradictions : String(entry.contradictions || '').split(';')).map(text).filter(Boolean).slice(0, 20),
     })).filter((entry) => entry.label) } : {}),
   };
 }
@@ -85,14 +88,19 @@ function palaceEditor(h, state, notify, isActive = () => true) {
   state.data = cleanPalace(state.data);
   if (!state.data.locations.length) state.data.locations = Array.from({ length: 5 }, (_, index) => ({ id: `hely-${index + 1}`, name: '', description: '' }));
   const list = h('ol', { className: 'hanna-location-editor' });
+  let activeLocation=0;
+  const stops=h('nav',{className:'hanna-builder-stops','aria-label':'Szerkesztett memóriahely'});
   const error = h('p', { className: 'hanna-validation', role: 'alert' });
 
   function updateIds() {
     state.data.locations.forEach((location, index) => { if (!location.id) location.id = `hely-${index + 1}`; });
   }
   function render() {
-    list.replaceChildren(...state.data.locations.map((location, index) => {
-      const name = h('input', { type: 'text', maxlength: 100, value: location.name, 'aria-label': `${index+1}. hely neve`, placeholder: `Például: ${index === 0 ? 'bejárati kilincs' : index === 1 ? 'ablakpárkány' : 'következő stabil hely'}`, onInput: (event) => { location.name = event.target.value; notify(); } });
+    activeLocation=Math.min(activeLocation,state.data.locations.length-1);
+    stops.replaceChildren(...state.data.locations.map((location,index)=>h('button',{type:'button','aria-pressed':String(index===activeLocation),onClick:()=>{activeLocation=index;render();}},h('span',{},String(index+1)),h('small',{},location.name||'Új állomás'))));
+    list.replaceChildren(...state.data.locations.flatMap((location, index) => {
+      if(index!==activeLocation)return [];
+      const name = h('input', { type: 'text', maxlength: 100, value: location.name, 'aria-label': `${index+1}. hely neve`, placeholder: `Például: ${index === 0 ? 'bejárati kilincs' : index === 1 ? 'ablakpárkány' : 'következő stabil hely'}`, onInput: (event) => { location.name = event.target.value; const caption=stops.children[index]?.querySelector('small');if(caption)caption.textContent=location.name||'Új állomás'; notify(); } });
       const description = h('textarea', { rows: 2, 'aria-label': `${index+1}. hely leírása`, maxlength: 500, value: location.description || '', placeholder: 'Mitől könnyű felismerni ezt a helyet?', onInput: (event) => { location.description = event.target.value; notify(); } });
       const photo = h('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp', 'aria-label': `${index + 1}. hely opcionális fotója` });
       photo.addEventListener('change', () => {
@@ -113,8 +121,8 @@ function palaceEditor(h, state, notify, isActive = () => true) {
           h('div', { className: 'hanna-photo-row' }, location.photo ? h('img', { src: location.photo, alt: '' }) : null, photo,
             location.photo ? h('button', { type: 'button', className: 'hanna-link-button', onClick: () => { delete location.photo; notify(); render(); } }, 'Fotó törlése') : null)),
         h('div', { className: 'hanna-order-controls', 'aria-label': `${index + 1}. hely mozgatása` },
-          h('button', { type: 'button', disabled: index === 0, 'aria-label': 'Feljebb', onClick: () => { [state.data.locations[index - 1], state.data.locations[index]] = [location, state.data.locations[index - 1]]; notify(); render(); } }, '↑'),
-          h('button', { type: 'button', disabled: index === state.data.locations.length - 1, 'aria-label': 'Lejjebb', onClick: () => { [state.data.locations[index + 1], state.data.locations[index]] = [location, state.data.locations[index + 1]]; notify(); render(); } }, '↓'),
+          h('button', { type: 'button', disabled: index === 0, 'aria-label': 'Feljebb', onClick: () => { [state.data.locations[index - 1], state.data.locations[index]] = [location, state.data.locations[index - 1]]; activeLocation=index-1; notify(); render(); } }, '↑'),
+          h('button', { type: 'button', disabled: index === state.data.locations.length - 1, 'aria-label': 'Lejjebb', onClick: () => { [state.data.locations[index + 1], state.data.locations[index]] = [location, state.data.locations[index + 1]]; activeLocation=index+1; notify(); render(); } }, '↓'),
           h('button', { type: 'button', disabled: state.data.locations.length <= 5, 'aria-label': 'Hely törlése', onClick: () => { state.data.locations.splice(index, 1); updateIds(); notify(); render(); } }, '×')),
       );
     }));
@@ -122,8 +130,8 @@ function palaceEditor(h, state, notify, isActive = () => true) {
   render();
   return h('div', { className: 'hanna-editor-body' },
     h('div', { className: 'hanna-editor-explainer' }, h('strong', {}, '5–30 stabil állomás'), h('p', {}, 'Rendezd abba a sorrendbe, ahogy valóban bejárnád a szobát. Mentés után az útvonaltesztet újra teljesíteni kell.')),
-    list, error,
-    h('button', { type: 'button', className: 'secondary-button', disabled: state.data.locations.length >= 30, onClick: () => { state.data.locations.push({ id: `hely-${Date.now().toString(36)}`, name: '', description: '' }); notify(); render(); } }, '+ Új állomás'),
+    stops,list, error,
+    h('button', { type: 'button', className: 'secondary-button', disabled: state.data.locations.length >= 30, onClick: () => { if(state.data.locations.length>=30)return;state.data.locations.push({ id: `hely-${Date.now().toString(36)}`, name: '', description: '' }); activeLocation=state.data.locations.length-1;notify(); render(); } }, '+ Új állomás'),
   );
 }
 
@@ -131,13 +139,18 @@ function pegEditor(h, state, notify) {
   state.data = cleanPeg(state.data);
   if (state.data.entries.length < 5) state.data.entries = Array.from({ length: 10 }, (_, index) => ({ number: index + 1, label: '' }));
   const grid = h('div', { className: 'hanna-dictionary-grid is-peg' });
+  let pegPage=0;const pages=h('nav',{className:'hanna-builder-pages','aria-label':'Horogtartomány'});
   function render() {
-    grid.replaceChildren(...state.data.entries.map((entry) => h('label', {}, h('span', {}, String(entry.number)), h('input', {
+    pegPage=Math.min(pegPage,Math.floor((state.data.entries.length-1)/10));
+    pages.replaceChildren(...Array.from({length:Math.ceil(state.data.entries.length/10)},(_,index)=>h('button',{type:'button','aria-pressed':String(index===pegPage),onClick:()=>{pegPage=index;render();}},`${index*10+1}–${Math.min((index+1)*10,state.data.entries.length)}`)));
+    grid.replaceChildren(...state.data.entries.slice(pegPage*10,pegPage*10+10).map((entry) => h('label', {}, h('span', {}, String(entry.number)), h('input', {
       type: 'text', maxlength: 100, value: entry.label, placeholder: 'képi horog',
       onInput: (event) => { entry.label = event.target.value; notify(); },
     }))));
   }
   function resize(size) {
+    const removed=state.data.entries.slice(size).filter(entry=>text(entry.label));
+    if(removed.length&&globalThis.confirm&&!globalThis.confirm(`A rövidebb listából ${removed.length} kitöltött horog kimarad. Folytatod a rövidítést?`))return;
     const old = new Map(state.data.entries.map((entry) => [entry.number, entry.label]));
     state.data.entries = Array.from({ length: size }, (_, index) => ({ number: index + 1, label: old.get(index + 1) || '' })); notify(); render();
   }
@@ -145,7 +158,7 @@ function pegEditor(h, state, notify) {
   return h('div', { className: 'hanna-editor-body' },
     h('div', { className: 'hanna-editor-explainer' }, h('strong', {}, 'Fix szám–kép horgok'), h('p', {}, 'Minden sorszámhoz egyetlen gyorsan elképzelhető képet adj. A játék oda-vissza gyakoroltatja őket.')),
     h('div', { className: 'hanna-size-presets' }, ...[10, 20, 100].map((size) => h('button', { type: 'button', className: state.data.entries.length === size ? 'is-active' : '', onClick: () => resize(size) }, `${size} elem`))),
-    grid,
+    pages,grid,
   );
 }
 
@@ -156,15 +169,18 @@ function majorEditor(h, state, notify) {
   state.data.entries = entries;
   const filter = h('input', { type: 'search', placeholder: 'Kód vagy szó keresése…', 'aria-label': 'Keresés a 00–99 szótárban' });
   const grid = h('div', { className: 'hanna-dictionary-grid is-major' });
+  let majorPage=0;const pages=h('nav',{className:'hanna-builder-pages','aria-label':'Számképtartomány'});
   function render(query = '') {
     const needle = text(query).toLocaleLowerCase('hu');
-    grid.replaceChildren(...entries.filter((entry) => !needle || entry.code.includes(needle) || entry.label.toLocaleLowerCase('hu').includes(needle)).map((entry) => h('label', {},
+    const matches=entries.filter((entry)=>!needle||entry.code.includes(needle)||entry.label.toLocaleLowerCase('hu').includes(needle));majorPage=Math.min(majorPage,Math.max(0,Math.ceil(matches.length/10)-1));
+    pages.replaceChildren(...Array.from({length:Math.ceil(matches.length/10)},(_,index)=>h('button',{type:'button','aria-pressed':String(index===majorPage),onClick:()=>{majorPage=index;render(filter.value);}},needle?String(index+1):`${String(index*10).padStart(2,'0')}–${index*10+9}`)));
+    grid.replaceChildren(...matches.slice(majorPage*10,majorPage*10+10).map((entry) => h('label', {},
       h('span', {}, entry.code), h('input', { type: 'text', maxlength: 100, value: entry.label, placeholder: 'kép-szó', onInput: (event) => { entry.label = event.target.value; notify(); } }))));
   }
-  filter.addEventListener('input', () => render(filter.value)); render();
+  filter.addEventListener('input', () => {majorPage=0;render(filter.value);}); render();
   return h('div', { className: 'hanna-editor-body' },
     h('div', { className: 'hanna-editor-explainer' }, h('strong', {}, 'Szerkeszthető 00–99 képszótár'), h('p', {}, 'Részlegesen is menthető. A Számszörny csak a valóban kitöltött kódokat használja.')),
-    filter, h('p', { className: 'hanna-major-count' }, 'A mentés az üres sorokat kihagyja.'), grid,
+    filter, h('p', { className: 'hanna-major-count' }, 'A mentés az üres sorokat kihagyja.'), pages,grid,
   );
 }
 
@@ -184,16 +200,17 @@ function materialEditor(h, state, notify) {
       h('button', { type: 'button', 'aria-label': `${index + 1}. tétel törlése`, onClick: () => { items.splice(index, 1); notify(); render(); } }, '×'))));
     rubricList.replaceChildren(...rubric.map((entry, index) => h('article', {},
       h('input', { type: 'text', maxlength: 200, value: entry.label, 'aria-label':`${index+1}. kulcsgondolat`, placeholder: 'Kulcsgondolat', onInput: (event) => { entry.label = event.target.value; notify(); } }),
-      h('input', { type: 'text', maxlength: 1000, value: (entry.accepted || []).join(', '), 'aria-label':`${index+1}. kulcsgondolat elfogadott alakjai`, placeholder: 'Elfogadott alakok, vesszővel', onInput: (event) => { entry.accepted = event.target.value.split(',').map(text).filter(Boolean); notify(); } }),
+      h('input', { type: 'text', maxlength: 1000, value: (entry.accepted || []).join('; '), 'aria-label':`${index+1}. kulcsgondolat elfogadott alakjai`, placeholder: 'Elfogadott mondatok; pontosvesszővel', onInput: (event) => { entry.accepted = event.target.value.split(';').map(text).filter(Boolean); notify(); } }),
+      h('input', { type: 'text', maxlength: 1000, value: (entry.contradictions || []).join('; '), 'aria-label':`${index+1}. kulcsgondolat ellentmondó alakjai`, placeholder: 'Ellentmondó mondatok; pontosvesszővel', onInput: (event) => { entry.contradictions = event.target.value.split(';').map(text).filter(Boolean); notify(); } }),
       h('button', { type: 'button', 'aria-label': `${index + 1}. kulcspont törlése`, onClick: () => { rubric.splice(index, 1); notify(); render(); } }, '×'))));
   }
   render();
   return h('div', { className: 'hanna-editor-body' },
-    h('div', { className: 'hanna-editor-explainer' }, h('strong', {}, 'Saját tananyag'), h('p', {}, 'Fogalmakat, kulcsszavakat vagy rövid szöveget adhatsz. A rubrika előre rögzíti, mi számít elfogadott kulcsgondolatnak.')),
+    h('div', { className: 'hanna-editor-explainer' }, h('strong', {}, 'Saját tananyag'), h('p', {}, 'Fogalmakat, kulcsszavakat vagy rövid szöveget adhatsz. A rubrika előre rögzíti az elfogadott megfogalmazásokat és az ismert ellentmondásokat. Más helyes átfogalmazást külön önellenőrzéssel jelölhetsz: a rendszer nem végez teljes jelentéselemzést.')),
     field(h, 'Forrásszöveg (opcionális)', h('textarea', { rows: 7, maxlength: 10000, value: state.data.text || '', onInput: (event) => { state.data.text = event.target.value; notify(); } }), 'Legfeljebb 10 000 karakter.'),
-    h('div', { className: 'hanna-editor-section-title' }, h('h3', {}, `Tételek (${items.length}/100)`), h('button', { type: 'button', className: 'secondary-button', disabled: items.length >= 100, onClick: () => { items.push({ id: `tetel-${Date.now().toString(36)}`, label: '' }); notify(); render(); } }, '+ Tétel')),
+    h('div', { className: 'hanna-editor-section-title' }, h('h3', {}, `Tételek (${items.length}/100)`), h('button', { type: 'button', className: 'secondary-button', disabled: items.length >= 100, onClick: () => { if(items.length>=100)return;items.push({ id: `tetel-${Date.now().toString(36)}`, label: '' }); notify(); render(); } }, '+ Tétel')),
     itemList,
-    h('div', { className: 'hanna-editor-section-title' }, h('h3', {}, 'Elfogadott kulcsgondolatok'), h('button', { type: 'button', className: 'secondary-button', disabled: rubric.length >= 100, onClick: () => { rubric.push({ id: `kulcs-${Date.now().toString(36)}`, label: '', accepted: [] }); notify(); render(); } }, '+ Kulcspont')),
+    h('div', { className: 'hanna-editor-section-title' }, h('h3', {}, 'Elfogadott kulcsgondolatok'), h('button', { type: 'button', className: 'secondary-button', disabled: rubric.length >= 100, onClick: () => { if(rubric.length>=100)return;rubric.push({ id: `kulcs-${Date.now().toString(36)}`, label: '', accepted: [] }); notify(); render(); } }, '+ Kulcspont')),
     rubricList,
   );
 }
@@ -212,6 +229,9 @@ function resourceEditor(h, resource, handlers) {
   const status = h('p', { className: 'hanna-editor-status', role: 'status' });
   let saving = false;
   let active = true;
+  function canLeave(){return !state.dirty||!globalThis.confirm||globalThis.confirm('Nem mentett módosításaid vannak. Elhagyod a szerkesztőt mentés nélkül?');}
+  function unload(event){if(active&&state.dirty){event.preventDefault();event.returnValue='';}}
+  globalThis.addEventListener?.('beforeunload',unload);
   function notify() { state.dirty = true; status.textContent = 'Nem mentett módosítások.'; }
   function renderBody() {
     state.kind = kind.value;
@@ -239,41 +259,47 @@ function resourceEditor(h, resource, handlers) {
   } }, original ? 'Módosítások mentése' : 'Eszköz létrehozása');
   renderBody();
   replaceContent(element,
-    h('header', {}, h('button', { type: 'button', className: 'hanna-link-button', onClick: () => { active = false; handlers.close(); } }, '← Eszközlista'), h('span', { className: 'hanna-kicker' }, original ? 'SZERKESZTÉS' : 'ÚJ SAJÁT ESZKÖZ'), h('h2', {}, original?.title || 'Új eszköz')),
+    h('header', {}, h('button', { type: 'button', className: 'hanna-link-button', onClick: () => { if(!canLeave())return; active = false; handlers.close(); } }, '← Eszközlista'), h('span', { className: 'hanna-kicker' }, original ? 'SZERKESZTÉS' : 'ÚJ SAJÁT ESZKÖZ'), h('h2', {}, original?.title || 'Új eszköz')),
     h('div', { className: 'hanna-resource-meta' }, field(h, 'Típus', kind), field(h, 'Név', title)), body, status,
     h('div', { className: 'hanna-editor-actions' }, save, original ? h('button', { type: 'button', className: 'hanna-danger-button', onClick: () => handlers.remove(original) }, 'Eszköz archiválása') : null),
   );
-  return { element, state, dispose() { active = false; } };
+  return { element, state, canLeave, dispose() { active = false;globalThis.removeEventListener?.('beforeunload',unload); } };
 }
 
 function routeReadiness(h, resource, handlers) {
-  const locations = resource.data?.locations || [];
-  const element = h('section', { className: 'hanna-readiness' });
-  const answers = locations.map((_, index) => ({ index, value: '' }));
-  let revealed = false;
-  function render() {
-    replaceContent(element,
-      h('header', {}, h('button', { type: 'button', className: 'hanna-link-button', onClick: handlers.close }, '← Vissza'), h('span', { className: 'hanna-kicker' }, 'ÚTVONALTESZT'), h('h2', {}, resource.title),
-        h('p', {}, 'A sorrend most rejtve marad. Idézd fel a helyeket index szerint; 90%-tól lesz kész a palota.')),
-      revealed ? h('ol', { className: 'hanna-route-study' }, ...locations.map((location, index) => h('li', {}, h('span', {}, String(index + 1)), h('div', {}, h('strong', {}, location.name), location.description ? h('p', {}, location.description) : null)))) : null,
-      !revealed ? h('div', { className: 'hanna-readiness-form' }, ...answers.map((answer, index) => field(h, `${index + 1}. állomás`, h('input', { type: 'text', maxlength: 100, value: answer.value, onInput: (event) => { answer.value = event.target.value; } })))) : null,
-      h('p', { className: 'hanna-editor-status', role: 'status', dataset: { readinessStatus: 'true' } }),
-      h('div', { className: 'hanna-editor-actions' },
-        !revealed ? h('button', { type: 'button', className: 'primary-button', onClick: async (event) => {
-          const button = event.currentTarget; button.disabled = true;
-          const status = element.querySelector?.('[data-readiness-status="true"]'); status.textContent = 'Ellenőrzés…';
-          try {
-            const response = await handlers.submit({ revision: resource.revision, answers: answers.filter((answer) => text(answer.value)).map((answer) => ({ index: answer.index, value: text(answer.value) })) });
-            const score = response?.percent ?? response?.score?.percent ?? (response?.resource?.ready ? 100 : null);
-            status.textContent = response?.resource?.ready || response?.ready ? `✓ ${score ?? 90}% – a palota készen áll, játékban választható.` : `${score ?? 0}% – még nem érte el a 90%-ot. Tanuld át és próbáld újra.`;
-            if (response?.resource) handlers.updated(response.resource);
-          } catch (error) { if (error?.name !== 'AbortError') status.textContent = error?.message || 'Az útvonalteszt ellenőrzése nem sikerült.'; }
-          finally { button.disabled = false; }
-        } }, 'Rejtett útvonal ellenőrzése') : null,
-        h('button', { type: 'button', className: 'secondary-button', onClick: () => { revealed = !revealed; render(); } }, revealed ? 'Teszt kitöltése' : 'Útvonal tanulása')),
-    );
+  const plan=createPalaceReadinessTrials(resource),locations=resource.data?.locations||[];
+  const element=h('section',{className:'hanna-readiness'});
+  const answers=plan.trials.map(trial=>({trialId:trial.id,value:''}));
+  let phase='study',index=0,active=true,saving=false,result=null,error='';
+  const close=()=>{active=false;handlers.close();};
+  const title=()=>h('header',{},h('button',{type:'button',className:'hanna-link-button',onClick:close},'← Vissza'),h('span',{className:'hanna-kicker'},'SAJÁT PALOTA · ÚTVONALTANULÁS'),h('h2',{},resource.title));
+  function draw(){
+    if(!active)return;
+    const location=locations[index],trial=plan.trials[index];
+    const body=phase==='study'?h('div',{className:'hanna-readiness-question'},
+      h('span',{className:'hanna-kicker'},`${index+1} / ${locations.length} · FIX HELY`),
+      location.photo?h('img',{src:location.photo,alt:'',style:{maxHeight:'230px',maxWidth:'100%',objectFit:'contain',borderRadius:'18px'}}):null,
+      h('h3',{},location.name),h('p',{},location.description||'Képzeld el a helyet a saját útvonaladon.'),
+      h('p',{},`${index>0?`Előtte: ${locations[index-1].name}. `:'Ez az első állomás. '}${index+1<locations.length?`Utána: ${locations[index+1].name}.`:'Ez az útvonal vége.'}`),
+      h('div',{className:'hanna-editor-actions'},h('button',{type:'button',className:'secondary-button',disabled:index===0,onClick:()=>{index--;draw();}},'Előző hely'),
+        h('button',{type:'button',className:'primary-button',onClick:()=>{if(index+1<locations.length)index++;else{phase='test';index=0;}draw();}},index+1<locations.length?'Következő hely':'Jöhet a rejtett útvonalpróba')))
+      :phase==='test'?h('div',{className:'hanna-readiness-question'},h('span',{className:'hanna-kicker'},`${index+1} / ${plan.trials.length} · FELIDÉZÉS`),h('h3',{},trial.prompt),
+        h('input',{type:'text',maxlength:100,'aria-label':'Felidézett memóriahely',value:answers[index].value,onInput:event=>{answers[index].value=event.target.value;}}),
+        h('p',{},'A helyek sorrendje most rejtve marad. A sorszámokra és a szomszédos helyekre is rákérdezünk.'),
+        h('div',{className:'hanna-editor-actions'},h('button',{type:'button',className:'secondary-button',disabled:index===0||saving,onClick:()=>{index--;draw();}},'Előző kérdés'),
+          h('button',{type:'button',className:'primary-button',disabled:saving,onClick:async()=>{
+            if(saving)return;if(index+1<answers.length){index++;draw();return;}saving=true;error='';draw();
+            try{result=await handlers.submit({version:2,revision:resource.revision,answers:answers.map(row=>({...row,value:text(row.value)}))});if(!active)return;if(result.resource)handlers.updated(result.resource);phase='result';}
+            catch(cause){if(active&&cause.name!=='AbortError')error=cause.message||'Az ellenőrzés nem sikerült.';}
+            finally{saving=false;if(active)draw();}
+          }},saving?'Ellenőrzés…':index+1<answers.length?'Válasz rögzítése':'Útvonal ellenőrzése')))
+      :h('div',{className:'hanna-readiness-question'},h('span',{className:'hanna-kicker'},'ÚTVONALPRÓBA EREDMÉNYE'),h('h3',{},`${result.percent}% · ${result.correct}/${result.total}`),
+        h('p',{},result.ready?'A palota készen áll: a játékban már ehhez az útvonalhoz kapcsolhatod az új tárgyakat.':'A 90%-os készültséghez még gyakorold át az útvonalat. A sorszámot és a szomszédokat együtt tanuld.'),
+        h('button',{type:'button',className:'secondary-button',onClick:()=>{phase='study';index=0;answers.forEach(row=>row.value='');draw();}},'Útvonal újratanulása'),
+        result.ready?h('button',{type:'button',className:'primary-button',onClick:close},'Kész, használom a palotát'):null);
+    replaceContent(element,title(),body,error?h('p',{role:'alert',className:'hanna-inline-error'},error):null);
   }
-  render(); return element;
+  element.dispose=()=>{active=false;};draw();return element;
 }
 
 export function createHannaWorkspace({ h, school, onStart = () => {} } = {}) {
@@ -283,9 +309,11 @@ export function createHannaWorkspace({ h, school, onStart = () => {} } = {}) {
   let disposed = false;
   let generation = 0;
   let resources = [];
+  let mastery = [];
   let mode = 'list';
   let selected = null;
   let viewDispose = null;
+  let editorCanLeave=null;
   const userId = school?.user?.id;
 
   function current(token) { return !disposed && token === generation && school?.user?.id === userId; }
@@ -295,7 +323,7 @@ export function createHannaWorkspace({ h, school, onStart = () => {} } = {}) {
     try {
       const data = await apiCall(school, '/api/hanna/resources', { method: 'GET' });
       if (!current(token)) return;
-      resources = Array.isArray(data?.resources) ? data.resources : []; mode = 'list'; renderList();
+      resources = Array.isArray(data?.resources) ? data.resources : []; mastery=Array.isArray(data?.mastery)?data.mastery:[]; mode = 'list'; renderList();
     } catch (error) {
       if (!current(token) || error?.name === 'AbortError') return;
       replaceContent(element, statusCard(h, 'error', 'Az eszközök nem töltődtek be', error?.message || 'Ez hálózati hiba, nem üres eszközlista.', load));
@@ -304,21 +332,21 @@ export function createHannaWorkspace({ h, school, onStart = () => {} } = {}) {
   function exactPreviewSettings(resource) {
     let raw = { activity: KIND_ACTIVITY[resource.kind], resourceIds: [resource.id] };
     if (resource.kind === 'palace') raw.itemCount = Math.min(30, Math.max(5, resource.data?.locations?.length || 5));
-    if (resource.kind === 'peg') raw.itemCount = Math.min(30, Math.max(5, resource.data?.entries?.length || 5));
+    if (resource.kind === 'peg') {raw.itemCount = Math.min(100, Math.max(5, resource.data?.entries?.length || 10));raw.trainingSize=10;}
     if (resource.kind === 'material' && resource.data?.text) raw = { ...raw, activity: 'text', itemCount: 1, contentLevel: 'material', recallMode: resource.data?.rubric?.length ? 'meaning' : 'verbatim' };
-    else if (resource.kind === 'material') raw = { ...raw, activity: 'concept', itemCount: Math.min(6, resource.data?.items?.length || 3), contentLevel: 'material' };
-    const base = normalizeHannaSettings(raw);
+    else if (resource.kind === 'material') {const count=resource.data?.items?.length||0;const concepts=resource.data?.items?.every(item=>item.meaning);raw={...raw,activity:concepts?'concept':'chain',itemCount:Math.min(8,count),contentLevel:'material'};}
+    const base = normalizeHannaSettings({...raw,resourceSnapshot:[resource]});
     return school?.user?.role === 'teacher' ? { ...base, resourceIds: [resource.id], resourceSnapshot: [resource] } : { ...base, resourceIds: [resource.id] };
   }
   function canPreview(resource) {
     if (resource.kind === 'palace') return resource.ready && (resource.data?.locations?.length || 0) >= 5;
     if (resource.kind === 'peg') return (resource.data?.entries?.length || 0) >= 5;
     if (resource.kind === 'major') return (resource.data?.entries?.length || 0) >= 1;
-    return !!resource.data?.text || (resource.data?.items?.length || 0) >= 3;
+    return !!resource.data?.text || (resource.data?.items?.length||0)>=(resource.data?.items?.every(item=>item.meaning)?3:5);
   }
   function renderList() {
     if (disposed) return;
-    viewDispose?.(); viewDispose = null;
+    viewDispose?.(); viewDispose = null; editorCanLeave=null;
     generation++; mode = 'list'; selected = null;
     replaceContent(element,
       h('div', { className: 'hanna-section-heading' }, h('div', {}, h('span', { className: 'hanna-kicker' }, 'SAJÁT ERŐFORRÁSOK'), h('h2', {}, 'A saját módszertárad'), h('p', {}, 'Szerkeszd bátran: a korábban tanult anyag és eredményed megmarad.')),
@@ -327,9 +355,10 @@ export function createHannaWorkspace({ h, school, onStart = () => {} } = {}) {
         h('div', { className: 'hanna-resource-icon', 'aria-hidden': 'true' }, KIND_ICON[resource.kind] || '◇'),
         h('div', { className: 'hanna-resource-copy' }, h('span', { className: 'hanna-kicker' }, `${KIND_LABEL[resource.kind] || resource.kind} · R${resource.revision}`), h('h3', {}, resource.title),
           h('p', {}, resource.kind === 'palace' ? `${resource.data?.locations?.length || 0} állomás · ${resource.ready ? 'útvonal kész' : 'útvonalteszt kell'}` : resource.kind === 'major' ? `${resource.data?.entries?.length || 0}/100 kitöltött kód` : resource.kind === 'peg' ? `${resource.data?.entries?.length || 0} horog` : resource.data?.text?`Szöveg · ${resource.data?.rubric?.length||0} kulcspont`:`${resource.data?.items?.length || 0} tétel`),
+          resource.kind==='peg'&&(resource.data?.entries?.length||0)>0?h('p',{className:'hanna-peg-mastery'},`${mastery.find(row=>row.resourceId===resource.id&&row.revision===resource.revision)?.mastered||0} / ${resource.data?.entries?.length||0} horog két irányban begyakorolva`,h('small',{},'A gyors, segítség nélküli előhívás külön-külön számít. Egy tízes kör nem igazolja az egész listát.')):null,
           h('small', {}, `Módosítva: ${formatDate(resource.updatedAt)}`)),
         h('div', { className: 'hanna-resource-actions' },
-          h('button', { type: 'button', className: 'secondary-button', disabled: !canPreview(resource), onClick: () => onStart(exactPreviewSettings(resource)) }, resource.kind === 'palace' && !resource.ready ? 'Teszt után használható' : !canPreview(resource) ? 'Adj legalább 3 tételt' : school?.user?.role === 'teacher' ? 'Saját előnézet' : 'Használom játékban'),
+          h('button', { type: 'button', className: 'secondary-button', disabled: !canPreview(resource), onClick: () => onStart(exactPreviewSettings(resource)) }, resource.kind === 'palace' && !resource.ready ? 'Teszt után használható' : !canPreview(resource) ? resource.kind==='peg'?'Adj legalább 5 horgot':resource.kind==='major'?'Adj legalább 1 számképet':resource.kind==='palace'?'Adj legalább 5 helyet':resource.data?.items?.every(item=>item.meaning)?'Adj legalább 3 fogalmat':'Adj legalább 5 tételt' : school?.user?.role === 'teacher' ? 'Saját előnézet' : 'Használom játékban'),
           resource.kind === 'palace' ? h('button', { type: 'button', className: 'hanna-link-button', onClick: () => openReadiness(resource) }, resource.ready ? 'Útvonal újratesztelése' : 'Útvonalteszt') : null,
           h('button', { type: 'button', className: 'hanna-link-button', onClick: () => openEditor(resource) }, 'Szerkesztés')),
       ))) : statusCard(h, 'empty', 'Még nincs saját eszközöd', 'Készíts palotát, peg-listát, 00–99 szótárt vagy saját tananyagot.'),
@@ -337,7 +366,7 @@ export function createHannaWorkspace({ h, school, onStart = () => {} } = {}) {
     );
   }
   function openEditor(resource) {
-    viewDispose?.(); viewDispose = null;
+    viewDispose?.(); viewDispose = null; editorCanLeave=null;
     generation++; mode = 'edit'; selected = resource;
     const editor = resourceEditor(h, resource, {
       close: renderList,
@@ -364,13 +393,13 @@ export function createHannaWorkspace({ h, school, onStart = () => {} } = {}) {
         }
       },
     });
-    viewDispose = editor.dispose;
+    viewDispose = editor.dispose; editorCanLeave=editor.canLeave;
     replaceContent(element, editor.element);
   }
   function openReadiness(resource) {
-    viewDispose?.(); viewDispose = null;
+    viewDispose?.(); viewDispose = null; editorCanLeave=null;
     generation++; mode = 'readiness'; selected = resource;
-    replaceContent(element, routeReadiness(h, resource, {
+    const readinessView=routeReadiness(h, resource, {
       close: renderList,
       submit: async (body) => {
         const token = generation;
@@ -379,10 +408,10 @@ export function createHannaWorkspace({ h, school, onStart = () => {} } = {}) {
         return response;
       },
       updated: (updated) => { const index = resources.findIndex((entry) => entry.id === updated.id); if (index >= 0) resources[index] = updated; selected = updated; },
-    }));
+    });viewDispose=()=>readinessView.dispose();replaceContent(element,readinessView);
   }
   load();
-  return { element, refresh: load, dispose() { disposed = true; generation++; viewDispose?.(); viewDispose = null; }, get resources() { return resources; } };
+  return { element, refresh: load, canLeave(){return editorCanLeave?.()??true;}, dispose() { disposed = true; generation++; viewDispose?.(); viewDispose = null; editorCanLeave=null; }, get resources() { return resources; } };
 }
 
 function discoveryView(h, school, onStart) {
@@ -406,7 +435,7 @@ function discoveryView(h, school, onStart) {
           h('span', { className: 'hanna-kicker' }, activity.technique), h('h2', {}, activity.title), h('p', { className: 'hanna-lead' }, activity.description),
           h('div', { className: 'hanna-mini-lesson' }, h('strong', {}, 'A saját tanító szakasz lényege'), h('p', {}, activity.instruction)),
           editor?.element || h('div', { className: 'hanna-editor-explainer' }, h('strong', {}, 'Csak valóban esedékes tartalommal indul'), h('p', {}, 'A Napi tréning fül a szerver szerint esedékes pillanatképeket mutatja. Itt nem készül friss helyettesítő lista.')),
-          h('button', { type: 'button', className: 'primary-button hanna-wide-button', onClick: () => onStart(editor ? editor.getValue() : { hannaVersion: 1, activity: 'review' }) }, selected === 'review' ? 'Esedékes ismétlés ellenőrzése' : school?.user?.role === 'teacher' ? 'Saját próbakör megnyitása' : 'Ezt próbálom ki')),
+          h('button', { type: 'button', className: 'primary-button hanna-wide-button', onClick: () => onStart(editor ? editor.getValue() : { hannaVersion: 2, activity: 'review' }) }, selected === 'review' ? 'Esedékes ismétlés ellenőrzése' : school?.user?.role === 'teacher' ? 'Saját próbakör megnyitása' : 'Ezt próbálom ki')),
       ),
     );
   }
@@ -423,11 +452,11 @@ function dailyView(h, dashboard, onStart) {
       h('ol', { className: 'hanna-daily-plan' }, ...plan.map((item, index) => {
         const activity = ACTIVITY_BY_ID.get(item.activity);
         return h('li', {}, h('span', {}, String(index + 1)), h('div', {}, h('strong', {}, item.label || activity?.title || item.activity), h('p', {}, activity?.technique || 'Hanna Módszer')),
-          h('small', {}, item.completed?'✓ Ma kész':item.available===false?'Később esedékes':`${item.minutes || 2} perc`), h('button', { type: 'button', className: 'secondary-button', disabled:item.available===false, onClick: () => onStart(item.activity === 'review' ? { hannaVersion: 1, activity: 'review' } : normalizeHannaSettings({ activity: item.activity })) }, item.completed?'Újra gyakorlom':item.available===false?'Még nincs esedékes':'Indítás'));
+          h('small', {}, item.completed?'✓ Ma kész':item.available===false?(item.unavailableReason||'Később esedékes'):`${item.minutes || 2} perc`), h('button', { type: 'button', className: 'secondary-button', disabled:item.available===false, onClick: () => onStart(item.activity === 'review' ? { hannaVersion: 2, activity: 'review' } : normalizeHannaSettings({ activity: item.activity,...(item.sourceResultId?{sourceResultId:item.sourceResultId}:{}) })) }, item.completed?'Újra gyakorlom':item.available===false?'Előbb tanulj':'Indítás'));
       })),
       h('aside', { className: 'hanna-due-card' }, h('span', { className: 'hanna-kicker' }, 'KÉSŐBBI VISSZAHÍVÁS'), h('h3', {}, due.length ? `${due.length} esedékes emlék` : 'Most nincs esedékes emlék'),
         due.length ? h('ul', {}, ...due.slice(0, 5).map((entry) => h('li', {}, h('strong', {}, entry.label), h('small', {}, `${ACTIVITY_BY_ID.get(entry.sourceActivity)?.title || entry.sourceActivity} · ${formatDate(entry.dueAt)}`)))) : h('p', {}, dashboard.nextDueAt ? `A következő valódi ismétlés: ${formatDate(dashboard.nextDueAt)}.` : 'Az első befejezett tanulókör után, a tényleges intervallum leteltével jelenik meg itt ismétlés.'),
-        due.length ? h('button', { type: 'button', className: 'primary-button', onClick: () => onStart({ hannaVersion: 1, activity: 'review', itemCount:Math.min(10,due.length), reviewIds: due.slice(0,10).map((entry) => entry.id) }) }, 'Esedékesek felidézése') : null),
+        due.length ? h('button', { type: 'button', className: 'primary-button', onClick: () => onStart({ hannaVersion: 2, activity: 'review', itemCount:Math.min(10,due.length), reviewIds: due.slice(0,10).map((entry) => entry.id) }) }, 'Esedékesek felidézése') : null),
     ));
 }
 
@@ -442,6 +471,7 @@ function progressView(h, dashboard, teacher = false, selectedStudent = null) {
       h('article', {}, h('span', {}, 'Befejezett körök'), h('strong', {}, String(results.length))),
       h('article', {}, h('span', {}, 'Esedékes felidézés'), h('strong', {}, String(dashboard.dueCount ?? dashboard.due?.length ?? 0))),
       h('article', {}, h('span', {}, 'Mérföldkövek'), h('strong', {}, String(milestones.length)))) : null,
+    (!teacher||selectedStudent)?renderHannaSkillMap(h,results,{teacher}):null,
     (!teacher||selectedStudent)&&results.length?renderHannaProgress(h,results,{teacher}):null,
     milestones.length ? h('div', { className: 'hanna-milestones' }, ...milestones.map((entry) => h('article', {}, h('span', { 'aria-hidden': 'true' }, '◆'), h('div', {}, h('strong', {}, entry.label), h('small', {}, formatDate(entry.at)))))) : null,
     teacher && !selectedStudent ? statusCard(h, 'empty', 'Nincs kiválasztott tanuló', 'A fenti választóban jelölj ki egy hozzád tartozó tanulót. Tanári saját próbakör nem jelenik meg tanulói eredményként.')
@@ -450,7 +480,7 @@ function progressView(h, dashboard, teacher = false, selectedStudent = null) {
         const activity = ACTIVITY_BY_ID.get(result.metrics?.activity || entry.settings?.activity);
         return h('details', { className: 'hanna-result-row' }, h('summary', {}, h('span', { className: 'hanna-result-icon' }, activity?.icon || '✦'),
           h('div', {}, h('strong', {}, activity?.title || 'Hanna-kör'), h('small', {}, `${formatDate(entry.at || entry.completedAt)} · ${result.metrics?.technique || activity?.technique || ''}`)),
-          h('b', {}, result.percent == null ? '—' : `${result.percent}%`)), renderHannaResult(h, result));
+          h('b', {}, result.percent == null ? '—' : `${result.percent}%`)), renderHannaResult(h, result,{teacher,studentId:selectedStudent?.id,studentLabel:selectedStudent?.displayName||selectedStudent?.name}));
       })) : statusCard(h, 'empty', 'Még nincs Hanna-eredmény', teacher ? 'Ennél a tanulónál még nincs befejezett, mentett Hanna-kör.' : 'Az első mentett kör után itt jelenik meg a tételes, gyakorlati visszajelzés.'),
   );
 }
@@ -511,6 +541,7 @@ export function createHannaHub({ h, school, onStart = () => {}, initialView='dis
   }
   function switchTab(id) {
     if (active === id) return;
+    if(child?.canLeave&&!child.canLeave())return;
     child?.dispose?.(); child = null; active = id;
     if (id === 'daily' && dashboardState === 'idle') loadDashboard();
     else if (id === 'progress') {
@@ -554,5 +585,5 @@ export function createHannaHub({ h, school, onStart = () => {}, initialView='dis
   }
   render();
   if(active==='daily')loadDashboard();
-  return { element, dispose() { disposed = true; generation++; child?.dispose?.(); child = null; } };
+  return { element, canLeave(){return child?.canLeave?.()??true;}, dispose() { disposed = true; generation++; child?.dispose?.(); child = null; } };
 }

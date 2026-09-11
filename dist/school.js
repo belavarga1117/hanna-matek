@@ -796,7 +796,7 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
         h('dt',{},result.gameId==='hanna-method'?'Kódolási idő':result.gameId==='nback'?'Ingerenkénti idő':cognitive?'Mód':'Megjegyzési idő'),h('dd',{},result.gameId==='hanna-method'?(result.settings.encodingMs?`${result.settings.encodingMs/1000} mp`:'Saját tempó'):result.gameId==='nback'?(result.settings?.selfPaced?'Saját tempó':`${Number(result.settings?.intervalMs||0)/1000} mp`):cognitive?(result.settings?.mode==='practice'?'Gyakorlás':'Rögzített próba'):`${result.settings?.seconds||10} mp`),
         h('dt',{},'Feladatsor'),h('dd',{},result.assignmentId?h('a',{className:'text-link',href:`#/tanar/feladatsorok?id=${encodeURIComponent(result.assignmentId)}`},result.assignmentTitle||'A kiosztott feladatsor megnyitása'):'Szabad gyakorlás'),
       ),result.rulesVersion===1?h('p',{className:'muted'},'Korábbi szabályokkal mentett kör.'):null),
-      result.gameId==='hanna-method'?renderHannaResult(h,result):result.gameId==='nback'?renderNbackResult(h,result):cognitive?h('div', {}, renderCognitiveResult(h,result), h('section', {className: 'school-card answer-review'},
+      result.gameId==='hanna-method'?renderHannaResult(h,result,{teacher:true,studentId:result.studentId}):result.gameId==='nback'?renderNbackResult(h,result):cognitive?h('div', {}, renderCognitiveResult(h,result), h('section', {className: 'school-card answer-review'},
         h('h2', {}, 'Válaszonkénti áttekintés'),
         details.length ? h('div', {className: 'answer-review-list'}, details.map((detail, index) => h('article', {className: `review-answer ${detail.correct ? 'correct' : 'incorrect'}`},
           h('span', {className: 'review-mark', 'aria-label': detail.correct ? 'Helyes' : 'Hibás'}, detail.correct ? '✓' : '×'),
@@ -851,6 +851,7 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
       const [progress, resultsData] = await Promise.all([api.get('/api/progress', {signal}), api.get('/api/results', {signal})]);
       if (!isCurrent(generation)) return;
       const results = resultsData.results || [];
+      const hannaRounds = results.filter(result => result.gameId === 'hanna-method').length;
       shell(h('div', {},
         schoolHero('HALADÁSOM', progress.rank || 'Kezdő', 'Minden befejezett kör hozzáad valamit a gyakorlásodhoz.'),
         h('section', {className: 'metric-grid'},
@@ -862,8 +863,9 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
           h('div', {className: 'rank-orbit', 'aria-hidden': 'true'}, '✦'),
           h('div', {}, h('span', {className: 'eyebrow'}, 'RANG'), h('h2', {}, progress.rank || 'Kezdő'), h('p', {}, rankHint(progress.stars || 0))),
         ),
+        hannaRounds ? h('section', {className: 'school-card'}, h('h2', {}, 'Hanna Módszer · saját készségtérkép'), h('p', {}, `${hannaRounds} mentett kör. A felidézés, a sorrend, az idő és a segítség használata külön mutatóként jelenik meg.`), h('a', {className: 'primary-button', href: '#/hanna-modszer?view=progress'}, 'Megnézem a készségeimet')) : null,
         sectionHeading('Játékok és szintek', `${(progress.games || []).length} teljesített mód`),
-        (progress.games || []).length ? h('div', {className: 'game-progress-grid'}, progress.games.map(item => h('article', {className: 'school-card game-progress-card'}, h('h3', {}, item.gameId==='nback'?`N-back · ${MODE_DEFINITIONS.find(mode=>mode.id===item.nbackSettings?.mode)?.title||'Gyakorlás'}`:gameName(item.gameId)), h('span', {}, item.gameId==='nback'?nbackProgressLabel(item):levelName(item.gameId, item.level)), h('strong', {}, `${item.bestPercent}%`), h('small', {}, `${item.rounds} kör`)))) : emptyState('Az első kör még előtted van.', 'Indíts el egy feladatot vagy válassz szabad gyakorlatot.'),
+        (progress.games || []).length ? h('div', {className: 'game-progress-grid'}, progress.games.map(item => h('article', {className: 'school-card game-progress-card'}, h('h3', {}, item.gameId==='nback'?`N-back · ${MODE_DEFINITIONS.find(mode=>mode.id===item.nbackSettings?.mode)?.title||'Gyakorlás'}`:gameName(item.gameId)), h('span', {}, item.gameId==='nback'?nbackProgressLabel(item):levelName(item.gameId, item.level)), h('strong', {}, `${item.bestPercent}%`), h('small', {}, `${item.rounds} kör`)))) : emptyState(hannaRounds ? 'A többi játékból még nincs eredményed.' : 'Az első kör még előtted van.', hannaRounds ? 'A Hanna Módszer saját méréseit a készségtérképen találod.' : 'Indíts el egy feladatot vagy válassz szabad gyakorlatot.'),
         sectionHeading('Legutóbbi eredmények', `${results.length} kör`),
         results.length ? h('div', {className: 'results-list'}, results.slice(0, 30).map(result => resultRow(result, null, false))) : emptyState('Még nincs eredményed.', 'Az eredmények egy befejezett kör után jelennek meg.'),
       ), '/haladas');
