@@ -90,6 +90,7 @@ function resultRow(row, includeAnswer = false, includeStudent = false) {
     starBasis: row.star_basis,
     summary: row.summary,
     details: row.details,
+    metrics: row.metrics ?? null,
     duration: row.duration,
     assignmentId: row.assignment_id,
     assignmentStepId: row.assignment_step_id,
@@ -205,6 +206,57 @@ function requestedRulesVersion(engine, body) {
 }
 function settingsForVersion(engine, gameId, settings, version) {
   return engine.normalizeSettingsForVersion ? engine.normalizeSettingsForVersion(gameId,settings,version) : engine.normalizeGameSettings(gameId,settings);
+}
+
+function nbackChallengeIdentity(settings) {
+  const normalized={...settings};
+  for(const key of ['n','trialCount','intervalMs','lowScoreCount'])delete normalized[key];
+  return stableStringify(normalized);
+}
+
+function nbackPendingIdentity(settings) {
+  if(settings?.adaptive)return `adaptive:${nbackChallengeIdentity(settings)}`;
+  return `manual:${stableStringify({...settings,lowScoreCount:0})}`;
+}
+
+function usableNbackAdaptation(result) {
+  const settings=result?.settings,metrics=result?.metrics,adaptation=metrics?.adaptation,percent=result?.percent;
+  if(!settings||metrics?.version!==1||!Number.isInteger(percent)||percent<0||percent>100)return null;
+  if(metrics.mode!==settings.mode||metrics.n!==settings.n||metrics.scoreProfile!==settings.scoreProfile||metrics.trialCount!==settings.trialCount)return null;
+  if(!Number.isInteger(settings.n)||settings.n<1||settings.n>20||!Number.isInteger(settings.lowScoreCount)||settings.lowScoreCount<0||settings.lowScoreCount>2)return null;
+  if(!adaptation||adaptation.fromN!==settings.n||!Number.isInteger(adaptation.nextN)||adaptation.nextN<1||adaptation.nextN>20||!Number.isInteger(adaptation.lowScoreCount)||adaptation.lowScoreCount<0||adaptation.lowScoreCount>2)return null;
+  const advance=settings.scoreProfile==='jaeggi'?90:80,fallback=settings.scoreProfile==='jaeggi'?75:50;
+  let expected;
+  if(!settings.adaptive)expected={nextN:settings.n,lowScoreCount:0,action:'manual'};
+  else if(percent>=advance)expected={nextN:Math.min(20,settings.n+1),lowScoreCount:0,action:settings.n<20?'up':'stay'};
+  else if(percent<fallback&&settings.n>1){
+    if(settings.scoreProfile==='jaeggi'||settings.lowScoreCount===2)expected={nextN:settings.n-1,lowScoreCount:0,action:'down'};
+    else expected={nextN:settings.n,lowScoreCount:settings.lowScoreCount+1,action:'stay'};
+  } else expected={nextN:settings.n,lowScoreCount:settings.n===1&&percent<fallback?0:settings.lowScoreCount,action:'stay'};
+  if(adaptation.nextN!==expected.nextN||adaptation.lowScoreCount!==expected.lowScoreCount||adaptation.action!==expected.action)return null;
+  return adaptation;
+}
+
+async function resolveNbackAttemptSettings(db,engine,studentId,rawSettings,assignmentStepId) {
+  let settings=settingsForVersion(engine,'nback',{...rawSettings,lowScoreCount:0},2);
+  if(!settings.adaptive)return settingsForVersion(engine,'nback',{...settings,lowScoreCount:0},2);
+  const candidates=await db.query(
+    `SELECT settings,metrics,percent FROM results
+     WHERE student_id=$1 AND game_id='nback' AND assignment_step_id IS NOT DISTINCT FROM $2::uuid
+     ORDER BY created_at DESC,id DESC LIMIT 500`,
+    [studentId,assignmentStepId],
+  );
+  const identity=nbackChallengeIdentity(settings);
+  const previous=candidates.rows.find(row=>nbackChallengeIdentity(row.settings)===identity&&usableNbackAdaptation(row));
+  if(previous){
+    const adaptation=usableNbackAdaptation(previous);
+    settings=settingsForVersion(engine,'nback',{...settings,n:adaptation.nextN,lowScoreCount:adaptation.lowScoreCount},2);
+  }
+  return settings;
+}
+
+function publicAttempt(row) {
+  return {id:row.id,seed:Number(row.seed),gameId:row.game_id,settings:row.settings,rulesVersion:row.rules_version,assignmentStepId:row.assignment_step_id,expiresAt:row.expires_at};
 }
 
 async function listAssignmentSteps(db, assignmentIds) {
@@ -535,7 +587,8 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
           if (!step || typeof step !== 'object') throw badRequest('Érvénytelen feladatsor-lépés.', 'INVALID_STEPS');
           if (!Number.isInteger(step.repetitions) || step.repetitions < 1 || step.repetitions > 10) throw badRequest('Az ismétlésszám 1–10 lehet.', 'INVALID_STEPS');
           try {
-            return { gameId: step.gameId, settings: settingsForVersion(engine, step.gameId, step.settings || {}, rulesVersion), repetitions: step.repetitions, rulesVersion };
+            const incomingSettings=step.gameId==='nback'?{...(step.settings||{}),lowScoreCount:0}:step.settings||{};
+            return { gameId: step.gameId, settings: settingsForVersion(engine, step.gameId, incomingSettings, rulesVersion), repetitions: step.repetitions, rulesVersion };
           } catch (error) {
             throw badRequest(error.message || 'Érvénytelen játékbeállítás.', 'INVALID_GAME_SETTINGS');
           }
@@ -666,26 +719,46 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
 
       if (req.method === 'GET' && pathname === '/api/progress') {
         const user = requireUser(context, 'student');
-        const totals = await pool.query('SELECT count(*)::int rounds,COALESCE(sum(correct),0)::int correct,COALESCE(sum(total),0)::int total FROM results WHERE student_id=$1', [user.id]);
+        const totals = await pool.query(`SELECT count(*)::int rounds,
+          count(*) FILTER (WHERE game_id<>'nback')::int legacy_rounds,
+          COALESCE(sum(correct) FILTER (WHERE game_id<>'nback'),0)::int correct,
+          COALESCE(sum(total) FILTER (WHERE game_id<>'nback'),0)::int total,
+          count(*) FILTER (WHERE game_id='nback')::int nback_rounds,
+          COALESCE(avg(percent) FILTER (WHERE game_id='nback'),0)::float8 nback_average_percent,
+          COALESCE(avg(CASE WHEN game_id='nback' AND settings->>'n' ~ '^([1-9]|1[0-9]|20)$' THEN (settings->>'n')::int END),0)::float8 nback_average_n,
+          COALESCE(max(CASE WHEN game_id='nback' AND settings->>'n' ~ '^([1-9]|1[0-9]|20)$' THEN (settings->>'n')::int END),0)::int nback_highest_n
+          FROM results WHERE student_id=$1`, [user.id]);
         const games = await pool.query(
-          `SELECT game_id,COALESCE((settings->>'level')::int,1) level,max(percent)::int best_percent,count(*)::int rounds
-           FROM results WHERE student_id=$1 GROUP BY game_id,COALESCE((settings->>'level')::int,1) ORDER BY game_id,level`, [user.id],
+          `SELECT game_id,CASE WHEN game_id='nback' THEN (settings->>'n')::int ELSE COALESCE((settings->>'level')::int,1) END level,
+             CASE WHEN game_id='nback' THEN (settings->>'n')::int ELSE NULL END n,
+             CASE WHEN game_id='nback' THEN COALESCE((settings->>'adaptive')::boolean,false) ELSE false END adaptive,
+             CASE WHEN game_id='nback' THEN settings - 'lowScoreCount' - 'trialCount' - 'intervalMs' ELSE NULL END nback_settings,
+             max(percent)::int best_percent,count(*)::int rounds
+           FROM results WHERE student_id=$1
+           GROUP BY 1,2,3,4,5
+           ORDER BY game_id,level`, [user.id],
         );
-        const all = await pool.query('SELECT stars FROM results WHERE student_id=$1', [user.id]);
+        const all = await pool.query('SELECT game_id,stars FROM results WHERE student_id=$1', [user.id]);
         const stars = all.rows.reduce((sum, row) => sum + (row.stars ?? 0), 0);
-        const ungradedStars = all.rows.filter(row => row.stars === null).length;
+        const ungradedStars = all.rows.filter(row => row.game_id!=='nback'&&row.stars === null).length;
+        const nbackRounds = totals.rows[0].nback_rounds;
         const rank = stars >= 60 ? 'Emlékmester' : stars >= 30 ? 'Gyakorló' : stars >= 10 ? 'Felfedező' : 'Kezdő';
         const total = totals.rows[0].total;
         const correct = totals.rows[0].correct;
         return sendJson(res, 200, {
           rounds: totals.rows[0].rounds,
+          legacyRounds: totals.rows[0].legacy_rounds,
           correct,
           total,
           percent: total ? Math.round(correct * 100 / total) : 0,
           stars,
           ungradedStars,
+          nbackRounds,
+          nbackAveragePercent: nbackRounds?Math.round(Number(totals.rows[0].nback_average_percent)):null,
+          nbackAverageN: nbackRounds?Math.round(Number(totals.rows[0].nback_average_n)*10)/10:null,
+          nbackHighestN: nbackRounds?totals.rows[0].nback_highest_n:null,
           rank,
-          games: games.rows.map((row) => ({ gameId: row.game_id, level: row.level, bestPercent: row.best_percent, rounds: row.rounds })),
+          games: games.rows.map((row) => ({ gameId: row.game_id, level: row.level, ...(row.game_id==='nback'?{n:row.n,adaptive:row.adaptive,nbackSettings:row.nback_settings}:{}), bestPercent: row.best_percent, rounds: row.rounds })),
         });
       }
 
@@ -710,6 +783,7 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
             settings = step.rows[0].settings;
             rulesVersion = step.rows[0].rules_version;
             if(rulesVersion > (body.clientRulesVersion ?? 1))throw conflict('A feladathoz frissítsd az oldalt.', 'CLIENT_UPDATE_REQUIRED');
+            if(gameId==='nback'&&rulesVersion!==2)throw conflict('Ez a régi N-back kör nem indítható. Kérj új kiosztást.', 'CLIENT_UPDATE_REQUIRED');
             const completed = await db.query('SELECT count(*)::int count FROM results WHERE student_id=$1 AND assignment_step_id=$2', [user.id, stepId]);
             if (completed.rows[0].count >= step.rows[0].repetitions) throw conflict('Ezt a lépést már teljesítetted.', 'REPETITIONS_COMPLETE');
             const pending = await db.query(
@@ -718,13 +792,35 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
             );
             if (pending.rowCount && new Date(pending.rows[0].expires_at) > new Date()) {
               const row = pending.rows[0];
-              return { attempt: { id: row.id, seed: Number(row.seed), gameId: row.game_id, settings: row.settings, rulesVersion: row.rules_version, assignmentStepId: row.assignment_step_id, expiresAt: row.expires_at } };
+              if(row.game_id!==gameId||row.rules_version!==rulesVersion)throw conflict('A függő kör nem egyezik a kiosztott feladattal. Indíts új kört.', 'ASSIGNMENT_UNAVAILABLE');
+              if(gameId==='nback'){
+                try { settingsForVersion(engine,'nback',row.settings,2); }
+                catch(error){throw badRequest(error.message||'A függő N-back kör beállítása érvénytelen.', 'INVALID_GAME_SETTINGS');}
+              }
+              return { attempt: publicAttempt(row) };
             }
             if (pending.rowCount) await db.query('DELETE FROM attempts WHERE id=$1', [pending.rows[0].id]);
           } else {
             gameId = body.gameId;
-            try { settings = settingsForVersion(engine, gameId, body.settings || {}, rulesVersion); }
+            if(gameId==='nback'&&body.clientRulesVersion!==2)throw badRequest('Az N-back indításához frissítsd az oldalt.', 'CLIENT_UPDATE_REQUIRED');
+            try { settings = settingsForVersion(engine, gameId, gameId==='nback'?{...(body.settings||{}),lowScoreCount:0}:body.settings||{}, rulesVersion); }
             catch (error) { throw badRequest(error.message || 'Érvénytelen játékbeállítás.', 'INVALID_GAME_SETTINGS'); }
+          }
+          if(gameId==='nback'){
+            let initial;
+            try { initial=settingsForVersion(engine,'nback',{...settings,lowScoreCount:0},2); }
+            catch(error){ throw badRequest(error.message||'Érvénytelen N-back beállítás.', 'INVALID_GAME_SETTINGS'); }
+            const identity=nbackPendingIdentity(initial);
+            const lockScope=stepId||`nback:${identity}`;
+            if(!stepId)await db.query('SELECT pg_advisory_xact_lock(hashtext($1),hashtext($2))',[user.id,lockScope]);
+            const pending=await db.query(
+              `SELECT * FROM attempts WHERE student_id=$1 AND game_id='nback' AND assignment_step_id IS NOT DISTINCT FROM $2::uuid AND submitted_at IS NULL
+               ORDER BY created_at DESC FOR UPDATE`,[user.id,stepId],
+            );
+            const matching=pending.rows.find(row=>nbackPendingIdentity(row.settings)===identity&&new Date(row.expires_at)>new Date());
+            if(matching)return {attempt:publicAttempt(matching)};
+            for(const row of pending.rows)if(nbackPendingIdentity(row.settings)===identity&&new Date(row.expires_at)<=new Date())await db.query('DELETE FROM attempts WHERE id=$1',[row.id]);
+            settings=await resolveNbackAttemptSettings(db,engine,user.id,initial,stepId);
           }
           const id = randomUUID();
           const seed = randomInt(0, 0x1_0000_0000);
@@ -744,14 +840,20 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
         const attemptId = cleanId(params[0]);
         const body = await readJson(req);
         if (!Object.hasOwn(body, 'answer')) throw badRequest('A nyers válasz hiányzik.', 'INVALID_ANSWER');
-        if (['correct', 'total', 'percent', 'score'].some((key) => Object.hasOwn(body, key))) throw badRequest('Kliensoldali pontszám nem küldhető.', 'CLIENT_SCORE_REJECTED');
+        if (['correct','total','percent','score','stars','starBasis','metrics','details','summary'].some((key) => Object.hasOwn(body, key))) throw badRequest('Kliensoldali pontszám vagy eredménymetrika nem küldhető.', 'CLIENT_SCORE_REJECTED');
         const answerHash = sha256(stableStringify(body.answer));
         const engine = await getEngine();
         const output = await transaction(pool, async (db) => {
-          const found = await db.query('SELECT * FROM attempts WHERE id=$1 FOR UPDATE', [attemptId]);
-          if (!found.rowCount) throw notFound();
+          const peek = await db.query('SELECT * FROM attempts WHERE id=$1', [attemptId]);
+          if (!peek.rowCount) throw notFound();
+          if (peek.rows[0].student_id !== user.id) throw forbidden('Másik tanuló körét nem küldheted be.');
+          if(peek.rows[0].game_id==='nback'&&peek.rows[0].rules_version!==2)throw conflict('Ez a régi N-back kör nem pontozható. Indíts új kört.', 'CLIENT_UPDATE_REQUIRED');
+          if(peek.rows[0].game_id==='nback'){
+            const lockScope=peek.rows[0].assignment_step_id||`nback:${nbackPendingIdentity(peek.rows[0].settings)}`;
+            await db.query('SELECT pg_advisory_xact_lock(hashtext($1),hashtext($2))',[user.id,lockScope]);
+          }
+          const found=await db.query('SELECT * FROM attempts WHERE id=$1 FOR UPDATE',[attemptId]);
           const attempt = found.rows[0];
-          if (attempt.student_id !== user.id) throw forbidden('Másik tanuló körét nem küldheted be.');
           const existing = await db.query('SELECT * FROM results WHERE attempt_id=$1', [attemptId]);
           if (existing.rowCount) {
             if (existing.rows[0].answer_hash !== answerHash) throw conflict('A kört már más válasszal beküldted.', 'ATTEMPT_ALREADY_SUBMITTED');
@@ -774,16 +876,20 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
           if (!score || !Number.isInteger(score.correct) || !Number.isInteger(score.total) || score.total < 1 || score.correct < 0 || score.correct > score.total) {
             throw new Error('A scoreAttempt érvénytelen eredményt adott.');
           }
-          const percent = Math.round(score.correct * 100 / score.total);
+          const percent = attempt.game_id==='nback'?score.percent:Math.round(score.correct * 100 / score.total);
+          if(!Number.isInteger(percent)||percent<0||percent>100)throw new Error('A scoreAttempt érvénytelen százalékot adott.');
           const stars = score.stars === undefined && attempt.rules_version === 1 ? (percent===100?3:percent>=60?2:percent>0?1:0) : (score.stars ?? null);
           if(stars !== null && (!Number.isInteger(stars) || stars<0 || stars>3))throw new Error('Érvénytelen csillagérték.');
           const starBasis = score.starBasis || (attempt.rules_version === 1 ? 'legacy-v1' : 'reference-unmeasured');
+          if(attempt.game_id==='nback'&&(stars!==null||starBasis!=='brainworkshop-no-stars'))throw new Error('Az N-back eredmény csillagmezői érvénytelenek.');
+          const metrics=attempt.game_id==='nback'?score.metrics:null;
+          if(attempt.game_id==='nback'&&(!metrics||metrics.version!==1||!usableNbackAdaptation({settings:attempt.settings,metrics,percent})))throw new Error('Az N-back motor érvénytelen metrikát adott.');
           const id = randomUUID();
           const duration = Math.max(0, Math.round(Date.now() - new Date(attempt.created_at).valueOf()));
           const inserted = await db.query(
-            `INSERT INTO results(id,attempt_id,student_id,assignment_id,assignment_step_id,game_id,settings,answer,answer_hash,correct,total,percent,summary,details,duration,rules_version,stars,star_basis)
-             VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) RETURNING *`,
-            [id, attemptId, user.id, assignmentId, attempt.assignment_step_id, attempt.game_id, jsonb(attempt.settings), jsonb(body.answer), answerHash, score.correct, score.total, percent, String(score.summary || ''), jsonb(score.details ?? []), duration, attempt.rules_version, stars, starBasis],
+            `INSERT INTO results(id,attempt_id,student_id,assignment_id,assignment_step_id,game_id,settings,answer,answer_hash,correct,total,percent,summary,details,duration,rules_version,stars,star_basis,metrics)
+             VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19) RETURNING *`,
+            [id, attemptId, user.id, assignmentId, attempt.assignment_step_id, attempt.game_id, jsonb(attempt.settings), jsonb(body.answer), answerHash, score.correct, score.total, percent, String(score.summary || ''), jsonb(score.details ?? []), duration, attempt.rules_version, stars, starBasis, metrics===null?null:jsonb(metrics)],
           );
           await db.query('UPDATE attempts SET submitted_at=now() WHERE id=$1', [attemptId]);
           return { result: resultRow(inserted.rows[0]), duplicate: false };

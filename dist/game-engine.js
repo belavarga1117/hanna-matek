@@ -1,8 +1,13 @@
 import {normalizeSettings} from './core.js';
 import * as legacy from './legacy/v1/game-engine.js';
 import {awardStars} from './scoring.js';
+import {normalizeConfig as normalizeNbackConfig,generateSession as generateNbackSession,scoreSession as scoreNbackSession} from './nback/engine.js';
 export const CURRENT_RULES_VERSION = 2;
 export function normalizeSettingsForVersion(gameId, raw, version=2) {
+  if(gameId==='nback'){
+    if(version!==2)throw new RangeError('Az N-back csak a 2. szabályverzióval indítható. Frissítsd az oldalt.');
+    return normalizeNbackConfig(raw);
+  }
   if(version===1)return legacy.normalizeGameSettings(gameId,raw);
   if(version!==2)throw new RangeError('Ismeretlen játékszabály-verzió.');
   return normalizeGameSettings(gameId,raw);
@@ -16,11 +21,13 @@ export const GAME_RULES=Object.freeze({
   stations:{levels:[1,2],count:[3,6],themes:['stations','streets'],level2Count:5},faces:{levels:[1,2,3],fixedCount:5},
   prices:{levels:[1,2],count:[3,5]},shopping:{levels:[1,2],fixedCount:9},picture:{levels:[1,2],rounds:[3,5]},
   code:{levels:[1,2,3],rounds:[3,5],symbolSets:['objects','abstract'],messageLengths:{1:3,2:4,3:5}},
+  nback:{nbackVersion:1,modes:28,n:[1,20],trialCount:[4,200],intervalMs:[400,10000]},
 });
 export const RAW_ANSWER_SHAPES=Object.freeze({
   digits:'{digits:string}',grid:'{cells:number[]}',path:'{cells:number[]}',missing:'{choiceId:string}',stations:'{items:string[]}',
   faces:'{attempts:[{answers:[{faceId,name,job?,room?}]}]}',prices:'{answers:[{itemId,price,discount?}]}',shopping:'{attempts:[{itemIds:string[]}]}',
   picture:'level1 {rounds:[{choiceId:string}]}; level2 {rounds:[{attempts:[{itemIds:string[]}]}]}',code:'{mapping:[{digit,symbolId}],answers:[{attempts:string[]}]} ',
+  nback:'{version:1,events:[{trialIndex:number,channel:string,atMs:number,value:true|string}]}',
 });
 const UINT32_MAX=0xffffffff;
 export const COMMON_GAME_SETTINGS=Object.freeze({
@@ -39,6 +46,7 @@ function requestedInteger(raw,key,fallback){
   const value=Number(raw[key]);if(!Number.isInteger(value))throw new TypeError(`A(z) ${key} egész szám legyen.`);return value;
 }
 export function normalizeGameSettings(gameId,raw={}){
+  if(gameId==='nback')return normalizeNbackConfig(raw);
   const rule=GAME_RULES[gameId];if(!rule)throw new RangeError(`Ismeretlen játék: ${String(gameId)}`);const levels=rule.levels;
   if(raw===null||typeof raw!=='object'||Array.isArray(raw))throw new TypeError('A játékbeállítások objektumként adhatók meg.');
   const level=requestedInteger(raw,'level',1);if(!levels.includes(level))throw new RangeError(`A(z) ${gameId} játékban nincs ${level}. szint.`);
@@ -78,6 +86,12 @@ function positionDetails(expected,actual,label='hely'){return expected.map((valu
 
 // RAW_ANSWER_SHAPES describes v2; the frozen legacy engine accepts v1 contracts.
 export function scoreAttempt(gameId,rawSettings,seed,answer,version=2){
+  if(gameId==='nback'){
+    if(version!==2)throw new RangeError('Az N-back nem pontozható a régi szabályverzióval.');
+    const settings=normalizeNbackConfig(rawSettings);
+    const session=generateNbackSession({seed,config:settings});
+    return {...scoreNbackSession(session,answer,{lowScoreCount:settings.lowScoreCount}),rulesVersion:2};
+  }
   if(version===1){const score=legacy.scoreAttempt(gameId,rawSettings,seed,answer);return {...score,...awardStars(gameId,rawSettings,score,1),rulesVersion:1};}
   if(version!==2)throw new RangeError('Ismeretlen játékszabály-verzió.');
   const settings=normalizeGameSettings(gameId,rawSettings);

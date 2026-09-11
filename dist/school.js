@@ -1,6 +1,9 @@
 import {ApiError, createApiClient} from './api-client.js';
 import {COMMON_GAME_SETTINGS, GAME_RULES, normalizeGameSettings} from './game-engine.js';
 import {resultDetailLabel} from './result-labels.js';
+import {createNbackSettings,describeNbackSettings} from './nback/settings-ui.js';
+import {renderNbackResult} from './nback/result-view.js';
+import {MODE_DEFINITIONS} from './nback/engine.js';
 
 const SCHOOL_PATHS = new Set([
   '/fiok', '/tanar', '/tanar/tanulok', '/tanar/csoportok',
@@ -565,7 +568,9 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
       event.preventDefault(); clearFormError(form);
       const values = new FormData(form);
       if (!values.getAll('studentIds').length && !values.getAll('groupIds').length) { showFormError(form, new Error('Válassz legalább egy tanulót vagy csoportot.')); return; }
-      const steps = [...stepsRoot.querySelectorAll('.step-editor')].map(readStep);
+      let steps;
+      try{steps=[...stepsRoot.querySelectorAll('.step-editor')].map(readStep);}
+      catch(error){showFormError(form,error);return;}
       const due = values.get('dueAt');
       requestKey ||= makeIdempotencyKey();
       withButton(form.querySelector('[type=submit]'), async () => {
@@ -589,7 +594,18 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
       field('Játék', gameSelect), settingsRoot,
       field('Ismétlések', h('input', {name: 'repetitions', type: 'number', min: '1', max: '10', value: '1', required: true})),
     );
-    const refreshSettings = () => settingsRoot.replaceChildren(...settingFields(games.find(game => game.id === gameSelect.value)));
+    const refreshSettings = () => {
+      const game=games.find(item=>item.id===gameSelect.value);
+      settingsRoot.classList.toggle('nback-step-settings',game?.id==='nback');
+      if(game?.id==='nback'){
+        const component=createNbackSettings({h,value:{},compact:true,onChange:()=>settingsRoot.dispatchEvent(new Event('input',{bubbles:true}))});
+        settingsRoot._nbackSettings=component;
+        settingsRoot.replaceChildren(component.element);
+      }else{
+        settingsRoot._nbackSettings=null;
+        settingsRoot.replaceChildren(...settingFields(game));
+      }
+    };
     gameSelect.addEventListener('change', refreshSettings); refreshSettings();
     card.querySelector('.remove-step').addEventListener('click', () => {
       if (card.parentElement.children.length === 1) return;
@@ -659,6 +675,12 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
   }
 
   function readStep(node) {
+    const gameId = node.querySelector('[name=gameId]').value;
+    if(gameId==='nback'){
+      const component=node.querySelector('.step-settings')?._nbackSettings;
+      if(!component)throw new Error('Az N-back beállításai nem olvashatók.');
+      return {gameId,settings:component.getValue(),repetitions:Number(node.querySelector('[name=repetitions]').value)};
+    }
     const settings = {};
     node.querySelectorAll('[name]').forEach(input => {
       if (input.name === 'gameId' || input.name === 'repetitions') return;
@@ -666,7 +688,6 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
       else if (input.type === 'number' || input.name === 'level' || input.name === 'seconds') settings[input.name] = Number(input.value);
       else settings[input.name] = input.value;
     });
-    const gameId = node.querySelector('[name=gameId]').value;
     return {gameId, settings: normalizeGameSettings(gameId, settings), repetitions: Number(node.querySelector('[name=repetitions]').value)};
   }
 
@@ -680,7 +701,7 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
     shell(h('div', {},
       h('a', {className: 'back-link', href: '#/tanar/feladatsorok'}, '← Feladatsorok'),
       h('section', {className: 'school-hero compact-school-hero'}, h('span', {className: 'eyebrow'}, assignment.dueAt ? `HATÁRIDŐ: ${formatDate(assignment.dueAt)}` : 'FELADATSOR'), h('h1', {}, assignment.title), assignment.instructions ? h('p', {}, assignment.instructions) : null),
-      h('section', {className: 'school-card'}, h('h2', {}, 'Lépések'), h('ol', {className: 'assignment-steps'}, (assignment.steps || []).map(step => h('li', {}, h('strong', {}, gameName(step.gameId)), h('span', {}, `${levelName(step.gameId, step.settings?.level)} · ${step.repetitions} ismétlés`))))),
+      h('section', {className: 'school-card'}, h('h2', {}, 'Lépések'), h('ol', {className: 'assignment-steps'}, (assignment.steps || []).map(step => h('li', {}, h('strong', {}, gameName(step.gameId)), h('span', {}, `${settingsName(step.gameId,step.settings)} · ${step.repetitions} ismétlés`))))),
       sectionHeading('Tanulói haladás', `${results.length} eredmény`), studentRows,
     ), '/tanar/feladatsorok');
   }
@@ -729,19 +750,19 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
     const backQuery=new URLSearchParams();
     if(result.studentId)backQuery.set('studentId',result.studentId);
     if(result.assignmentId)backQuery.set('assignmentId',result.assignmentId);
-    const stars=Number.isInteger(result.stars)?`${result.stars} csillag · ${'★'.repeat(result.stars)}${'☆'.repeat(3-result.stars)}`:'Ehhez az eredményhez még nincs meghatározott csillagértékelés.';
+    const stars=result.gameId==='nback'?'A Brain Workshop N-back forrás nem használ csillagokat.':Number.isInteger(result.stars)?`${result.stars} csillag · ${'★'.repeat(result.stars)}${'☆'.repeat(3-result.stars)}`:'Ehhez az eredményhez még nincs meghatározott csillagértékelés.';
     shell(h('div', {},
       h('a', {className: 'back-link', href: `#/tanar/eredmenyek${backQuery.size?`?${backQuery}`:''}`}, '← Eredmények'),
       h('section', {className: 'school-hero compact-school-hero'}, h('span', {className: 'eyebrow'}, formatDate(result.at)), h('h1', {}, `${gameName(result.gameId)} · ${result.percent}%`), h('p', {}, result.summary || `${result.correct} / ${result.total} helyes válasz`)),
       h('section',{className:'school-card result-context'},h('h2',{},'A kör adatai'),h('dl',{className:'result-metadata'},
         h('dt',{},'Tanuló'),h('dd',{},result.studentDisplayName||'Tanuló'),
-        h('dt',{},'Játékváltozat'),h('dd',{},`${result.settings?.level||1}. szint – ${levelName(result.gameId,result.settings?.level)}`),
-        h('dt',{},'Pontszám'),h('dd',{},`${result.correct} / ${result.total}`),
+        h('dt',{},'Játékváltozat'),h('dd',{},settingsName(result.gameId,result.settings)),
+        h('dt',{},'Pontszám'),h('dd',{},result.gameId==='nback'?`${result.percent}%`:`${result.correct} / ${result.total}`),
         h('dt',{},'Csillag'),h('dd',{},stars),
-        h('dt',{},'Megjegyzési idő'),h('dd',{},`${result.settings?.seconds||10} mp`),
+        h('dt',{},result.gameId==='nback'?'Ingerenkénti idő':'Megjegyzési idő'),h('dd',{},result.gameId==='nback'?(result.settings?.selfPaced?'Saját tempó':`${Number(result.settings?.intervalMs||0)/1000} mp`):`${result.settings?.seconds||10} mp`),
         h('dt',{},'Feladatsor'),h('dd',{},result.assignmentId?h('a',{className:'text-link',href:`#/tanar/feladatsorok?id=${encodeURIComponent(result.assignmentId)}`},result.assignmentTitle||'A kiosztott feladatsor megnyitása'):'Szabad gyakorlás'),
       ),result.rulesVersion===1?h('p',{className:'muted'},'Korábbi szabályokkal mentett kör.'):null),
-      h('section', {className: 'school-card answer-review'},
+      result.gameId==='nback'?renderNbackResult(h,result):h('section', {className: 'school-card answer-review'},
         h('h2', {}, 'Válaszonkénti áttekintés'),
         details.length ? h('div', {className: 'answer-review-list'}, details.map((detail, index) => h('article', {className: `review-answer ${detail.correct ? 'correct' : 'incorrect'}`},
           h('span', {className: 'review-mark', 'aria-label': detail.correct ? 'Helyes' : 'Hibás'}, detail.correct ? '✓' : '×'),
@@ -776,7 +797,7 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
         const complete = Number(step.completed || 0) >= Number(step.repetitions || 0);
         const button = h('button', {className: complete ? 'secondary-button' : 'primary-button', disabled: complete}, complete ? 'Kész' : 'Indítás');
         button.addEventListener('click', () => onPlay?.(step.gameId, {...step.settings}, {assignmentStepId: step.id, assignmentId: assignment.id}));
-        return h('li', {}, h('span', {className: `step-state ${complete ? 'done' : ''}`, 'aria-hidden': 'true'}, complete ? '✓' : '○'), h('div', {}, h('strong', {}, gameName(step.gameId)), h('span', {}, `${levelName(step.gameId, step.settings?.level)} · ${step.completed || 0} / ${step.repetitions} kör`)), button);
+        return h('li', {}, h('span', {className: `step-state ${complete ? 'done' : ''}`, 'aria-hidden': 'true'}, complete ? '✓' : '○'), h('div', {}, h('strong', {}, gameName(step.gameId)), h('span', {}, `${settingsName(step.gameId,step.settings)} · ${step.completed || 0} / ${step.repetitions} kör`)), button);
       })),
     );
   }
@@ -790,24 +811,36 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
       const results = resultsData.results || [];
       shell(h('div', {},
         schoolHero('HALADÁSOM', progress.rank || 'Kezdő', 'Minden befejezett kör hozzáad valamit a gyakorlásodhoz.'),
-        h('section', {className: 'metric-grid'}, metric('Befejezett kör', progress.rounds || 0, 'összesen'), metric('Pontosság', `${progress.percent || 0}%`, `${progress.correct || 0} / ${progress.total || 0}`), metric('Csillag', progress.stars || 0, progress.ungradedStars ? `${progress.ungradedStars} kör csillagértékelése még nincs meghatározva` : 'összesen')),
+        h('section', {className: 'metric-grid'},
+          metric('Befejezett kör', progress.rounds || 0, 'összesen'),
+          metric('Pontosság', progress.legacyRounds?`${progress.percent || 0}%`:'–', progress.legacyRounds?`${progress.correct || 0} / ${progress.total || 0} · a többi játékban`:'Még nincs más játékból eredmény'),
+          metric('N-back fejlődés', progress.nbackRounds?`${progress.nbackAveragePercent}%`:'–', progress.nbackRounds?`${progress.nbackRounds} kör · átlag N=${progress.nbackAverageN} · legmagasabb N=${progress.nbackHighestN}`:'Még nincs N-back kör'),
+          metric('Csillag', progress.stars || 0, progress.ungradedStars ? `${progress.ungradedStars} nem N-back kör csillagértékelése nincs meghatározva${progress.nbackRounds?`; ${progress.nbackRounds} N-back körhöz a forrás szerint nincs csillag`:''}` : progress.nbackRounds?`${progress.nbackRounds} N-back kör nem ad csillagot`:'összesen')),
         h('section', {className: 'rank-card school-card'},
           h('div', {className: 'rank-orbit', 'aria-hidden': 'true'}, '✦'),
           h('div', {}, h('span', {className: 'eyebrow'}, 'RANG'), h('h2', {}, progress.rank || 'Kezdő'), h('p', {}, rankHint(progress.stars || 0))),
         ),
         sectionHeading('Játékok és szintek', `${(progress.games || []).length} teljesített mód`),
-        (progress.games || []).length ? h('div', {className: 'game-progress-grid'}, progress.games.map(item => h('article', {className: 'school-card game-progress-card'}, h('h3', {}, gameName(item.gameId)), h('span', {}, levelName(item.gameId, item.level)), h('strong', {}, `${item.bestPercent}%`), h('small', {}, `${item.rounds} kör`)))) : emptyState('Az első kör még előtted van.', 'Indíts el egy feladatot vagy válassz szabad gyakorlatot.'),
+        (progress.games || []).length ? h('div', {className: 'game-progress-grid'}, progress.games.map(item => h('article', {className: 'school-card game-progress-card'}, h('h3', {}, item.gameId==='nback'?`N-back · ${MODE_DEFINITIONS.find(mode=>mode.id===item.nbackSettings?.mode)?.title||'Gyakorlás'}`:gameName(item.gameId)), h('span', {}, item.gameId==='nback'?nbackProgressLabel(item):levelName(item.gameId, item.level)), h('strong', {}, `${item.bestPercent}%`), h('small', {}, `${item.rounds} kör`)))) : emptyState('Az első kör még előtted van.', 'Indíts el egy feladatot vagy válassz szabad gyakorlatot.'),
         sectionHeading('Legutóbbi eredmények', `${results.length} kör`),
         results.length ? h('div', {className: 'results-list'}, results.slice(0, 30).map(result => resultRow(result, null, false))) : emptyState('Még nincs eredményed.', 'Az eredmények egy befejezett kör után jelennek meg.'),
       ), '/haladas');
     } catch (error) { if (isCurrent(generation)) renderError(error, renderRoute, '/haladas'); }
   }
 
+  function nbackProgressLabel(item){
+    const s=item.nbackSettings||{},parts=[`N=${item.n??item.level}`,s.adaptive?'adaptív':'kézi N'];
+    if(s.variable)parts.push('változó N');if(s.crab)parts.push('Crab');if(s.multiStim>1)parts.push(`${s.multiStim} tárgy`);
+    if(s.selfPaced)parts.push('saját tempó');if(s.scoreProfile==='jaeggi')parts.push('Jaeggi');
+    if([7,8,9].includes(s.mode))parts.push(`${(s.operations||[]).join(' ')} · ${s.allowNegative?'-'+s.numberMax:0}…${s.numberMax}`);
+    return parts.join(' · ');
+  }
+
   function resultRow(result, studentName, teacherView) {
     const content = [
       h('span', {className: `score-dot ${scoreClass(result.percent)}`}, `${result.percent}%`),
-      h('div', {className: 'result-row-main'}, h('strong', {}, gameName(result.gameId)), h('span', {}, `${studentName ? `${studentName} · ` : ''}${formatDate(result.at)} · ${levelName(result.gameId, result.settings?.level)}`)),
-      h('span', {className: 'result-ratio'}, `${result.correct} / ${result.total}`),
+      h('div', {className: 'result-row-main'}, h('strong', {}, gameName(result.gameId)), h('span', {}, `${studentName ? `${studentName} · ` : ''}${formatDate(result.at)} · ${settingsName(result.gameId,result.settings)}`)),
+      h('span', {className: 'result-ratio'}, result.gameId==='nback'?`${result.percent}% · N=${result.settings?.n}`:`${result.correct} / ${result.total}`),
       teacherView ? h('span', {className: 'row-arrow', 'aria-hidden': 'true'}, '→') : null,
     ];
     return teacherView ? h('a', {className: 'school-card result-row', href: `#/tanar/eredmenyek?result=${encodeURIComponent(result.id)}`}, content) : h('article', {className: 'school-card result-row'}, content);
@@ -867,6 +900,7 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
   }
   function numericRange(min, max, step = 1) { const values = []; for (let value = min; value <= max; value += step) values.push(value); return values; }
   function levelName(gameId, value = 1) { return gameLevels(games.find(game => game.id === gameId)).find(level => level.value === Number(value))?.label || `${Number(value) || 1}. szint`; }
+  function settingsName(gameId,settings={}) { return gameId==='nback'?describeNbackSettings(settings):levelName(gameId,settings?.level); }
   function gameName(id) { return games.find(game => game.id === id)?.title || id || 'Ismeretlen játék'; }
   function initials(name) { return String(name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]?.toLocaleUpperCase('hu')).join(''); }
   function formatDate(value) { if (!value) return '–'; const date = new Date(value); return Number.isNaN(date.getTime()) ? '–' : date.toLocaleString('hu-HU', {year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'}); }
