@@ -132,7 +132,7 @@ async function startGame(game,rawSettings,assignment=null){
     const library=modules[moduleKey]||(modules[moduleKey]=await loader());
     if(token!==generation||disposed)return;
     if(!library[game.id]?.mount)throw new Error('A gyakorlat nem érhető el.');
-    const ctx={root,settings,seed:localSeed,rand:seededRandom(localSeed),h,phase(title,subtitle){if(disposed)return;phaseTitle.textContent=title;phaseText.textContent=subtitle||'';announce(title);},delay(fn,ms){const t=setTimeout(()=>{timers.delete(t);if(!disposed)fn();},ms);timers.add(t);return t;},memorize(callback,{onProgress,allowSkip=true}={}){
+    const ctx={root,settings,seed:localSeed,rand:seededRandom(localSeed),h,phase(title,subtitle){if(disposed)return;phaseTitle.textContent=title;phaseText.textContent=subtitle||'';announce(title);},async prepareDelayedRecall(){if(!attempt)return null;const response=await school.api(`/api/attempts/${attempt.id}/delay-ready`,{method:'POST',body:{}});return response.availableAt||null;},delay(fn,ms){const t=setTimeout(()=>{timers.delete(t);if(!disposed)fn();},ms);timers.add(t);return t;},memorize(callback,{onProgress,allowSkip=true}={}){
       if(disposed)return;countdown?.cancel();timerWrap.hidden=false;ready.hidden=!allowSkip;pause.hidden=false;
       countdown=createCountdown(settings.seconds,{onTick:left=>{timerText.textContent=`${Math.ceil(left)} mp`;timerFill.style.width=`${Math.max(0,left/settings.seconds*100)}%`;onProgress?.(Math.min(1,Math.max(0,1-left/settings.seconds)));},onDone:()=>{if(disposed)return;countdown=null;timerWrap.hidden=true;ready.hidden=true;pause.hidden=true;overlay.hidden=true;root.inert=false;phaseTitle.focus({preventScroll:true});callback();}});
       if(document.hidden)setPaused(true);

@@ -900,6 +900,30 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
         return sendJson(res, 201, output);
       }
 
+      params = routeMatch(pathname, /^\/api\/attempts\/([^/]+)\/delay-ready$/);
+      if (req.method === 'POST' && params) {
+        const user = requireUser(context, 'student');
+        const attemptId = cleanId(params[0]);
+        const output = await transaction(pool, async (db) => {
+          const found = await db.query('SELECT * FROM attempts WHERE id=$1 FOR UPDATE', [attemptId]);
+          if (!found.rowCount) throw notFound();
+          const attempt = found.rows[0];
+          if (attempt.student_id !== user.id) throw forbidden('Másik tanuló körét nem módosíthatod.');
+          if (attempt.game_id !== 'picture-place') throw badRequest('Ehhez a körhöz nincs késleltetett felidézési kapu.', 'INVALID_DELAY_GATE');
+          if (attempt.submitted_at) throw conflict('Ezt a kört már beküldted.', 'ATTEMPT_ALREADY_SUBMITTED');
+          if (new Date(attempt.expires_at) <= new Date()) throw conflict('A kör lejárt. Indíts új kört.', 'ATTEMPT_EXPIRED');
+          let availableAt = attempt.available_at ? new Date(attempt.available_at) : null;
+          if (!availableAt) {
+            const delayMs = Number(attempt.settings?.delayedMinimumMs);
+            if (!Number.isInteger(delayMs) || delayMs < 60000) throw new Error('A kép–hely késleltetése érvénytelen.');
+            availableAt = new Date(Date.now() + delayMs);
+            await db.query('UPDATE attempts SET available_at=$2 WHERE id=$1', [attemptId, availableAt]);
+          }
+          return {availableAt: availableAt.toISOString()};
+        });
+        return sendJson(res, 200, output);
+      }
+
       params = routeMatch(pathname, /^\/api\/attempts\/([^/]+)\/submit$/);
       if (req.method === 'POST' && params) {
         const user = requireUser(context, 'student');
@@ -926,7 +950,7 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
             return { result: resultRow(existing.rows[0]), duplicate: true };
           }
           if (new Date(attempt.expires_at) <= new Date()) throw conflict('A kör lejárt. Indíts új kört.', 'ATTEMPT_EXPIRED');
-          if (attempt.available_at && new Date(attempt.available_at) > new Date()) throw conflict(`A későbbi felidézés ${new Date(attempt.available_at).toISOString()} után küldhető be.`, 'REVIEW_NOT_DUE');
+          if (attempt.game_id !== 'picture-place' && attempt.available_at && new Date(attempt.available_at) > new Date()) throw conflict(`A későbbi felidézés ${new Date(attempt.available_at).toISOString()} után küldhető be.`, 'REVIEW_NOT_DUE');
           let assignmentId = null;
           if (attempt.assignment_step_id) {
             const step = await db.query('SELECT * FROM assignment_steps WHERE id=$1 FOR UPDATE', [attempt.assignment_step_id]);
@@ -939,9 +963,8 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
           }
           const duration = Math.max(0, Math.round(Date.now() - new Date(attempt.created_at).valueOf()));
           if (attempt.game_id === 'picture-place') {
-            const plan = typeof engine.generateCognitiveAssessment === 'function' ? engine.generateCognitiveAssessment(attempt.game_id, attempt.settings, Number(attempt.seed)) : null;
-            const delayedStart = plan ? Math.min(...plan.trials.filter((trial) => trial.phase === 'delayed').map((trial) => trial.onsetMs)) : attempt.settings.delayedMinimumMs;
-            if (!Number.isFinite(delayedStart) || duration < delayedStart) throw conflict('A késleltetett felidézés ideje még nem telt le.', 'DELAY_NOT_COMPLETE');
+            if (!attempt.available_at) throw conflict('A késleltetett felidézés még nem kezdődött el.', 'DELAY_NOT_STARTED');
+            if (new Date(attempt.available_at) > new Date()) throw conflict('A késleltetett felidézés ideje még nem telt le.', 'DELAY_NOT_COMPLETE');
           }
           let score;
           try { score = engine.scoreAttempt(attempt.game_id, attempt.settings, Number(attempt.seed), body.answer, attempt.rules_version, {

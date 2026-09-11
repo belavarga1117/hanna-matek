@@ -73,9 +73,18 @@ test('cognitive school flow keeps private answers server-side, enforces delays, 
     assert.equal(reply.status,201);
     const pictureAttempt=reply.json.attempt;
     reply=await student.req(`/api/attempts/${pictureAttempt.id}/submit`,'POST',{answer:raw([])});
+    assert.equal(reply.status,409);assert.equal(reply.json.error.code,'DELAY_NOT_STARTED');
+    reply=await student.req(`/api/attempts/${pictureAttempt.id}/delay-ready`,'POST',{});
+    assert.equal(reply.status,200);const delayReadyAt=reply.json.availableAt;assert.ok(Date.parse(delayReadyAt)>Date.now());
+    reply=await student.req(`/api/attempts/${pictureAttempt.id}/delay-ready`,'POST',{});
+    assert.equal(reply.status,200);assert.equal(reply.json.availableAt,delayReadyAt,'delay gate must be idempotent and never move earlier');
+    reply=await student.req(`/api/attempts/${pictureAttempt.id}/submit`,'POST',{answer:raw([])});
     assert.equal(reply.status,409);assert.equal(reply.json.error.code,'DELAY_NOT_COMPLETE');
+    await pool.query("UPDATE attempts SET available_at=now() - interval '1 second',created_at=now() - interval '2 minutes' WHERE id=$1",[pictureAttempt.id]);
+    reply=await student.req(`/api/attempts/${pictureAttempt.id}/submit`,'POST',{answer:raw([])});
+    assert.equal(reply.status,200);assert.equal(reply.json.result.metrics.familyId,'picture-place');
 
-    reply=await student.req('/api/progress');assert.equal(reply.status,200);assert.equal(reply.json.cognitiveRounds,3);assert.equal(reply.json.legacyRounds,0);assert.equal(reply.json.stars,0);
-    reply=await teacher.req('/api/teacher/results');assert.equal(reply.status,200);assert.equal(reply.json.results.length,3);
+    reply=await student.req('/api/progress');assert.equal(reply.status,200);assert.equal(reply.json.cognitiveRounds,4);assert.equal(reply.json.legacyRounds,0);assert.equal(reply.json.stars,0);
+    reply=await teacher.req('/api/teacher/results');assert.equal(reply.status,200);assert.equal(reply.json.results.length,4);
   }finally{await running.close();await db.close();}
 });
