@@ -49,3 +49,11 @@ A Grok mobil- és Safari/iOS-megjegyzései lefedettségi korlátok, nem bizonyí
 - Grok 4.6, medium, ugyanezekkel a korlátokkal, egyedi `review-20260911-r2`, `27fb085`: PASS. A kétirányú kijelölésjavítás és a tényleges stop/dispose út ellenőrizve; további blokkoló hibát nem jelzett.
 - Root saját vizuális UAT-tal még az első review előtt megtalálta a nézetváltás közbeni kameraközelítést: az egyenes interpoláció az agy belseje felé vitt. A végleges kamera gömbi koordinátákon, megtartott távolsággal fordul.
 - 157 integrált teszt és 83 nyilvános állomány szintaxis/asset ellenőrzése PASS. Valódi Chrome WebGL-megjelenítés, hét feladatválasztás, régióválasztás, nézetek, egér és billentyűzet, nagyítás, visszatérés; külön 390×844 emulált mobilnézet, 44px vezérlők, vízszintes túlcsordulás nélkül. Natív Safari/iOS és WebGL-vesztés hibainjektálása nem futott. A statikus review ezeket nem bizonyítja.
+
+## Közös menü, kontraszt és ElevenLabs számjegyek – 2026-09-11
+
+- Root tényleges böngészős próbája reprodukálta a hiányzó színváltozókat, a 45%-ra halványított memóriamezőt, valamint a csak két linket mutató tanulói fejlécet. A javítást tanulói és tanári saját localhost QA-fiókon, 390 CSS-pixeles emulált mobilméretben és két rácsos játékban ellenőrizte.
+- Grok 4.6 medium, statikus/tool/web/subagent nélkül: az első egyedi `review-20260911-ui-digits-r1` kérését a root leállította, miután saját UAT-tal újrakezdési hibát talált. Ehhez a körhöz nem érkezett elfogadható lezáró verdict; nem számít PASS-nak.
+- Root hibatalálat: a hangos kör újrakezdésekor a régi aszinkron ág felülírta az új lejátszóképernyőt. A `4e8d0e2` javítás megszakítja a hangot, eldobja az elavult kör folytatásait és szünet alatt sem enged további számjegyet lejátszani. A hiba javítását ugyanazzal a böngészős lépéssorral és külön késői callback/aktív hang/köztes csend/szünet tesztekkel ellenőrizte.
+- Grok 4.6 medium, egyedi `review-20260911-ui-digits-r2`, végleges `4e8d0e2`: PASS. A teljes végleges diffet, a hangmodult, a közös fejlécet és a köréletciklust vizsgálta; további blokkoló hibát nem jelzett.
+- 162/162 integrált teszt és a 94 nyilvános állomány szintaxis/asset ellenőrzése PASS. A hangbankok dekódolása és manifest-hash egyezése ellenőrizve. Emberi érthetőségi hallgatóteszt és fizikai mobileszköz vizsgálata nem lett modellellenőrzésként állítva.

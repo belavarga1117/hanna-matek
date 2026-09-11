@@ -166,3 +166,26 @@
 }
 
 .scene-palette [draggable], .scene-drop [draggable] { touch-action:none; user-select:none; }
+
+/* Keep each editable digit–symbol pair inside its own card. */
+.code-map {
+  width: 100%;
+  max-width: 900px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+}
+.code-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  min-width: 0;
+  gap: 12px;
+  padding: 16px;
+}
+.code-pair .code-digit { justify-self: start; }
+.code-pair .code-symbol { justify-self: end; }
+.code-pair select {
+  grid-column: 1 / -1;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  font-size: 1rem;
+}
