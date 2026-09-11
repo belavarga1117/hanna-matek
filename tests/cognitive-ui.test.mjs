@@ -112,3 +112,32 @@ test('the brain selector and task cards agree in both directions',async()=>{
   assert.equal(cards[6].querySelector('button').getAttribute('aria-pressed'),'false');
   hub.dispose();
 });
+
+test('digit audio restart cannot paint a cancelled round over the new playback prompt',async()=>{
+  const previousAudio=globalThis.Audio, clips=[];
+  globalThis.Audio=class {
+    constructor(){this.listeners=new Map();clips.push(this);}
+    load(){} addEventListener(type,cb){this.listeners.set(type,cb);} removeEventListener(type,cb){if(this.listeners.get(type)===cb)this.listeners.delete(type);}
+    play(){this.playing=true;return Promise.resolve();} pause(){this.playing=false;}
+  };
+  const {normalizeCognitiveSettings}=await import('../dist/cognitive/engine.js');
+  const root=new MiniNode('root');let cleanup;
+  try{
+    cleanup=cognitiveGames['digit-span'].mount({root,h,seed:7,settings:normalizeCognitiveSettings('digit-span',{mode:'practice',minLength:2,maxLength:2}),phase(){},done(){}});
+    button(root,'Számsor lejátszása').click();await flush();
+    const active=clips.find(x=>x.playing);assert.ok(active);
+    const lateEnd=active.listeners.get('ended');
+    button(root,'Feladat újraindítása').click();await flush();lateEnd();await flush();
+    assert.equal(active.playing,false);
+    assert.ok(button(root,'Számsor lejátszása'));
+    assert.equal(button(root,'Válasz rögzítése'),undefined);
+    assert.equal(root.querySelector('.input-error'),null);
+    button(root,'Számsor lejátszása').click();await flush();
+    button(root,'Szünet').click();await flush();
+    assert.ok(clips.every(x=>!x.playing));
+    assert.equal(root.querySelector('.cognitive-task').inert,true);
+    button(root,'Folytatom').click();await flush();
+    assert.equal(button(root,'Számsor lejátszása').disabled,false);
+    assert.equal(button(root,'Válasz rögzítése'),undefined);
+  }finally{cleanup?.();globalThis.Audio=previousAudio;}
+});
