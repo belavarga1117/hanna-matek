@@ -516,6 +516,17 @@ function parseRawAnswer(plan, answer) {
   return {startedAt, completedAt, responses, qualityFlags: [...quality].sort(), device: answer.device ? clone(answer.device) : null};
 }
 
+export function validateCognitiveDelayedCheckpoint(gameId, rawSettings, seed, answer) {
+  if (gameId !== 'picture-place') invalid('késleltetési checkpoint csak kép–hely feladathoz tartozhat');
+  const plan = internalPlan(gameId, normalizeCognitiveSettings(gameId, rawSettings), seed);
+  const parsed = parseRawAnswer(plan, answer);
+  const required = plan.trials.filter((item) => item.response && item.phase !== 'delayed');
+  if (required.some((item) => !parsed.responses.has(item.trialIndex))) invalid('a tanulási és azonnali felidézési válaszok még nem teljesek');
+  const minimumServerElapsedMs = plan.trials.filter((item) => item.kind === 'association-study').reduce((sum, item) => sum + item.stimulus.studyMs, 0);
+  const checkpointEvents = answer.events.map(({eventId: _eventId, ...event}) => event);
+  return {minimumServerElapsedMs, checkpointIdentity: stableStringify({events: checkpointEvents, device: answer.device ?? null})};
+}
+
 function emptyValue(value) {
   return value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0);
 }
@@ -562,6 +573,15 @@ function durationFromContext(context) {
     return end - start;
   }
   return null;
+}
+
+function delayedDurationFromContext(context) {
+  if (context.delayCheckpointAt && context.submittedAt) {
+    const start = Date.parse(context.delayCheckpointAt), end = Date.parse(context.submittedAt);
+    if (!Number.isFinite(start) || !Number.isFinite(end) || end < start) invalid('context késleltetési időpontjai hibásak');
+    return end - start;
+  }
+  return durationFromContext(context);
 }
 
 function metricsEnvelope(gameId, settings, parsed, context, primaryMetric, subscales, counts, extraFlags = [], comparableOverride = true, timing = {}) {
@@ -643,7 +663,7 @@ function scorePicturePlace(plan, parsed, context) {
     correct += ok ? 1 : 0; total += 1; wrongLocations += !emptyValue(actual) && !ok ? 1 : 0;
     details.push({trialId: item.trialId, phase, label: item.response.itemId, expected: item.response.expected, actual: emptyValue(actual) ? null : actual, correct: ok});
   }
-  const delay = durationFromContext(context);
+  const delay = delayedDurationFromContext(context);
   const flags = [];
   if (plan.settings.mode === 'assessment' && delay === null) flags.push('delayedTimingUnverified');
   if (delay !== null && delay < plan.settings.delayedMinimumMs) flags.push('delayedRecallTooEarly');
@@ -755,7 +775,7 @@ function scoreActiveRecall(plan, parsed, context) {
 }
 
 export function scoreCognitiveAttempt(gameId, rawSettings, seed, answer, context = {}) {
-  exactObject(context, ['privateSettings', 'serverDurationMs', 'attemptCreatedAt', 'submittedAt'], 'context');
+  exactObject(context, ['privateSettings', 'serverDurationMs', 'attemptCreatedAt', 'submittedAt', 'delayCheckpointAt'], 'context');
   const plan = internalPlan(gameId, rawSettings, seed);
   const parsed = parseRawAnswer(plan, answer);
   if (gameId === 'spatial-span' || gameId === 'digit-span') return scoreSpan(gameId, plan, parsed, context);

@@ -75,12 +75,25 @@ test('cognitive school flow keeps private answers server-side, enforces delays, 
     reply=await student.req(`/api/attempts/${pictureAttempt.id}/submit`,'POST',{answer:raw([])});
     assert.equal(reply.status,409);assert.equal(reply.json.error.code,'DELAY_NOT_STARTED');
     reply=await student.req(`/api/attempts/${pictureAttempt.id}/delay-ready`,'POST',{});
+    assert.equal(reply.status,400);assert.equal(reply.json.error.code,'INVALID_DELAY_CHECKPOINT');
+    const picturePlan=generateCognitiveAssessment('picture-place',pictureAttempt.settings,pictureAttempt.seed);
+    const mapping=new Map(picturePlan.trials.find(trial=>trial.kind==='association-study').stimulus.associations.map(item=>[item.itemId,item.cell]));
+    const checkpointEvents=picturePlan.trials.filter(trial=>trial.kind==='place-recall'&&trial.phase!=='delayed').map((trial,index)=>event(trial,mapping.get(trial.stimulus.itemId),index));
+    const checkpointAnswer=raw(checkpointEvents);
+    reply=await student.req(`/api/attempts/${pictureAttempt.id}/delay-ready`,'POST',{answer:checkpointAnswer});
+    assert.equal(reply.status,409);assert.equal(reply.json.error.code,'DELAY_CHECKPOINT_TOO_EARLY');
+    await pool.query("UPDATE attempts SET created_at=now() - interval '30 seconds' WHERE id=$1",[pictureAttempt.id]);
+    reply=await student.req(`/api/attempts/${pictureAttempt.id}/delay-ready`,'POST',{answer:checkpointAnswer});
     assert.equal(reply.status,200);const delayReadyAt=reply.json.availableAt;assert.ok(Date.parse(delayReadyAt)>Date.now());
-    reply=await student.req(`/api/attempts/${pictureAttempt.id}/delay-ready`,'POST',{});
+    reply=await student.req(`/api/attempts/${pictureAttempt.id}/delay-ready`,'POST',{answer:checkpointAnswer});
     assert.equal(reply.status,200);assert.equal(reply.json.availableAt,delayReadyAt,'delay gate must be idempotent and never move earlier');
     reply=await student.req(`/api/attempts/${pictureAttempt.id}/submit`,'POST',{answer:raw([])});
     assert.equal(reply.status,409);assert.equal(reply.json.error.code,'DELAY_NOT_COMPLETE');
-    await pool.query("UPDATE attempts SET available_at=now() - interval '1 second',created_at=now() - interval '2 minutes' WHERE id=$1",[pictureAttempt.id]);
+    const restartedCheckpoint=raw([{eventId:uuid(100),type:'recovery',atMs:0,value:'reload'},...checkpointEvents]);
+    await pool.query("UPDATE attempts SET available_at=now() - interval '1 second' WHERE id=$1",[pictureAttempt.id]);
+    reply=await student.req(`/api/attempts/${pictureAttempt.id}/delay-ready`,'POST',{answer:restartedCheckpoint});
+    assert.equal(reply.status,200);assert.ok(Date.parse(reply.json.availableAt)>Date.now(),'restart checkpoint must begin a fresh delay');
+    await pool.query("UPDATE attempts SET available_at=now() - interval '1 second',delay_checkpoint_at=now() - interval '2 minutes',created_at=now() - interval '2 minutes' WHERE id=$1",[pictureAttempt.id]);
     reply=await student.req(`/api/attempts/${pictureAttempt.id}/submit`,'POST',{answer:raw([])});
     assert.equal(reply.status,200);assert.equal(reply.json.result.metrics.familyId,'picture-place');
 

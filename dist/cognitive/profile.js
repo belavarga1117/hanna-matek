@@ -6,7 +6,9 @@ function normalizedPoint(result,index){
   const metrics=result?.metrics||{};const primary=metrics.primaryMetric;
   if(result?.gameId==='nback'&&metrics.version===1){const settings=result.settings||{};const mode=settings.selfPaced||settings.adaptive?'practice':'assessment';const identity={mode:metrics.mode,n:metrics.n,trialCount:metrics.trialCount,scoreProfile:metrics.scoreProfile,intervalMs:settings.intervalMs,selfPaced:!!settings.selfPaced,adaptive:!!settings.adaptive,variable:!!settings.variable,crab:!!settings.crab,multiStim:settings.multiStim||1,identity:settings.identity||null};return {id:result.id||`result-${index}`,gameId:'nback',familyId:'nback',mode,key:`nback:${JSON.stringify(identity)}`,value:Number(result.percent),unit:'percent',name:'nbackPercent',at:result.at||result.createdAt,qualityFlags:[],comparable:mode==='assessment',summary:result.summary||''};}
   if(!primary||!Number.isFinite(Number(primary.value))||!metrics.comparabilityKey)return null;
-  return {id:result.id||`result-${index}`,gameId:result.gameId,familyId:metrics.familyId||result.gameId,mode:metrics.mode||result.settings?.mode||'practice',key:metrics.comparabilityKey,value:Number(primary.value),unit:primary.unit||'',name:primary.name||'eredmény',at:result.at||result.createdAt,qualityFlags:Array.isArray(metrics.qualityFlags)?metrics.qualityFlags:[],comparable:metrics.comparable===true,summary:result.summary||''};
+  const id=result.id||`result-${index}`,mode=metrics.mode||result.settings?.mode||'practice',qualityFlags=Array.isArray(metrics.qualityFlags)?metrics.qualityFlags:[];
+  const isolated=qualityFlags.length>0||(mode==='assessment'&&metrics.comparable!==true);
+  return {id,gameId:result.gameId,familyId:metrics.familyId||result.gameId,mode,key:isolated?`${metrics.comparabilityKey}:isolated:${id}`:metrics.comparabilityKey,value:Number(primary.value),unit:primary.unit||'',name:primary.name||'eredmény',at:result.at||result.createdAt,qualityFlags,comparable:metrics.comparable===true,summary:result.summary||''};
 }
 
 export function groupComparableResults(results=[]){

@@ -904,6 +904,10 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
       if (req.method === 'POST' && params) {
         const user = requireUser(context, 'student');
         const attemptId = cleanId(params[0]);
+        const body = await readJson(req);
+        if (!Object.hasOwn(body, 'answer')) throw badRequest('Az azonnali felidézés nyers válasza hiányzik.', 'INVALID_DELAY_CHECKPOINT');
+        if (Object.keys(body).some((key) => key !== 'answer')) throw badRequest('A késleltetési checkpoint csak nyers választ fogad.', 'INVALID_DELAY_CHECKPOINT');
+        const engine = await getEngine();
         const output = await transaction(pool, async (db) => {
           const found = await db.query('SELECT * FROM attempts WHERE id=$1 FOR UPDATE', [attemptId]);
           if (!found.rowCount) throw notFound();
@@ -912,12 +916,19 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
           if (attempt.game_id !== 'picture-place') throw badRequest('Ehhez a körhöz nincs késleltetett felidézési kapu.', 'INVALID_DELAY_GATE');
           if (attempt.submitted_at) throw conflict('Ezt a kört már beküldted.', 'ATTEMPT_ALREADY_SUBMITTED');
           if (new Date(attempt.expires_at) <= new Date()) throw conflict('A kör lejárt. Indíts új kört.', 'ATTEMPT_EXPIRED');
+          let checkpoint;
+          try { checkpoint = engine.validateCognitiveDelayedCheckpoint(attempt.game_id, attempt.settings, Number(attempt.seed), body.answer); }
+          catch (error) { throw badRequest(error.message || 'Az azonnali felidézés checkpointja érvénytelen.', 'INVALID_DELAY_CHECKPOINT'); }
+          const elapsed = Date.now() - new Date(attempt.created_at).valueOf();
+          if (elapsed < checkpoint.minimumServerElapsedMs) throw conflict('A tanulási bemutatás még nem fejeződhetett be.', 'DELAY_CHECKPOINT_TOO_EARLY');
+          const checkpointHash = sha256(checkpoint.checkpointIdentity);
           let availableAt = attempt.available_at ? new Date(attempt.available_at) : null;
-          if (!availableAt) {
+          if (!availableAt || attempt.delay_checkpoint_hash !== checkpointHash) {
             const delayMs = Number(attempt.settings?.delayedMinimumMs);
             if (!Number.isInteger(delayMs) || delayMs < 60000) throw new Error('A kép–hely késleltetése érvénytelen.');
-            availableAt = new Date(Date.now() + delayMs);
-            await db.query('UPDATE attempts SET available_at=$2 WHERE id=$1', [attemptId, availableAt]);
+            const checkpointAt = new Date();
+            availableAt = new Date(checkpointAt.valueOf() + delayMs);
+            await db.query('UPDATE attempts SET available_at=$2,delay_checkpoint_at=$3,delay_checkpoint_hash=$4 WHERE id=$1', [attemptId, availableAt, checkpointAt, checkpointHash]);
           }
           return {availableAt: availableAt.toISOString()};
         });
@@ -972,6 +983,7 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
             serverDurationMs: duration,
             attemptCreatedAt: new Date(attempt.created_at).toISOString(),
             submittedAt: new Date().toISOString(),
+            delayCheckpointAt: attempt.delay_checkpoint_at ? new Date(attempt.delay_checkpoint_at).toISOString() : null,
           }); }
           catch (error) { throw badRequest(error.message || 'Érvénytelen válasz.', 'INVALID_ANSWER'); }
           if (!score || !Number.isInteger(score.correct) || !Number.isInteger(score.total) || score.total < 1 || score.correct < 0 || score.correct > score.total) {

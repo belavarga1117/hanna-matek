@@ -12,6 +12,7 @@ import {
   normalizeCognitiveSettings,
   scoreCognitiveAttempt,
   stableStringify,
+  validateCognitiveDelayedCheckpoint,
 } from '../dist/cognitive/engine.js';
 
 const SEED = 0x51a7c0de;
@@ -173,6 +174,15 @@ test('a kép–hely terv két tanulási kört, azonnali és legalább 60 másodp
   assert.equal(result.metrics.subscales.delayed.correct, 4);
   assert.equal(result.metrics.subscales.actualDelayedRecallMs, 60000);
   assert.equal(result.metrics.comparable, true);
+});
+
+test('a kép–hely szerveres checkpoint csak a teljes azonnali felidézés után érvényes',()=>{
+  const settings={itemCount:4,gridSize:6};const {plan,events}=perfectEvents('picture-place',settings);
+  const immediate=events.filter(event=>plan.trials[event.trialIndex].phase!=='delayed');
+  assert.throws(()=>validateCognitiveDelayedCheckpoint('picture-place',settings,SEED,raw([])),/még nem teljesek/);
+  const checkpoint=validateCognitiveDelayedCheckpoint('picture-place',settings,SEED,raw(immediate));
+  assert.equal(checkpoint.minimumServerElapsedMs,24000);assert.match(checkpoint.checkpointIdentity,/response/);
+  assert.throws(()=>validateCognitiveDelayedCheckpoint('spatial-span',{},SEED,raw([])),/csak kép–hely/);
 });
 
 test('a kép–hely késleltetése szerveridő nélkül vagy túl korán minőségi jelzést kap', () => {

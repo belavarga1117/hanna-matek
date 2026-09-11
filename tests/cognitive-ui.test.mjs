@@ -41,10 +41,10 @@ const {cognitiveGames,createActiveRecallBuilder,renderCognitiveHub}=await import
 const {groupComparableResults,createCognitiveProfile}=await import('../dist/cognitive/profile.js');
 
 test('profile keeps practice and assessment separate and only joins identical comparability keys',()=>{
-  const result=(id,mode,key,value)=>({id,gameId:'spatial-span',at:`2026-09-${10+id}T08:00:00Z`,metrics:{familyId:'spatial-span',mode,comparabilityKey:key,comparable:true,qualityFlags:[],primaryMetric:{name:'forwardSpanScore',value,unit:'items'}}});
-  const grouped=groupComparableResults([result(1,'assessment','a',3),result(2,'assessment','a',4),result(3,'assessment','b',5),result(4,'practice','a',6)]);
-  assert.equal(grouped.assessment[0].series.length,2);
-  assert.deepEqual(grouped.assessment[0].series.map(series=>series.points.length),[2,1]);
+  const result=(id,mode,key,value,qualityFlags=[])=>({id,gameId:'spatial-span',at:`2026-09-${10+id}T08:00:00Z`,metrics:{familyId:'spatial-span',mode,comparabilityKey:key,comparable:qualityFlags.length===0,qualityFlags,primaryMetric:{name:'forwardSpanScore',value,unit:'items'}}});
+  const grouped=groupComparableResults([result(1,'assessment','a',3),result(2,'assessment','a',4),result(3,'assessment','b',5),result(4,'practice','a',6),result(5,'assessment','a',6,['paused'])]);
+  assert.equal(grouped.assessment[0].series.length,3);
+  assert.deepEqual(grouped.assessment[0].series.map(series=>series.points.length),[2,1,1]);
   assert.equal(grouped.practice[0].series[0].points.length,1);
 });
 
@@ -73,6 +73,16 @@ test('mounted active recall records one raw response for a double click and perm
   const mount=async({empty=false}={})=>{const root=new MiniNode('root'),done=[];const cleanup=cognitiveGames['active-recall'].mount({root,h,seed:7,settings:{mode:'assessment',inputModality:'keyboard',questions:[{questionId:'q1',question:'Mi a főváros?',learningExplanation:'Olvasd el: Budapest.'}],reviewRound:'initial',reviewDelayMinutes:60},phase(){},done:(_local,raw)=>done.push(raw)});await flush();button(root,'Elolvastam').click();await flush();const input=root.querySelector('textarea');input.value=empty?'':'Budapest';const submit=button(root,empty?'Nem tudom':'Válasz rögzítése');submit.click();submit.click();await flush();cleanup();return done[0];};
   const answered=await mount();assert.equal(answered.events.filter(event=>event.type==='response').length,1);assert.equal(answered.events.find(event=>event.type==='response').value,'Budapest');assert.equal(answered.device.pointer,'coarse');assert.equal(answered.device.viewportBucket,'small');
   const empty=await mount({empty:true});assert.equal(empty.events.filter(event=>event.type==='response').length,1);assert.equal(empty.events.find(event=>event.type==='response').value,null);
+});
+
+test('a kézi szünetet a háttérből visszatérés nem oldja fel',async()=>{
+  const root=new MiniNode('root');
+  const cleanup=cognitiveGames['active-recall'].mount({root,h,seed:7,settings:{mode:'assessment',inputModality:'keyboard',questions:[{questionId:'q1',question:'Mi a főváros?',learningExplanation:'Olvasd el: Budapest.'}],reviewRound:'initial',reviewDelayMinutes:60},phase(){},done(){}});
+  await flush();button(root,'Szünet').click();assert.equal(button(root,'Folytatom').textContent,'Folytatom');assert.equal(root.querySelector('.cognitive-task').inert,true);
+  documentHub.hidden=true;for(const listener of documentHub.listeners.get('visibilitychange')||[])listener();
+  documentHub.hidden=false;for(const listener of documentHub.listeners.get('visibilitychange')||[])listener();
+  assert.equal(button(root,'Folytatom').textContent,'Folytatom');assert.equal(root.querySelector('.cognitive-task').inert,true);
+  cleanup();
 });
 
 test('taxonomy mounts the trusted N-back link, source limitation and exact educational brain disclaimer',async()=>{
