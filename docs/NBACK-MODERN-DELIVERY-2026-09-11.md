@@ -29,4 +29,13 @@ Elkészült a [Memóriaprofil és fejlődéskövetés kutatási jelentése](COGN
 
 ## Kiadás
 
-A helyi ellenőrzés és felülvizsgálat lezárva. A Railway-kiadás és a kiadott fájlok ellenőrzésének eredménye a kiadás után kerül ide.
+**Kiadva:** [N-back Műhely](https://memoria-web-production-a86b.up.railway.app/#/jatek/nback), felül a **Modernizált** fülön. Az éles választót Chrome-ban megnyitottuk, a modern fület kiválasztottuk.
+
+- Megvalósítás: `224302e2a908485a2c1e9153b23ab5d2cf61d234`.
+- Railway deployment: `7ed1314b-005b-4723-8345-434a5fba3860`, **SUCCESS**, létrehozva 2026-09-11 09:47:05 CEST. A meglévő Railway-kiadási folyamatot használtuk; nyilvános GitHub-push nem történt.
+- Friss PostgreSQL-mentés és külön ideiglenes adatbázisba sikeres visszaállítás: 09:45:36 CEST, 34 285 bájt; SHA256 `00c880d502e605a0a26f38bddea524e8b41ea60b2e51aa008af4a5faed4de8fc`. Az eredeti adatbázist a visszaállítási próba nem módosította.
+- A futó konténer **71/71** vizsgált forrásfájlja és a HTTP-n visszakért **56/56** nyilvános fájl megegyezett a kiadott jelölttel; `/api/health`: HTTP 200, `ok: true`.
+- Éles, csak olvasásos böngészőpróba: alapértelmezett Klasszikus nézet → Modernizált → Mind a 28 → Hely és hang részletező, indítógomb engedélyezve. A felületi kiadás ellenőrzése nem indított új éles tanulói kört. A teljes modern kör és mentés fent dokumentált bizonyítéka a saját helyi tesztfiókból származik.
+- Kiadási bizonyítékok: `.local/nback-modern/deployment.json`, `release-manifest.json`, `runtime-source-proof.json`, `public-assets-proof.json`, `backup.json`, `live-catalog.txt`, `live-detail.txt`, `live.png`.
+
+Ez a kiadás a választófelület működését és a korábbi játékhoz kapcsolódását igazolja; nem új tudományos tesztvalidálás vagy teljes referencia-paritási állítás.
