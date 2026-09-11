@@ -1,11 +1,11 @@
 # Hanna Módszer – átadási ellenőrzés
 
-Állapot: **V1 történeti kiadás; a teljes eredeti scope audit után újranyitva**. A lent dokumentált konkrét tesztek és kiadás megtörténtek, de a „nem maradt kötelező funkcióhiány” minősítés túl erős volt. Az eredeti koncepcióhoz hiányzó mély tanítási mechanikák és vizuális rendszer elfogadási mátrixa: `HANNA-METHOD-ORIGINAL-SCOPE-ACCEPTANCE.md`. V1 indítás:2026-09-11 13:10:24UTC, kiadási lezárás:15:19:51UTC, eltelt2óra9perc27másodperc. Új hullám indulása:15:40:36UTC.
+Aktuális állapot: **V2 kiadva, az alább felsorolt ellenőrzési és módszertani korlátokkal**. A V1 történeti kiadást a teljes eredeti scope audit után újranyitottuk. A lent dokumentált konkrét tesztek és kiadás megtörténtek, de a „nem maradt kötelező funkcióhiány” minősítés túl erős volt. Az eredeti koncepcióhoz hiányzó mély tanítási mechanikák és vizuális rendszer elfogadási mátrixa: `HANNA-METHOD-ORIGINAL-SCOPE-ACCEPTANCE.md`. V1 indítás:2026-09-11 13:10:24UTC, kiadási lezárás:15:19:51UTC, eltelt2óra9perc27másodperc. Új hullám indulása:15:40:36UTC.
 
 
 ## V2 – az eredeti koncepció mély megvalósítása
 
-Állapot: **kiadási ellenőrzés alatt**. A V2 a tizenöt tevékenységet közös, többfázisú tanítási és felidézési motorral, hat rendezett szobával, saját módszertárral és tízdimenziós készségtérképpel valósítja meg. A tételes eredeti követelmény → megvalósítás → saját bizonyíték mátrix a [HANNA-METHOD-ORIGINAL-SCOPE-ACCEPTANCE.md](HANNA-METHOD-ORIGINAL-SCOPE-ACCEPTANCE.md) dokumentum; a régi V1 táblázatok alább történeti állapotot írnak le.
+Állapot: **éles kiadás és saját SQL-ellenőrzés lezárva**. A V2 a tizenöt tevékenységet közös, többfázisú tanítási és felidézési motorral, hat rendezett szobával, saját módszertárral és tízdimenziós készségtérképpel valósítja meg. A tételes eredeti követelmény → megvalósítás → saját bizonyíték mátrix a [HANNA-METHOD-ORIGINAL-SCOPE-ACCEPTANCE.md](HANNA-METHOD-ORIGINAL-SCOPE-ACCEPTANCE.md) dokumentum; a régi V1 táblázatok alább történeti állapotot írnak le.
 
 Fontos helyesbítés: a 90%-os sajátpalota-kapu és a Major95%/1,5mp, illetve peg2mp cél **Hanna eredeti kéréséből** származik. Az alábbi V1 szöveg tévesen mindet saját találmánynak nevezte. Az adaptáció konkrét lépcsői, intervallumlétra és peg-pontossági küszöb továbbra saját termékdöntés, nem kutatási norma.
 
@@ -16,9 +16,9 @@ Fontos helyesbítés: a 90%-os sajátpalota-kapu és a Major95%/1,5mp, illetve p
 | Azonos anyag többféle felidézése | Lánc/palota/peg → Random Recall | Sorrend → szóbank nélküli lista → konkrét/szomszéd/több pozíció/kategória; korábbi mentett palotából10/10. |
 | Aktív és későbbi felidézés | Mai útvonal, Későbbi visszahívás | Ténylegesen kivárt10 perces későbbi kör; napos/hetes intervallumok idővezérelt adatbázispróbán. |
 | Készségtérkép | Fejlődésem, tanárnál tanulói profil | Valódi saját eredmények, külön mértékegységek, azonos beállítású idősor; hiányzó tartós adat nem0. |
-| Tanári/tanulói teljes folyamat | Tanári feladatsorok és eredmények | Saját böngészős kiosztás →17/17 tanulói mentés →új tanári belépés →helyes tanulói részlet/profil. Éles SQL bizonyíték alább kerül rögzítésre. |
+| Tanári/tanulói teljes folyamat | Tanári feladatsorok és eredmények | Saját böngészős kiosztás →17/17 tanulói mentés →új tanári belépés →helyes tanulói részlet/profil. Éles kétismétléses saját QA-folyamat és tényleges SQL-visszaolvasás alább rögzítve. |
 | Mobil és nyugodt tér | Minden játék saját vezérlése |390×844 CSSpx,100% nagyítás: végső rendező720px keret/566px tartalom túlcsordulás nélkül; teljes tárgyképek, nagy válaszgombok, valódi sortöréses szabad lista és30/30 mentés. |
-| Független ellenőrzés | MODEL-EVAL.md | Saját Claude Code előfizetés, tényleges Opus5 medium / firstParty. MotorR9/R10 és UIR6 PASS, előző hibák reprodukcióval javítva. |
+| Független ellenőrzés | MODEL-EVAL.md | Saját Claude Code előfizetés, tényleges Opus5 medium / firstParty. MotorR9/R10, UIR6 és külön vizuálisR2 PASS; előző hibák reprodukcióval javítva. |
 
 A V2 hangigénye **0 új kötelező klip**. Meglévő ElevenLabs bankok változatlanok; nincs új gépi TTS. Az illusztrációk előre elkészültek; a saját asszociáció írása és a tanuló képzeleti képe nem futásidejű AI-generálás.
 
@@ -28,9 +28,28 @@ A szerkesztett szövegrubrika elfogadott megfogalmazásokat, kulcsgondolatokat �
 
 ### V2 kiadási bizonyíték
 
-Folyamatban; éles kiadási és mentési állítást csak a lenti végleges azonosítók igazolnak.
+- Játszható: [Hanna Módszer](https://memoria-web-production-a86b.up.railway.app/?release=b75b02b#/hanna-modszer), Chrome-ban megnyitva. Éles kezdőképernyő: `.local/hanna-v2/screenshots/live-hub-desktop.png`; friss console error nincs.
+- Futó forrás: `b75b02bdb9b74c9173ab6cd8e3cd1d0fd3ddeaa1`; Railway deployment `ce8b4717-760d-4c93-bb8a-4a586c3c16bb`, **SUCCESS**. Publikus **282/282**, futó konténer **303/303** fájl SHA256 szerint azonos a jelölttel. Az ezt követő dokumentációs commit nem változtatja a kiadott programot.
+- Friss teljes regresszió: **389/389 PASS**, forrás- és assetellenőrzés PASS. Független valódi `claude-opus-5`, `medium`, `firstParty`: motorR9/R10, UIR6, vizuálisR2 **PASS**. A puszta tesztszám helyett a követelményenkénti böngészős bizonyíték az elfogadási mátrixban szerepel.
+- Éles PostgreSQL: saját tanár öt saját tananyagelemmel kétismétléses láncot osztott ki; mindkét külön seedű kör három felidézési fázisa **20/20**. A szerver a valós tíz másodperc letelte előtti mentést elutasította. Párhuzamos újraküldés egyetlen eredményre futott; új tanulói belépés után2/2 teljesítés, tanári részletes visszaolvasás sikeres. Két teljes tanultlánc-pillanatkép került a későbbi ismétlésbe, nem háromszoros másolat a három felidézési fázisból.
+- Feladatsor: `87e436b5-45b1-4da0-b4c3-28c0e95fdeb9`. Éles eredmények: `2e79dff0-9e3d-43a1-bf02-f4600052f1db`, `59bb8b33-e096-4771-aa06-bbc32614fee2`. Bizonyíték: `.local/hanna-v2/live-flow-proof.json`, `live-db-closeout.json`. Ez az éles rész API/SQL-integrációs próba ismert válaszokkal; a teljes családos kézi böngészővezérlés külön, saját helyi adatbázison történt.
+- Saját privát szótár létrehozás/szerkesztés/revízió/visszaolvasás/archiválás és idegen tanári hozzáférés elutasítása sikeres. A korábbi **8 fiók és11 eredmény teljes sor-ujjlenyomata változatlan**. Csak a két új saját QA-fiókot inaktiváltuk, saját bizonyítékeredményeiket megőriztük. A böngészőben nyitott Hanna-fiókkal csak a katalógust olvastuk, nem írtunk teszteredményt és nem léptettük ki.
+- Mentés és tényleges külön SQL-visszaállítás: **2026-09-11 19:33:26 UTC PASS**,53 233 bájt; SHA256 `7132d724ee30712d85bab5a028590cd29346a6784c0a0bee8d2d2c39104e29cf`. A visszaállítás izolált, eldobott adatbázisra történt. Új migráció: `008_hanna_v2_flow.sql`, additív; a régi V1 körök értékelése fagyasztott.
+- Az első éles QA-script túl korán már tíz másodperc eltelt késleltetést állított a checkpointban; a szerver helyesen400-zal elutasította. A kizárólag helyi tesztscriptet javítottuk a checkpointkor tényleges0ms-re, majd a teljes valódi időzített próbát újrafuttattuk. A kiadott programot ez nem módosította; az első félbemaradt saját QA-kör az inaktív tesztfióknál megmaradt.
+- V2 hullám: **2026-09-11 15:40:36 UTC → 2026-09-11 20:31:08 UTC; 4 óra 50 perc 32 másodperc**. A V1 korábbi2óra9perc27másodperces szakasza ettől külön történeti adat.
+
+### V2 fennmaradó pontos korlátok
+
+- Fizikai iOS/Android és önálló OS-háttérváltási UAT nem történt. A390×844 mobilpróba szimulált; pause/restart valódi felületi, blur/visibility célzott automatikus teszt.
+- Napos/hetes esedékesség idővezérelt tesztből igazolt, nem kivárt többnapos emberi hatásvizsgálat. A ténylegesen kivárt tízperces visszahívás külön mentett kör.
+- A rubrika szerkesztett gondolategyezést kezel; szokatlan, összetett megfogalmazás tanári/önellenőrzést kérhet. Nem általános jelentésmegértés vagy klinikai mérés.
+- A runtime AI-asszociáció és diktálás nem aktív. Nincs új kötelező ElevenLabs-klip. A saját képek, történetek, eszközök és kézi tananyaggal tanulás működő részek.
+- Nem blokkoló vizuális/hozzáférhetőségi megjegyzés: mobil katalógusban a felirat a dekoratív szobakép aljára kerül; forgatáskor a rendező fókusza a választóhoz térhet; ritka, fókuszvesztés nélküli elveszett billentyűfelengedésnél egy újabb gombnyomás szükséges lehet. Ezek nem rejtett készültségi állítások.
 
 ---
+
+# V1 történeti jelentés – az alábbi állításokat a fenti V2 helyesbítés felülírja
+
 
 ## Hol található
 

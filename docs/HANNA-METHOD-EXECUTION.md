@@ -8,7 +8,7 @@
 - Tervezett függőségek: adatkontraktus → motor/tartalom és UI párhuzamosan → integráció/szerver/ismétlés és kész UI párhuzamosan → egységes regresszió, böngészős UAT, stabil review → javítás → kiadás.
 - Megőrzendő idegen változások: módosított `docs/FEATURE-MATRIX.md`; untracked `AMAKIDS-FELMERES-2026-09-10.md`, `HANNA-UJRABECSLES-ES-FEATURE-MATCH-2026-09-10.md`, `TARGYALASI-FELKESZITO-2026-09-10.md`, `docs/FINAL-PARITY-REPORT-2026-09-10.md`, `docs/REFERENCE-AUDIT-2026-09-10.md`.
 - Bizonyítékok: `.local/hanna-method/`; nincs titok vagy személyes tesztadat tracked dokumentumban.
-- Aktuális állapot: **újranyitott teljesítési hullám**,2026-09-11 15:40:36UTC. A V1 kiadás/adatfolyam igazolt, de az eredeti Hanna-koncepció teljes mechanikai és vizuális scope-ja részleges volt. Az alábbi napló történeti, a legfrissebb hullám felülírja a teljeskész-minősítést.
+- Aktuális állapot: **V2 kiadva és éles SQL-zárás megtörtént**,2026-09-11 20:31:08 UTC. Eredeti scope szerinti mátrix és fennmaradó pontos ellenőrzési korlátok a DELIVERY-ben. A teljesítési hullám kezdete2026-09-11 15:40:36UTC. A V1 kiadás/adatfolyam igazolt, de az eredeti Hanna-koncepció teljes mechanikai és vizuális scope-ja részleges volt. Az alábbi napló történeti, a legfrissebb hullám felülírja a teljeskész-minősítést.
 
 ## Első hullám – 2026-09-11 13:18 UTC
 
@@ -107,3 +107,12 @@
 - MotorR9/R10, UIR6 és külön vizuálisR2 Opus5medium PASS; minden blocking/major reprodukált finding javítva. A nem blokkoló segítőtechnológiai fókusz- és katalóguskozmetikai észrevételek dokumentáltak.
 - Végleges mobil10elemű lánc30/30 mentve, háromfelidézési fázis és valódi sortörések.389/389 teljes regresszió; katalógusCSS után célzott57/57+check, kiadáselőtt ismételt teljesfutás.
 - V2 kiadási QA saját2fiók előkészítve, előző8felhasználó/11eredmény ujjlenyomata rögzítve. Következő: commit, Railwaykiadás, publikusforrás-egyezés, ténylegesSQLmentés/visszaolvasás, sajátQAinaktiválás.
+
+## V2 kiadási lezárás — 2026-09-11 20:31:08 UTC
+
+- Kiadott b75b02b, Railway ce8b4717-760d-4c93-bb8a-4a586c3c16bb SUCCESS.282/282 publikus,303/303 futó fájl SHA256-egyezés;389/389 végleges regresszió,check PASS. MotorR9/R10,UIR6,vizuálisR2 Opus5medium/firstParty PASS.
+- Két tényleges tíz másodperces éles saját QA-kör20/20+20/20; párhuzamos beküldés idempotens, új belépés és tanári részlet PASS. Két teljes-listás ismétlési pillanatkép.8korábbiuser/11result sor-ujjlenyomat változatlan, új2QA inaktiválva. SQL-migráció008 ellenőrizve.
+- Első csak helyi QA-script checkpoint delayDurationMs hibáját a szerver helyesen elutasította; script0ms checkpointjavítás után teljes új időzített próba PASS. Kiadott program változatlan.
+- Publikus katalógus valódi Chrome nézetben megnyitva, nincs console error. A meglévő Hanna-session csak olvasásra használt; saját eredményeket API-n külön QA-k készítettek.
+- Tételes eredeti scope és bizonyíték: ORIGINAL-SCOPE-ACCEPTANCE; kiadási azonosítók, külön helyi/éles QA, pontos korlátok: DELIVERY. Tényleges V2 eltelt idő: **4 óra 50 perc 32 másodperc**.
+- Parentnak játszható URL átadva. Nincs aktív executor vagy fennmaradó kiadási lépés. Fizikai eszköz/OS-háttérpróba, többnapos emberi hatásvizsgálat és általános AI-szemantika nem teljesítettként jelölt korlát.

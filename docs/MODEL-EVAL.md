@@ -139,3 +139,10 @@ Nem blokkoló maradványok: ritka segítőtechnológiai keyup-vesztéskor egy el
 
 - `opus-visual-final`: CHANGES_REQUIRED,149.455s; az összes30 jelölő és a hat természetes szoba SVG-jét elfogadta, a katalógus rögzített keretén levágást talált.
 - `opus-visual-final-r2`: **PASS**,81.700s, tényleges `claude-opus-5` / `firstParty`, medium. A katalógus kerete követi az5:3 képet. FrissDOMmérés: nagy képen552×331.20 és362.66×217.59, mobilon130×78; mindkét szobakép teljesen a saját keretében.
+
+## Hanna V2 release evidence — 2026-09-11T20:31:08+00:00
+
+- Reviewed runtime candidate `b75b02bdb9b74c9173ab6cd8e3cd1d0fd3ddeaa1` released as Railway `ce8b4717-760d-4c93-bb8a-4a586c3c16bb` SUCCESS.282 public and303 runtime source/package/migration SHA256 matches.
+- Final389/389 tests and source/assetcheck PASS. Earlier independently verified actual Opus5medium/firstParty engineR9/R10,UIR6,visualR2 verdicts remain the review evidence; deployment checks are controller-run and are not attributed to the reviewer.
+- Real authenticated own-QA two20/20 rounds, concurrent retry idempotence, relogin/teacher reread, private-resource boundary and actual PostgreSQL arrays/schedule PASS. Existing8users/11results unchanged; new2QA deactivated. `.local/hanna-v2/live-flow-proof.json`, `live-db-closeout.json`, `release-closeout.json`.
+- No production code changed after review/deployment. The first local live-QA harness incorrectly supplied10s delay at its initial checkpoint; server rejected it. Harness correction to actual0ms followed by real elapsed-time rerun passed. Not a deployed app fix.
