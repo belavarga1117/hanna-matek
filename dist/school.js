@@ -4,6 +4,7 @@ import {resultDetailLabel} from './result-labels.js';
 import {createNbackSettings,describeNbackSettings} from './nback/settings-ui.js';
 import {renderNbackResult} from './nback/result-view.js';
 import {MODE_DEFINITIONS} from './nback/engine.js';
+import {createActiveRecallBuilder,createCognitiveSettings,describeCognitiveSettings,isCognitiveGameId,renderCognitiveResult} from './cognitive/ui.js';
 
 const SCHOOL_PATHS = new Set([
   '/fiok', '/tanar', '/tanar/tanulok', '/tanar/csoportok',
@@ -580,6 +581,7 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
           dueAt: due ? new Date(due).toISOString() : undefined,
           studentIds: values.getAll('studentIds'), groupIds: values.getAll('groupIds'), steps,
         }, {headers: {'Idempotency-Key': requestKey}});
+        stepsRoot.querySelectorAll('[data-private-answer]').forEach(input => { input.value = ''; });
         location.hash = `#/tanar/feladatsorok?id=${encodeURIComponent(result.assignment.id)}`;
       }, error => showFormError(form, error));
     });
@@ -589,21 +591,35 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
   function stepEditor(index) {
     const gameSelect = h('select', {name: 'gameId', 'aria-label': `${index + 1}. lépés játéka`}, games.map(game => h('option', {value: game.id}, game.title)));
     const settingsRoot = h('div', {className: 'step-settings'});
+    const repetitions=h('input', {name: 'repetitions', type: 'number', min: '1', max: '10', value: '1', required: true});
+    const repetitionField=field('Ismétlések',repetitions);
     const card = h('article', {className: 'step-editor'},
       h('div', {className: 'step-editor-head'}, h('strong', {className: 'step-title'}, `${index + 1}. lépés`), h('button', {type: 'button', className: 'text-link remove-step'}, 'Eltávolítás')),
       field('Játék', gameSelect), settingsRoot,
-      field('Ismétlések', h('input', {name: 'repetitions', type: 'number', min: '1', max: '10', value: '1', required: true})),
+      repetitionField,
     );
     const refreshSettings = () => {
       const game=games.find(item=>item.id===gameSelect.value);
       settingsRoot.classList.toggle('nback-step-settings',game?.id==='nback');
+      settingsRoot.classList.toggle('cognitive-step-settings',isCognitiveGameId(game?.id));
       if(game?.id==='nback'){
         const component=createNbackSettings({h,value:{},compact:true,onChange:()=>settingsRoot.dispatchEvent(new Event('input',{bubbles:true}))});
-        settingsRoot._nbackSettings=component;
+        settingsRoot._nbackSettings=component;settingsRoot._cognitiveSettings=null;
         settingsRoot.replaceChildren(component.element);
+        repetitions.value='1';repetitions.min='1';repetitions.max='10';repetitions.readOnly=false;repetitionField.hidden=false;
+      }else if(game?.id==='active-recall'){
+        const component=createActiveRecallBuilder({h,onChange:()=>settingsRoot.dispatchEvent(new Event('input',{bubbles:true}))});
+        settingsRoot._nbackSettings=null;settingsRoot._cognitiveSettings=component;settingsRoot.replaceChildren(component.element);
+        repetitions.value='2';repetitions.min='2';repetitions.max='2';repetitions.readOnly=true;repetitionField.hidden=true;
+      }else if(isCognitiveGameId(game?.id)){
+        const component=createCognitiveSettings({h,gameId:game.id,value:{mode:'assessment'},compact:true,onChange:()=>settingsRoot.dispatchEvent(new Event('input',{bubbles:true}))});
+        settingsRoot._nbackSettings=null;settingsRoot._cognitiveSettings=component;settingsRoot.replaceChildren(component.element);
+        repetitions.value='1';repetitions.min='1';repetitions.max='10';repetitions.readOnly=false;repetitionField.hidden=false;
       }else{
         settingsRoot._nbackSettings=null;
+        settingsRoot._cognitiveSettings=null;
         settingsRoot.replaceChildren(...settingFields(game));
+        repetitions.value='1';repetitions.min='1';repetitions.max='10';repetitions.readOnly=false;repetitionField.hidden=false;
       }
     };
     gameSelect.addEventListener('change', refreshSettings); refreshSettings();
@@ -681,6 +697,11 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
       if(!component)throw new Error('Az N-back beállításai nem olvashatók.');
       return {gameId,settings:component.getValue(),repetitions:Number(node.querySelector('[name=repetitions]').value)};
     }
+    if(isCognitiveGameId(gameId)){
+      const component=node.querySelector('.step-settings')?._cognitiveSettings;
+      if(!component)throw new Error('A memóriapróba beállításai nem olvashatók.');
+      return {gameId,settings:component.getValue(),repetitions:gameId==='active-recall'?2:Number(node.querySelector('[name=repetitions]').value)};
+    }
     const settings = {};
     node.querySelectorAll('[name]').forEach(input => {
       if (input.name === 'gameId' || input.name === 'repetitions') return;
@@ -750,19 +771,20 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
     const backQuery=new URLSearchParams();
     if(result.studentId)backQuery.set('studentId',result.studentId);
     if(result.assignmentId)backQuery.set('assignmentId',result.assignmentId);
-    const stars=result.gameId==='nback'?'A Brain Workshop N-back forrás nem használ csillagokat.':Number.isInteger(result.stars)?`${result.stars} csillag · ${'★'.repeat(result.stars)}${'☆'.repeat(3-result.stars)}`:'Ehhez az eredményhez még nincs meghatározott csillagértékelés.';
+    const cognitive=isCognitiveGameId(result.gameId);
+    const stars=result.gameId==='nback'?'A Brain Workshop N-back forrás nem használ csillagokat.':cognitive?'A memóriapróbák nem adnak csillagot vagy rangpontot.':Number.isInteger(result.stars)?`${result.stars} csillag · ${'★'.repeat(result.stars)}${'☆'.repeat(3-result.stars)}`:'Ehhez az eredményhez még nincs meghatározott csillagértékelés.';
     shell(h('div', {},
       h('a', {className: 'back-link', href: `#/tanar/eredmenyek${backQuery.size?`?${backQuery}`:''}`}, '← Eredmények'),
       h('section', {className: 'school-hero compact-school-hero'}, h('span', {className: 'eyebrow'}, formatDate(result.at)), h('h1', {}, `${gameName(result.gameId)} · ${result.percent}%`), h('p', {}, result.summary || `${result.correct} / ${result.total} helyes válasz`)),
       h('section',{className:'school-card result-context'},h('h2',{},'A kör adatai'),h('dl',{className:'result-metadata'},
         h('dt',{},'Tanuló'),h('dd',{},result.studentDisplayName||'Tanuló'),
         h('dt',{},'Játékváltozat'),h('dd',{},settingsName(result.gameId,result.settings)),
-        h('dt',{},'Pontszám'),h('dd',{},result.gameId==='nback'?`${result.percent}%`:`${result.correct} / ${result.total}`),
+        h('dt',{},cognitive?'Feladateredmény':'Pontszám'),h('dd',{},cognitive&&result.metrics?.primaryMetric?`${result.metrics.primaryMetric.value} ${result.metrics.primaryMetric.unit||''}`:result.gameId==='nback'?`${result.percent}%`:`${result.correct} / ${result.total}`),
         h('dt',{},'Csillag'),h('dd',{},stars),
-        h('dt',{},result.gameId==='nback'?'Ingerenkénti idő':'Megjegyzési idő'),h('dd',{},result.gameId==='nback'?(result.settings?.selfPaced?'Saját tempó':`${Number(result.settings?.intervalMs||0)/1000} mp`):`${result.settings?.seconds||10} mp`),
+        h('dt',{},result.gameId==='nback'?'Ingerenkénti idő':cognitive?'Mód':'Megjegyzési idő'),h('dd',{},result.gameId==='nback'?(result.settings?.selfPaced?'Saját tempó':`${Number(result.settings?.intervalMs||0)/1000} mp`):cognitive?(result.settings?.mode==='practice'?'Gyakorlás':'Rögzített próba'):`${result.settings?.seconds||10} mp`),
         h('dt',{},'Feladatsor'),h('dd',{},result.assignmentId?h('a',{className:'text-link',href:`#/tanar/feladatsorok?id=${encodeURIComponent(result.assignmentId)}`},result.assignmentTitle||'A kiosztott feladatsor megnyitása'):'Szabad gyakorlás'),
       ),result.rulesVersion===1?h('p',{className:'muted'},'Korábbi szabályokkal mentett kör.'):null),
-      result.gameId==='nback'?renderNbackResult(h,result):h('section', {className: 'school-card answer-review'},
+      result.gameId==='nback'?renderNbackResult(h,result):cognitive?renderCognitiveResult(h,result):h('section', {className: 'school-card answer-review'},
         h('h2', {}, 'Válaszonkénti áttekintés'),
         details.length ? h('div', {className: 'answer-review-list'}, details.map((detail, index) => h('article', {className: `review-answer ${detail.correct ? 'correct' : 'incorrect'}`},
           h('span', {className: 'review-mark', 'aria-label': detail.correct ? 'Helyes' : 'Hibás'}, detail.correct ? '✓' : '×'),
@@ -795,9 +817,11 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
       progressBar(percent),
       h('ol', {className: 'student-steps'}, (assignment.steps || []).map(step => {
         const complete = Number(step.completed || 0) >= Number(step.repetitions || 0);
-        const button = h('button', {className: complete ? 'secondary-button' : 'primary-button', disabled: complete}, complete ? 'Kész' : 'Indítás');
+        const reviewWaiting=step.gameId==='active-recall'&&Number(step.completed||0)===1&&step.availableAt&&new Date(step.availableAt)>new Date();
+        const button = h('button', {className: complete||reviewWaiting ? 'secondary-button' : 'primary-button', disabled: complete||reviewWaiting}, complete ? 'Kész' : reviewWaiting?'Később nyílik':step.gameId==='active-recall'&&Number(step.completed||0)===1?'Későbbi felidézés':'Indítás');
         button.addEventListener('click', () => onPlay?.(step.gameId, {...step.settings}, {assignmentStepId: step.id, assignmentId: assignment.id}));
-        return h('li', {}, h('span', {className: `step-state ${complete ? 'done' : ''}`, 'aria-hidden': 'true'}, complete ? '✓' : '○'), h('div', {}, h('strong', {}, gameName(step.gameId)), h('span', {}, `${settingsName(step.gameId,step.settings)} · ${step.completed || 0} / ${step.repetitions} kör`)), button);
+        const timing=reviewWaiting?` · Következő kör: ${formatDate(step.availableAt)}`:'';
+        return h('li', {}, h('span', {className: `step-state ${complete ? 'done' : ''}`, 'aria-hidden': 'true'}, complete ? '✓' : reviewWaiting?'◷':'○'), h('div', {}, h('strong', {}, gameName(step.gameId)), h('span', {}, `${settingsName(step.gameId,step.settings)} · ${step.completed || 0} / ${step.repetitions} kör${timing}`)), button);
       })),
     );
   }
@@ -900,7 +924,7 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
   }
   function numericRange(min, max, step = 1) { const values = []; for (let value = min; value <= max; value += step) values.push(value); return values; }
   function levelName(gameId, value = 1) { return gameLevels(games.find(game => game.id === gameId)).find(level => level.value === Number(value))?.label || `${Number(value) || 1}. szint`; }
-  function settingsName(gameId,settings={}) { return gameId==='nback'?describeNbackSettings(settings):levelName(gameId,settings?.level); }
+  function settingsName(gameId,settings={}) { return gameId==='nback'?describeNbackSettings(settings):isCognitiveGameId(gameId)?describeCognitiveSettings(settings):levelName(gameId,settings?.level); }
   function gameName(id) { return games.find(game => game.id === id)?.title || id || 'Ismeretlen játék'; }
   function initials(name) { return String(name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]?.toLocaleUpperCase('hu')).join(''); }
   function formatDate(value) { if (!value) return '–'; const date = new Date(value); return Number.isNaN(date.getTime()) ? '–' : date.toLocaleString('hu-HU', {year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'}); }
