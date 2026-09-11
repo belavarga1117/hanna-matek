@@ -2,7 +2,8 @@ import {h, normalizeSettings, settingsQuery, parseRoute, normalizeResult, readHi
 import {games} from './catalog.js';
 import {seededRandom, normalizeGameSettings, normalizeSettingsForVersion, scoreAttempt, GAME_RULES, COMMON_GAME_SETTINGS} from './game-engine.js';
 import {createSchool} from './school.js';
-import {createNbackSettings,describeNbackSettings} from './nback/settings-ui.js';
+import {describeNbackSettings} from './nback/settings-ui.js';
+import {createNbackExplorer} from './nback/explorer.js';
 import {renderNbackResult} from './nback/result-view.js';
 
 const app=document.querySelector('#app');
@@ -54,11 +55,9 @@ function renderSetup(game,settings){
   activeAssignment=null;
   if(game.id==='nback'){
     let s;try{s=normalizeGameSettings('nback',settings);}catch{s=normalizeGameSettings('nback',{});toast('Ez az N-back beállítás nem támogatott; az alapbeállítást nyitottuk meg.');}
-    const component=createNbackSettings({h,value:s,onChange:value=>{settingsDraft={gameId:game.id,settings:value};}});
     settingsDraft={gameId:game.id,settings:s};
-    const get=()=>component.getValue();
-    const withValidSettings=action=>{try{action(get());}catch(error){toast(error?.message||'Ezt az N-back beállítást nem lehet elindítani.');}};
-    shell(h('div',{},h('a',{href:'#/',className:'back-link'},'← Gyakorlatok'),h('div',{className:'setup-layout'},h('section',{className:'setup-info'},mini(game,true),h('span',{className:'eyebrow'},game.tag),h('h1',{},game.title),h('p',{className:'muted'},game.description),h('ol',{className:'steps'},game.steps.map((text,i)=>h('li',{},h('span',{},String(i+1)),text)))),h('section',{className:'settings-panel nback-host-settings','aria-label':'N-back beállításai'},h('span',{className:'eyebrow'},'BRAIN WORKSHOP FELADATCSALÁD'),h('h2',{},'Válaszd ki a módot'),component.element,h('button',{className:'primary-button start-button',onClick:()=>withValidSettings(value=>startGame(game,value))},'N-back indítása'),h('button',{className:'secondary-button',onClick:()=>withValidSettings(value=>shareSettings(game,value))},'Gyakorlatlink másolása'),h('p',{className:'settings-footnote'},'Az N-back pontszám forráshű százalék; ehhez a játékcsaládhoz nincs csillag.')))),'game');
+    const component=createNbackExplorer({h,value:s,onChange:value=>{settingsDraft={gameId:game.id,settings:value};},onStart:value=>startGame(game,value),onShare:value=>shareSettings(game,value),onError:toast});
+    shell(component.element,'game');
     return;
   }
   let s;try{s=normalizeGameSettings(game.id,settings);}catch{s=normalizeGameSettings(game.id);toast('Ehhez a játékhoz az alapbeállításokat nyitottuk meg.');}
