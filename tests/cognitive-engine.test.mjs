@@ -115,7 +115,7 @@ test('azonos játék, normalizált settings és uint32 seed bájtszinten azonos 
 });
 
 test('a számsor nyilvános terve csak a 0–9 hangtokeneket és az elvárt manifestverziót kéri', () => {
-  assert.equal(DIGIT_AUDIO_MANIFEST_VERSION, 'hu-digits-v1');
+  assert.equal(DIGIT_AUDIO_MANIFEST_VERSION, 'hu-digits-v2');
   assert.deepEqual(DIGIT_AUDIO_TOKENS.map((item) => item.digit), [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
   const plan = generateCognitiveAssessment('digit-span', {}, SEED);
   assert.ok(plan.trials.every((item) => item.stimulus.audioSetVersion === DIGIT_AUDIO_MANIFEST_VERSION));
@@ -327,4 +327,14 @@ test('túl sok esemény, hibás device és nem véges kontextusidő nem jut el a
   assert.throws(() => scoreCognitiveAttempt('spatial-span', {}, SEED, raw(tooMany)), /4096/);
   assert.throws(() => scoreCognitiveAttempt('spatial-span', {}, SEED, raw([], {device: {pointer: 'finger', viewportBucket: 'small'}})), /device.pointer/);
   assert.throws(() => scoreCognitiveAttempt('picture-place', {itemCount: 4}, SEED, raw(), {serverDurationMs: Number.NaN}), /serverDurationMs/);
+});
+
+
+test('new voice bank is separate in progress while historical settings remain scoreable', () => {
+  const old = normalizeCognitiveSettings('digit-span', {audioSetVersion: 'hu-digits-v1'});
+  const current = normalizeCognitiveSettings('digit-span', {});
+  assert.equal(current.audioSetVersion, 'hu-digits-v2');
+  assert.equal(generateCognitiveAssessment('digit-span', old, SEED).trials[0].stimulus.audioSetVersion, 'hu-digits-v1');
+  assert.notDeepEqual(cognitiveComparabilityIdentity('digit-span', old), cognitiveComparabilityIdentity('digit-span', current));
+  assert.doesNotThrow(() => scoreCognitiveAttempt('digit-span', old, SEED, raw()));
 });

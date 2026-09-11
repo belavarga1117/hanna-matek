@@ -117,15 +117,16 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
   }
 
   function renderNav(active = '') {
-    const items = currentUser?.role === 'teacher'
+    const roleItems = currentUser?.role === 'teacher'
       ? [['/tanar', 'Áttekintés'], ['/tanar/tanulok', 'Tanulók'], ['/tanar/csoportok', 'Csoportok'], ['/tanar/feladatsorok', 'Feladatsorok'], ['/tanar/eredmenyek', 'Eredmények']]
       : currentUser?.role === 'student'
         ? [['/feladataim', 'Feladataim'], ['/haladas', 'Haladásom']]
         : [];
+    const items = [...roleItems, ['/', 'Gyakorlatok'], ['/memoriaprobak', 'Memóriapróbák']];
     return h('nav', {className: 'school-nav', 'aria-label': 'Iskolai menü'},
       items.map(([path, label]) => h('a', {
         href: `#${path}`,
-        className: active === path || (path !== '/tanar' && active.startsWith(path)) ? 'school-nav-link current' : 'school-nav-link',
+        className: active === path || (path !== '/tanar' && path !== '/' && active.startsWith(path + '/')) ? 'school-nav-link current' : 'school-nav-link',
         'aria-current': active === path ? 'page' : null,
       }, label)),
     );
@@ -144,10 +145,10 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
         h('span', {className: 'brand-mark', 'aria-hidden': 'true'}, 'm'),
         h('span', {}, 'memória', h('strong', {}, 'műhely')),
       ),
-      currentUser ? renderNav(active) : h('span', {className: 'school-header-note'}, 'Tanulói és tanári fiók'),
+      renderNav(active),
       h('div', {className: 'school-account'},
         currentUser
-          ? h('a', {href: '#/fiok', className: active === '/fiok' ? 'school-account-link current' : 'school-account-link'},
+          ? h('a', {href: '#/fiok', 'aria-label': 'Fiókom', title: 'Fiókom', className: active === '/fiok' ? 'school-account-link current' : 'school-account-link'},
               h('span', {className: 'account-avatar', 'aria-hidden': 'true'}, initials(currentUser.displayName)),
               h('span', {}, h('strong', {}, currentUser.displayName), h('small', {}, currentUser.role === 'teacher' ? 'Tanár' : 'Tanuló')))
           : h('a', {href: '#/fiok', className: 'secondary-button compact-button'}, 'Belépés'),
@@ -962,6 +963,7 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
     get supported() { return supported; },
     api,
     renderNav,
+    renderHeader: schoolHeader,
     renderFooter,
     refresh,
   };

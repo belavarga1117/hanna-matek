@@ -1,0 +1,120 @@
+{
+  "version": "hu-digits-v2",
+  "voiceVersion": "hu-elevenlabs-david-2",
+  "language": "hu-HU",
+  "voice": "ElevenLabs David · user supplied recordings",
+  "format": "PCM signed 16-bit little-endian, 44100 Hz, mono WAV",
+  "generation": "User supplied 2026-09-11 downloads, oldest to newest = 0–9 as confirmed by user. Decoded without speed/pitch/gain changes. Only outer silence removed using 10 ms RMS frames at -50 dBFS, with 60 ms leading and 200 ms trailing margin; no internal silence removal.",
+  "files": [
+    {
+      "digit": 0,
+      "spoken": "nulla",
+      "file": "digit-0.wav",
+      "sha256": "21971f293f29fe4a4e963a2f6feb11c8f1246591b21e3f63f59696dbd660d9b6",
+      "source": "ElevenLabs_2026-09-11T11_25_38_David - Deep, Soothing and Sincere_pvc_sp100_s50_sb75_v3.mp3",
+      "sourceSha256": "adce60dceab03122204aeae3629ee7ed172515d15db2b68b96623d6b3df4a656",
+      "sourceDurationMs": 1411,
+      "trimStartMs": 20,
+      "durationMs": 840
+    },
+    {
+      "digit": 1,
+      "spoken": "egy",
+      "file": "digit-1.wav",
+      "sha256": "9ab8f74c75d7ce627aaad4b25470a3f9a8e2417a7873b56c518b46d8e32c8390",
+      "source": "ElevenLabs_2026-09-11T11_25_52_David - Deep, Soothing and Sincere_pvc_sp100_s50_sb75_v3.mp3",
+      "sourceSha256": "a96da160aca7fd23eb7bc8c0a2264afe045cdaec3384cbaa4aa4acd88ee9f374",
+      "sourceDurationMs": 1306,
+      "trimStartMs": 640,
+      "durationMs": 666
+    },
+    {
+      "digit": 2,
+      "spoken": "kettő",
+      "file": "digit-2.wav",
+      "sha256": "a42d77c899ab15648236288906ead9187662eb1c63f7124bc6668e77f745e162",
+      "source": "ElevenLabs_2026-09-11T11_26_08_David - Deep, Soothing and Sincere_pvc_sp100_s50_sb75_v3.mp3",
+      "sourceSha256": "2412faaa4baa11a2fd252ca7c1239ae8da264e1c8432a5752c1ca7846bf26de2",
+      "sourceDurationMs": 1567,
+      "trimStartMs": 0,
+      "durationMs": 960
+    },
+    {
+      "digit": 3,
+      "spoken": "három",
+      "file": "digit-3.wav",
+      "sha256": "a719d6adb9ea7a59bc4335fbbe91d92388e18b2ab4e4d14629ca72589010095b",
+      "source": "ElevenLabs_2026-09-11T11_26_21_David - Deep, Soothing and Sincere_pvc_sp100_s50_sb75_v3.mp3",
+      "sourceSha256": "4dee707f9570128cf94ab6bee5273cb0a79252ff896cd57eeb3bac5b4fc07926",
+      "sourceDurationMs": 1489,
+      "trimStartMs": 30,
+      "durationMs": 770
+    },
+    {
+      "digit": 4,
+      "spoken": "négy",
+      "file": "digit-4.wav",
+      "sha256": "d78efea2d9babda4acd320d2266545f7f06f86a0e80a2be3f7d22570b326440e",
+      "source": "ElevenLabs_2026-09-11T11_26_34_David - Deep, Soothing and Sincere_pvc_sp100_s50_sb75_v3.mp3",
+      "sourceSha256": "38e254877e4b9e6e9065cf0a668553aece7cd57234508c473be072b597eb752a",
+      "sourceDurationMs": 1149,
+      "trimStartMs": 0,
+      "durationMs": 860
+    },
+    {
+      "digit": 5,
+      "spoken": "öt",
+      "file": "digit-5.wav",
+      "sha256": "a9fbe1e5b98bc59c0189ef8c268a4ef67515a997034f425dff04e65781a8dcab",
+      "source": "ElevenLabs_2026-09-11T11_26_47_David - Deep, Soothing and Sincere_pvc_sp100_s50_sb75_v3.mp3",
+      "sourceSha256": "e2384ffde530fe5dd3e6de9d54ea0d6273c9a3d60c6fe6e7f3f0c7ebe366d764",
+      "sourceDurationMs": 1306,
+      "trimStartMs": 20,
+      "durationMs": 730
+    },
+    {
+      "digit": 6,
+      "spoken": "hat",
+      "file": "digit-6.wav",
+      "sha256": "27e0d7d6f4987deac78c3a32af82d1be726f77a48452362cb1d2f6f063e594f7",
+      "source": "ElevenLabs_2026-09-11T11_27_00_David - Deep, Soothing and Sincere_pvc_sp100_s50_sb75_v3.mp3",
+      "sourceSha256": "c8c49230987068fd442d98d6f9cda1b1e83a4f2817a3be0a8257da2cbb2f3891",
+      "sourceDurationMs": 601,
+      "trimStartMs": 0,
+      "durationMs": 601
+    },
+    {
+      "digit": 7,
+      "spoken": "hét",
+      "file": "digit-7.wav",
+      "sha256": "dd017ab85f2eb7e3b1c76978c2f0d9246ecba10344e85b262a7b84ed391114fa",
+      "source": "ElevenLabs_2026-09-11T11_27_11_David - Deep, Soothing and Sincere_pvc_sp100_s50_sb75_v3.mp3",
+      "sourceSha256": "3c463dabfff57b100efe4c21444d4852645fb9a871259f9f0af16e06fa151901",
+      "sourceDurationMs": 1228,
+      "trimStartMs": 80,
+      "durationMs": 760
+    },
+    {
+      "digit": 8,
+      "spoken": "nyolc",
+      "file": "digit-8.wav",
+      "sha256": "8ce7f0f31525558928b97fa8e3d126de5c24983271e42c596c2f8a7f477d776d",
+      "source": "ElevenLabs_2026-09-11T11_27_25_David - Deep, Soothing and Sincere_pvc_sp100_s50_sb75_v3.mp3",
+      "sourceSha256": "94564c33d9fb443f09a7719c90d6d88a65448d3cfc9349adf41ea9414bc1a347",
+      "sourceDurationMs": 836,
+      "trimStartMs": 0,
+      "durationMs": 810
+    },
+    {
+      "digit": 9,
+      "spoken": "kilenc",
+      "file": "digit-9.wav",
+      "sha256": "c2da5c95269c9017f0a98ee34d3552e93a4c7074e01e3b0e6e5ab37411cab3fd",
+      "source": "ElevenLabs_2026-09-11T11_27_40_David - Deep, Soothing and Sincere_pvc_sp100_s50_sb75_v3.mp3",
+      "sourceSha256": "f3298a19b0719218fd418d6d13b6d74c4cb4d1b3fd48d2082a1e105006e7b3d5",
+      "sourceDurationMs": 679,
+      "trimStartMs": 0,
+      "durationMs": 679
+    }
+  ]
+}

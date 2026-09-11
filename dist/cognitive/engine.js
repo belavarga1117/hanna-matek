@@ -22,7 +22,8 @@ export const COGNITIVE_PROTOCOLS = Object.freeze({
   'active-recall': 'hanna-active-recall-v1',
 });
 
-export const DIGIT_AUDIO_MANIFEST_VERSION = 'hu-digits-v1';
+export const DIGIT_AUDIO_MANIFEST_VERSION = 'hu-digits-v2';
+export const DIGIT_AUDIO_LEGACY_VERSION = 'hu-digits-v1';
 export const DIGIT_AUDIO_TOKENS = Object.freeze(Array.from({length: 10}, (_, digit) => Object.freeze({
   id: `digit-${digit}`,
   digit,
@@ -146,7 +147,7 @@ export function normalizeCognitiveSettings(gameId, raw = {}) {
     const minLength = integer(raw.minLength ?? defaults.minLength, 'minLength', 2, 7);
     const maxLength = integer(raw.maxLength ?? defaults.maxLength, 'maxLength', minLength, 12);
     const audioSetVersion = stringValue(raw.audioSetVersion ?? defaults.audioSetVersion, 'audioSetVersion', {max: 80});
-    if (audioSetVersion !== DIGIT_AUDIO_MANIFEST_VERSION) invalid(`audioSetVersion értéke ${DIGIT_AUDIO_MANIFEST_VERSION} legyen`);
+    if (![DIGIT_AUDIO_MANIFEST_VERSION, DIGIT_AUDIO_LEGACY_VERSION].includes(audioSetVersion)) invalid(`audioSetVersion értéke ${DIGIT_AUDIO_MANIFEST_VERSION} legyen`);
     return {...common, minLength, maxLength, sequencesPerLength: integer(raw.sequencesPerLength ?? defaults.sequencesPerLength, 'sequencesPerLength', 2, 2), digitMs: integer(raw.digitMs ?? defaults.digitMs, 'digitMs', 300, 3000), interdigitMs: integer(raw.interdigitMs ?? defaults.interdigitMs, 'interdigitMs', 100, 2000), responseWindowMs: integer(raw.responseWindowMs ?? defaults.responseWindowMs, 'responseWindowMs', 3000, 60000), audioSetVersion};
   }
   if (gameId === 'picture-place') {

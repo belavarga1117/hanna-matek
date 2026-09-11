@@ -1,4 +1,4 @@
-const DIGIT_AUDIO_MANIFEST_VERSION = 'hu-digits-v1';
+import {DIGIT_AUDIO_MANIFEST_VERSION, DIGIT_AUDIO_LEGACY_VERSION} from './engine.js';
 
 function audioError() {
   return new Error('A rögzített magyar számsor hangja most nem játszható le.');
@@ -45,15 +45,21 @@ function wait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-export async function createDigitAudio({AudioCtor = globalThis.Audio, baseUrl = './cognitive/audio'} = {}) {
+export async function createDigitAudio({AudioCtor = globalThis.Audio, baseUrl = './cognitive/audio', audioSetVersion = DIGIT_AUDIO_MANIFEST_VERSION} = {}) {
   if (typeof AudioCtor !== 'function') throw audioError();
-  const clips = Array.from({length: 10}, (_, digit) => createClip(AudioCtor, `${baseUrl}/digit-${digit}.wav`));
+  if (![DIGIT_AUDIO_MANIFEST_VERSION, DIGIT_AUDIO_LEGACY_VERSION].includes(audioSetVersion)) throw audioError();
+  const assetPath = audioSetVersion === DIGIT_AUDIO_LEGACY_VERSION ? baseUrl : `${baseUrl}/elevenlabs-v2`;
+  const clips = Array.from({length: 10}, (_, digit) => createClip(AudioCtor, `${assetPath}/digit-${digit}.wav`));
   const active = new Set();
   let disposed = false;
+  let playbackId = 0;
 
   async function playDigits(digits, {gapMs = 350} = {}) {
     if (disposed) throw new Error('A hangkör már lezárult.');
+    stop();
+    const id = playbackId;
     for (let index = 0; index < digits.length; index += 1) {
+      if (disposed || id !== playbackId) throw new Error('A hangkör megszakadt.');
       const digit = Number(digits[index]);
       if (!Number.isInteger(digit) || digit < 0 || digit > 9) throw new TypeError('A számsor csak 0–9 közötti számjegyeket tartalmazhat.');
       await playClip(clips[digit], active);
@@ -62,6 +68,7 @@ export async function createDigitAudio({AudioCtor = globalThis.Audio, baseUrl = 
   }
 
   const stop = () => {
+    playbackId += 1;
     for (const cancel of [...active]) cancel();
     for (const clip of clips) {
       clip.pause?.();
@@ -70,8 +77,8 @@ export async function createDigitAudio({AudioCtor = globalThis.Audio, baseUrl = 
   };
 
   return {
-    manifestVersion: DIGIT_AUDIO_MANIFEST_VERSION,
-    voiceLabel: 'Rögzített magyar hang · Tünde 1',
+    manifestVersion: audioSetVersion,
+    voiceLabel: audioSetVersion === DIGIT_AUDIO_LEGACY_VERSION ? 'Rögzített magyar hang · Tünde 1' : 'Rögzített magyar hang · ElevenLabs David',
     async test() { stop(); await playDigits([2, 7], {gapMs: 250}); },
     playDigits,
     stop,
