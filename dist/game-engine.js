@@ -1,3 +1,5 @@
+import {normalizeHannaSettings,generateHannaSession,scoreHannaAttempt,normalizeHannaResource,nextHannaReview,evaluatePalaceReadiness} from './hanna/engine.js';
+export {normalizeHannaSettings,generateHannaSession,scoreHannaAttempt,normalizeHannaResource,nextHannaReview,evaluatePalaceReadiness};
 import {normalizeSettings} from './core.js';
 import * as legacy from './legacy/v1/game-engine.js';
 import {awardStars} from './scoring.js';
@@ -6,6 +8,7 @@ import {isCognitiveGame,normalizeCognitiveSettings,generateCognitiveAssessment,s
 export {cognitiveComparabilityIdentity,generateCognitiveAssessment,validateCognitiveDelayedCheckpoint};
 export const CURRENT_RULES_VERSION = 2;
 export function normalizeSettingsForVersion(gameId, raw, version=2) {
+  if(gameId==='hanna-method'){if(version!==2)throw new RangeError('A Hanna Módszerhez frissítsd az oldalt.');return normalizeHannaSettings(raw);}
   if(gameId==='nback'){
     if(version!==2)throw new RangeError('Az N-back csak a 2. szabályverzióval indítható. Frissítsd az oldalt.');
     return normalizeNbackConfig(raw);
@@ -23,6 +26,7 @@ import {generateStationsRound,scoreStationOrder,generateFaces,scoreFaceAnswers,g
 import {generatePictureRounds,generateCodeRound} from './games/advanced-games.js';
 
 export const GAME_RULES=Object.freeze({
+  'hanna-method':{hannaVersion:1,activities:15},
   digits:{levels:[1],count:[3,8]},grid:{levels:[1],count:[3,8]},path:{levels:[1],count:[3,8]},missing:{levels:[1],count:[3,8]},
   stations:{levels:[1,2],count:[3,6],themes:['stations','streets'],level2Count:5},faces:{levels:[1,2,3],fixedCount:5},
   prices:{levels:[1,2],count:[3,5]},shopping:{levels:[1,2],fixedCount:9},picture:{levels:[1,2],rounds:[3,5]},
@@ -32,6 +36,7 @@ export const GAME_RULES=Object.freeze({
   'complex-span':{cognitiveVersion:1},recognition:{cognitiveVersion:1},'attention-nogo':{cognitiveVersion:1},'active-recall':{cognitiveVersion:1},
 });
 export const RAW_ANSWER_SHAPES=Object.freeze({
+  'hanna-method':'{version:1,events:[],encoding:[],responses:[{trialId,value,rtMs,hintLevel}]}',
   digits:'{digits:string}',grid:'{cells:number[]}',path:'{cells:number[]}',missing:'{choiceId:string}',stations:'{items:string[]}',
   faces:'{attempts:[{answers:[{faceId,name,job?,room?}]}]}',prices:'{answers:[{itemId,price,discount?}]}',shopping:'{attempts:[{itemIds:string[]}]}',
   picture:'level1 {rounds:[{choiceId:string}]}; level2 {rounds:[{attempts:[{itemIds:string[]}]}]}',code:'{mapping:[{digit,symbolId}],answers:[{attempts:string[]}]} ',
@@ -61,6 +66,7 @@ function requestedInteger(raw,key,fallback){
   const value=Number(raw[key]);if(!Number.isInteger(value))throw new TypeError(`A(z) ${key} egész szám legyen.`);return value;
 }
 export function normalizeGameSettings(gameId,raw={}){
+  if(gameId==='hanna-method')return normalizeHannaSettings(raw);
   if(gameId==='nback')return normalizeNbackConfig(raw);
   if(isCognitiveGame(gameId))return normalizeCognitiveSettings(gameId,raw);
   const rule=GAME_RULES[gameId];if(!rule)throw new RangeError(`Ismeretlen játék: ${String(gameId)}`);const levels=rule.levels;
@@ -102,6 +108,7 @@ function positionDetails(expected,actual,label='hely'){return expected.map((valu
 
 // RAW_ANSWER_SHAPES describes v2; the frozen legacy engine accepts v1 contracts.
 export function scoreAttempt(gameId,rawSettings,seed,answer,version=2,context={}){
+  if(gameId==='hanna-method'){if(version!==2)throw new RangeError('A Hanna Módszerhez frissítsd az oldalt.');return {...scoreHannaAttempt(rawSettings,seed,answer,context),rulesVersion:2};}
   if(gameId==='nback'){
     if(version!==2)throw new RangeError('Az N-back nem pontozható a régi szabályverzióval.');
     const settings=normalizeNbackConfig(rawSettings);

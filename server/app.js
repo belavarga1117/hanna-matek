@@ -15,6 +15,7 @@ import {
   verifyPassword,
 } from './security.js';
 import { createRateLimiter } from './rate-limit.js';
+import {handleHannaRoute,resolveHannaResources,adaptHannaSettings,prepareHannaReview,reserveHannaReview,hannaCheckpointHash,validateHannaCompletion,saveHannaLearning,splitHannaPrivateSettings} from './hanna.js';
 
 const SESSION_SECONDS = 7 * 24 * 60 * 60;
 const ACTIVATION_HOURS = 72;
@@ -104,6 +105,18 @@ function resultRow(row, includeAnswer = false, includeStudent = false) {
     assignmentStepId: row.assignment_step_id,
   };
   if (includeAnswer) result.answer = row.answer;
+  if (includeStudent && row.game_id==='hanna-method') {
+    const {resourceSnapshot,reviewSnapshot,...safeSettings}=result.settings||{};
+    result.settings=safeSettings;
+    // Own tools stay private even when the teacher can inspect practice performance.
+    if (!row.assignment_id || row.settings?.activity==='review') {
+      result.details=(result.details||[]).map((detail,index)=>({label:`${index+1}. felidézési egység`,correct:detail.correct,actual:detail.correct?'Helyes':'Nem helyes',expected:'Saját tananyag'}));
+      delete result.answer;
+    } else if(result.answer) {
+      const {encoding,...safeAnswer}=result.answer;
+      result.answer=safeAnswer;
+    }
+  }
   if (includeStudent) {
     result.studentId = row.student_id;
     if(row.student_display_name!==undefined)result.studentDisplayName=row.student_display_name;
@@ -374,6 +387,11 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
       const csrfExempt = ['/api/auth/login', '/api/auth/setup', '/api/auth/activate'];
       if (isWrite && !csrfExempt.includes(pathname)) verifyCsrf(req, context);
 
+      if (pathname.startsWith('/api/hanna/')) {
+        const user = requireUser(context);
+        if (await handleHannaRoute({req,res,url,pool,user,engine:await getEngine(),resultRow})) return;
+      }
+
       if (req.method === 'GET' && pathname === '/api/health') {
         await pool.query('SELECT 1');
         return sendJson(res, 200, { ok: true });
@@ -627,6 +645,7 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
           if (!Number.isInteger(step.repetitions) || step.repetitions < 1 || step.repetitions > 10) throw badRequest('Az ismétlésszám 1–10 lehet.', 'INVALID_STEPS');
           try {
             let incomingSettings=step.gameId==='nback'?{...(step.settings||{}),lowScoreCount:0}:step.settings||{};
+            if(step.gameId==='hanna-method'){const {resourceSnapshot,reviewSnapshot,customContent,...safe}=incomingSettings;incomingSettings=safe;}
             let privateSettings = null;
             if (step.gameId === 'active-recall') {
               const split = splitActiveRecallSettings(incomingSettings);
@@ -658,6 +677,7 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
           ) : { rows: [] };
           const targetIds = [...new Set([...studentIds, ...members.rows.map((row) => row.student_id)])];
           if (!targetIds.length) throw badRequest('Legalább egy tanulót vagy nem üres csoportot válassz.', 'NO_RECIPIENTS');
+          for(const step of steps)if(step.gameId==='hanna-method'){const resolved=await resolveHannaResources(db,user.id,step.settings,engine,{assignment:true});try{if(resolved.activity!=='review')engine.generateHannaSession(resolved,0);}catch(error){throw badRequest(error.message||'Ezekkel az eszközökkel nem osztható ki a kör.','INVALID_GAME_SETTINGS');}const split=splitHannaPrivateSettings(resolved);step.settings=split.settings;step.privateSettings=split.privateSettings;}
           const assignmentId = randomUUID();
           const created = await db.query(
             'INSERT INTO assignments(id,teacher_id,title,instructions,due_at) VALUES($1,$2,$3,$4,$5) RETURNING *',
@@ -770,12 +790,13 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
 
       if (req.method === 'GET' && pathname === '/api/progress') {
         const user = requireUser(context, 'student');
-        const cognitiveIds = [...COGNITIVE_GAME_IDS];
+        const cognitiveIds = [...COGNITIVE_GAME_IDS,'hanna-method'];
         const totals = await pool.query(`SELECT count(*)::int rounds,
           count(*) FILTER (WHERE game_id<>'nback' AND NOT (game_id=ANY($2::text[])))::int legacy_rounds,
           COALESCE(sum(correct) FILTER (WHERE game_id<>'nback' AND NOT (game_id=ANY($2::text[]))),0)::int correct,
           COALESCE(sum(total) FILTER (WHERE game_id<>'nback' AND NOT (game_id=ANY($2::text[]))),0)::int total,
-          count(*) FILTER (WHERE game_id=ANY($2::text[]))::int cognitive_rounds,
+          count(*) FILTER (WHERE game_id=ANY($2::text[]) AND game_id<>'hanna-method')::int cognitive_rounds,
+          count(*) FILTER (WHERE game_id='hanna-method')::int hanna_rounds,
           count(*) FILTER (WHERE game_id='nback')::int nback_rounds,
           COALESCE(avg(percent) FILTER (WHERE game_id='nback'),0)::float8 nback_average_percent,
           COALESCE(avg(CASE WHEN game_id='nback' AND settings->>'n' ~ '^([1-9]|1[0-9]|20)$' THEN (settings->>'n')::int END),0)::float8 nback_average_n,
@@ -793,7 +814,7 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
         );
         const all = await pool.query('SELECT game_id,stars FROM results WHERE student_id=$1', [user.id]);
         const stars = all.rows.reduce((sum, row) => sum + (row.stars ?? 0), 0);
-        const ungradedStars = all.rows.filter(row => row.game_id!=='nback'&&!isCognitiveGame(row.game_id)&&row.stars === null).length;
+        const ungradedStars = all.rows.filter(row => row.game_id!=='nback'&&!isCognitiveGame(row.game_id)&&row.game_id!=='hanna-method'&&row.stars === null).length;
         const nbackRounds = totals.rows[0].nback_rounds;
         const rank = stars >= 60 ? 'Emlékmester' : stars >= 30 ? 'Gyakorló' : stars >= 10 ? 'Felfedező' : 'Kezdő';
         const total = totals.rows[0].total;
@@ -807,6 +828,7 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
           stars,
           ungradedStars,
           cognitiveRounds: totals.rows[0].cognitive_rounds,
+          hannaRounds: totals.rows[0].hanna_rounds,
           nbackRounds,
           nbackAveragePercent: nbackRounds?Math.round(Number(totals.rows[0].nback_average_percent)):null,
           nbackAverageN: nbackRounds?Math.round(Number(totals.rows[0].nback_average_n)*10)/10:null,
@@ -840,7 +862,7 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
             privateSettings = step.rows[0].private_settings ?? null;
             rulesVersion = step.rows[0].rules_version;
             if(rulesVersion > (body.clientRulesVersion ?? 1))throw conflict('A feladathoz frissítsd az oldalt.', 'CLIENT_UPDATE_REQUIRED');
-            if((gameId==='nback'||isCognitiveGame(gameId))&&rulesVersion!==2)throw conflict('Ez a régi feladatkör nem indítható. Kérj új kiosztást.', 'CLIENT_UPDATE_REQUIRED');
+            if((gameId==='nback'||gameId==='hanna-method'||isCognitiveGame(gameId))&&rulesVersion!==2)throw conflict('Ez a régi feladatkör nem indítható. Kérj új kiosztást.', 'CLIENT_UPDATE_REQUIRED');
             const completed = await db.query('SELECT count(*)::int count,max(created_at) AS last_completed_at FROM results WHERE student_id=$1 AND assignment_step_id=$2', [user.id, stepId]);
             if (completed.rows[0].count >= step.rows[0].repetitions) throw conflict('Ezt a lépést már teljesítetted.', 'REPETITIONS_COMPLETE');
             availableAt = nextReviewAvailableAt(gameId, settings, completed.rows[0].count, completed.rows[0].last_completed_at);
@@ -867,10 +889,20 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
             if (pending.rowCount) await db.query('DELETE FROM attempts WHERE id=$1', [pending.rows[0].id]);
           } else {
             gameId = body.gameId;
-            if((gameId==='nback'||isCognitiveGame(gameId))&&body.clientRulesVersion!==2)throw badRequest('A memóriapróba indításához frissítsd az oldalt.', 'CLIENT_UPDATE_REQUIRED');
+            if((gameId==='nback'||gameId==='hanna-method'||isCognitiveGame(gameId))&&body.clientRulesVersion!==2)throw badRequest('A memóriapróba indításához frissítsd az oldalt.', 'CLIENT_UPDATE_REQUIRED');
             if(gameId==='active-recall')throw badRequest('Tanári aktív felidézés csak kiosztásból indítható.', 'ASSIGNMENT_REQUIRED');
             try { settings = settingsForVersion(engine, gameId, gameId==='nback'?{...(body.settings||{}),lowScoreCount:0}:body.settings||{}, rulesVersion); }
             catch (error) { throw badRequest(error.message || 'Érvénytelen játékbeállítás.', 'INVALID_GAME_SETTINGS'); }
+          }
+          if(gameId==='hanna-method'){
+            await db.query('SELECT pg_advisory_xact_lock(hashtext($1),hashtext($2))',[user.id,'hanna-method']);
+            if(!stepId){const resolved=await resolveHannaResources(db,user.id,body.settings||{},engine);const split=splitHannaPrivateSettings(resolved);settings=split.settings;privateSettings=split.privateSettings;}
+            const identity=value=>{const {resourceSnapshot,reviewSnapshot,itemCount,...rest}=value;return stableStringify({...rest,...(!value.adaptive?{itemCount}:{})});};
+            const pending=await db.query("SELECT * FROM attempts WHERE student_id=$1 AND game_id='hanna-method' AND assignment_step_id IS NOT DISTINCT FROM $2::uuid AND submitted_at IS NULL AND expires_at>now() ORDER BY created_at DESC FOR UPDATE",[user.id,stepId]);
+            const matching=pending.rows.find(row=>identity(row.settings)===identity(settings));
+            if(matching)return {attempt:publicAttempt(matching)};
+            settings=await adaptHannaSettings(db,user.id,settings,stepId,engine);
+            if(settings.activity==='review'){const prepared=await prepareHannaReview(db,user.id,settings,engine);const split=splitHannaPrivateSettings(prepared);settings=split.settings;privateSettings={...(privateSettings||{}),...(split.privateSettings||{})};}
           }
           if(gameId==='nback'){
             let initial;
@@ -890,14 +922,40 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
           }
           const id = randomUUID();
           const seed = randomInt(0, 0x1_0000_0000);
+          if(gameId==='hanna-method'){try{engine.generateHannaSession(settings,seed);}catch(error){throw badRequest(error.message||'Ezekkel az eszközökkel nem indítható a kör.', 'INVALID_GAME_SETTINGS');}}
           const expiresAt = new Date(Date.now() + config.attemptHours * 3_600_000);
           await db.query(
             `INSERT INTO attempts(id,student_id,game_id,settings,private_settings,seed,assignment_step_id,available_at,expires_at,rules_version)
              VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`, [id, user.id, gameId, jsonb(settings), privateSettings === null ? null : jsonb(privateSettings), seed, stepId, availableAt, expiresAt, rulesVersion],
           );
+          if(gameId==='hanna-method')await reserveHannaReview(db,settings,id);
           return { attempt: { id, seed, gameId, settings, rulesVersion, assignmentStepId: stepId, availableAt, expiresAt: expiresAt.toISOString() } };
         });
         return sendJson(res, 201, output);
+      }
+
+      params = routeMatch(pathname, /^\/api\/attempts\/([^/]+)\/hanna-ready$/);
+      if(req.method==='POST'&&params){
+        const user=requireUser(context,'student'),attemptId=cleanId(params[0]);
+        const body=await readJson(req),engine=await getEngine();
+        const output=await transaction(pool,async db=>{
+          const found=await db.query('SELECT * FROM attempts WHERE id=$1 FOR UPDATE',[attemptId]);
+          if(!found.rowCount)throw notFound('A kör nem található.');
+          const attempt=found.rows[0];
+          if(attempt.student_id!==user.id)throw forbidden();
+          if(attempt.game_id!=='hanna-method')throw badRequest('Ez nem Hanna Módszer kör.', 'INVALID_DELAY_GATE');
+          if(attempt.submitted_at)throw conflict('A kör már elkészült.', 'ATTEMPT_ALREADY_SUBMITTED');
+          if(new Date(attempt.expires_at)<=new Date())throw conflict('A kör lejárt.', 'ATTEMPT_EXPIRED');
+          if(attempt.settings.activity==='review')return {availableAt:null};
+          const checkpointHash=hannaCheckpointHash(attempt.settings,Number(attempt.seed),body.answer,engine);
+          const elapsed=Date.now()-new Date(attempt.created_at).valueOf();
+          if(Number(body.answer.encodingDurationMs)>elapsed+1500)throw conflict('A kódolási idő nem felel meg az eltelt időnek.', 'INVALID_DELAY_CHECKPOINT');
+          if(attempt.delay_checkpoint_hash===checkpointHash&&attempt.available_at)return {availableAt:attempt.available_at};
+          const at=new Date(),availableAt=new Date(at.valueOf()+Number(attempt.settings.delayMs||0));
+          await db.query('UPDATE attempts SET available_at=$2,delay_checkpoint_at=$3,delay_checkpoint_hash=$4 WHERE id=$1',[attemptId,availableAt,at,checkpointHash]);
+          return {availableAt:availableAt.toISOString()};
+        });
+        return sendJson(res,200,output);
       }
 
       params = routeMatch(pathname, /^\/api\/attempts\/([^/]+)\/delay-ready$/);
@@ -977,10 +1035,12 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
             if (!attempt.available_at) throw conflict('A késleltetett felidézés még nem kezdődött el.', 'DELAY_NOT_STARTED');
             if (new Date(attempt.available_at) > new Date()) throw conflict('A késleltetett felidézés ideje még nem telt le.', 'DELAY_NOT_COMPLETE');
           }
+          if(attempt.game_id==='hanna-method')validateHannaCompletion(attempt,body.answer,engine);
           let score;
           try { score = engine.scoreAttempt(attempt.game_id, attempt.settings, Number(attempt.seed), body.answer, attempt.rules_version, {
             privateSettings: attempt.private_settings ?? null,
             serverDurationMs: duration,
+            ...(attempt.game_id==='hanna-method'?{serverRetentionMs:attempt.settings.activity==='review' ? Math.min(...(attempt.settings.reviewSnapshot||[]).map(item=>Math.max(0,Date.now()-new Date(item.lastReviewedAt||item.learnedAt).valueOf()))) : (attempt.delay_checkpoint_at?Date.now()-new Date(attempt.delay_checkpoint_at).valueOf():0)}:{}),
             attemptCreatedAt: new Date(attempt.created_at).toISOString(),
             submittedAt: new Date().toISOString(),
             delayCheckpointAt: attempt.delay_checkpoint_at ? new Date(attempt.delay_checkpoint_at).toISOString() : null,
@@ -989,15 +1049,20 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
           if (!score || !Number.isInteger(score.correct) || !Number.isInteger(score.total) || score.total < 1 || score.correct < 0 || score.correct > score.total) {
             throw new Error('A scoreAttempt érvénytelen eredményt adott.');
           }
-          const percent = (attempt.game_id==='nback'||isCognitiveGame(attempt.game_id)) && Number.isInteger(score.percent) ? score.percent : Math.round(score.correct * 100 / score.total);
+          const percent = (attempt.game_id==='nback'||attempt.game_id==='hanna-method'||isCognitiveGame(attempt.game_id)) && Number.isInteger(score.percent) ? score.percent : Math.round(score.correct * 100 / score.total);
           if(!Number.isInteger(percent)||percent<0||percent>100)throw new Error('A scoreAttempt érvénytelen százalékot adott.');
           const stars = score.stars === undefined && attempt.rules_version === 1 ? (percent===100?3:percent>=60?2:percent>0?1:0) : (score.stars ?? null);
           if(stars !== null && (!Number.isInteger(stars) || stars<0 || stars>3))throw new Error('Érvénytelen csillagérték.');
           const starBasis = score.starBasis || (attempt.rules_version === 1 ? 'legacy-v1' : 'reference-unmeasured');
           if(attempt.game_id==='nback'&&(stars!==null||starBasis!=='brainworkshop-no-stars'))throw new Error('Az N-back eredmény csillagmezői érvénytelenek.');
           if(isCognitiveGame(attempt.game_id)&&(stars!==null||starBasis!=='cognitive-no-stars'))throw new Error('A memóriapróba csillagmezői érvénytelenek.');
-          let metrics=(attempt.game_id==='nback'||isCognitiveGame(attempt.game_id))?score.metrics:null;
+          let metrics=(attempt.game_id==='nback'||attempt.game_id==='hanna-method'||isCognitiveGame(attempt.game_id))?score.metrics:null;
           if(attempt.game_id==='nback'&&(!metrics||metrics.version!==1||!usableNbackAdaptation({settings:attempt.settings,metrics,percent})))throw new Error('Az N-back motor érvénytelen metrikát adott.');
+          if(attempt.game_id==='hanna-method'){
+            if(stars!==null||starBasis!=='hanna-method-no-stars'||!metrics||metrics.schemaVersion!==1||metrics.familyId!=='hanna-method')throw new Error('Érvénytelen Hanna Módszer metrika.');
+            const {resourceSnapshot,reviewSnapshot,...identity}=attempt.settings;
+            metrics={...metrics,comparabilityKey:sha256(stableStringify({...identity,...(metrics.sourceTextId?{sourceTextId:metrics.sourceTextId}:{}),resources:(resourceSnapshot||[]).map(resource=>({id:resource.id,revision:resource.revision})),...(attempt.settings.activity==='review'?{reviewItems:(reviewSnapshot||[]).map(item=>item.id)}:{})}))};
+          }
           if(isCognitiveGame(attempt.game_id)){
             if(!metrics||metrics.schemaVersion!==1||metrics.familyId!==attempt.game_id)throw new Error('A memóriapróba motor érvénytelen metrikát adott.');
             if(typeof engine.cognitiveComparabilityIdentity==='function')metrics={...metrics,comparabilityKey:sha256(stableStringify(engine.cognitiveComparabilityIdentity(attempt.game_id,attempt.settings)))};
@@ -1008,6 +1073,7 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
              VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19) RETURNING *`,
             [id, attemptId, user.id, assignmentId, attempt.assignment_step_id, attempt.game_id, jsonb(attempt.settings), jsonb(body.answer), answerHash, score.correct, score.total, percent, String(score.summary || ''), jsonb(score.details ?? []), duration, attempt.rules_version, stars, starBasis, metrics===null?null:jsonb(metrics)],
           );
+          if(attempt.game_id==='hanna-method')await saveHannaLearning(db,{attempt,result:inserted.rows[0],score:{...score,metrics},answer:body.answer,engine});
           await db.query('UPDATE attempts SET submitted_at=now() WHERE id=$1', [attemptId]);
           return { result: resultRow(inserted.rows[0]), duplicate: false };
         });

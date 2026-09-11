@@ -1,0 +1,12 @@
+// Primary publications describe the principles, not validation of this app's scoring.
+export const HANNA_METHOD_SOURCES = Object.freeze([
+  {id:'dresler-2017',title:'Dresler és munkatársai (2017)',url:'https://pmc.ncbi.nlm.nih.gov/articles/PMC5439266/',method:'Memóriaútvonal',summary:'A hathetes loci-tréning vizsgálatában a szófelidézés javult. A kutatás elosztott hálózati változásokat vizsgált; nem egyetlen agyterület pontszámát.',application:'A stabil útvonal megtanítása és az új információ helyekhez kötése innen kap módszertani alapot. A mi rövid köreink hatását ez a tanulmány külön nem tesztelte.'},
+  {id:'roediger-karpicke-2006',title:'Roediger és Karpicke (2006)',url:'https://doi.org/10.1111/j.1467-9280.2006.01693.x',method:'Aktív felidézés',summary:'Szövegtanulási kísérletekben a korábbi felidézési próbák a két nappal és egy héttel későbbi megtartást segítették.',application:'Ezért a tanulást emlékezetből adott válasz követi, és a Szövegépítő újabb felidézést kér. A segítséggel adott választ külön jelöljük.'},
+  {id:'cepeda-2008',title:'Cepeda és munkatársai (2008)',url:'https://digitalcommons.usf.edu/psy_facpub/1766/',method:'Időben elosztott ismétlés',summary:'Az ismétlések közti idő és a későbbi teszt időpontja együtt befolyásolta a megtartást; nincs minden célra egyetlen ideális időköz.',application:'Az alkalmazás elemenként ütemez. A 10 perces kezdés, a gyorsasági határ és az intervallum növelése saját termékszabály, nem e tanulmány hitelesített algoritmusa.'},
+  {id:'atkinson-raugh-1975',title:'Atkinson és Raugh (1975)',url:'https://escholarship.org/uc/item/5gb7g0zc',method:'Kulcsszómódszer',summary:'Az idegen szó hangzása egy ismerős kulcsszóhoz, a kulcsszó pedig a jelentéshez kötött mentális képhez kapcsolódik.',application:'A Kulcsszóhíd ezt a két kapcsolatot tanítja. A magyar példák saját oktatási példák; hangzásbeli segítségek, nem kiejtési útmutatók.'},
+]);
+export function renderHannaMethodSources(h) {
+  return h('details',{className:'hanna-method-sources'},h('summary',{},'Mi támasztja alá a módszereket?'),
+    h('p',{},'Kutatásokból átvett tanulási elvek, saját magyar gyakorlófeladatok. A pontszámok azt mutatják, hogyan ment a konkrét feladat; nem diagnózisok és nem korosztályos rangsorok.'),
+    HANNA_METHOD_SOURCES.map(source=>h('article',{},h('h3',{},source.method),h('p',{},source.summary),h('p',{},source.application),h('a',{href:source.url,target:'_blank',rel:'noopener noreferrer'},source.title+' ↗'))));
+}

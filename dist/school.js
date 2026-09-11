@@ -1,3 +1,5 @@
+import {createHannaSettings,renderHannaResult} from './hanna/ui.js';
+import {describeHannaSettings} from './hanna/engine.js';
 import {ApiError, createApiClient} from './api-client.js';
 import {COMMON_GAME_SETTINGS, GAME_RULES, normalizeGameSettings} from './game-engine.js';
 import {resultDetailLabel} from './result-labels.js';
@@ -122,7 +124,7 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
       : currentUser?.role === 'student'
         ? [['/feladataim', 'Feladataim'], ['/haladas', 'Haladásom']]
         : [];
-    const items = [...roleItems, ['/', 'Gyakorlatok'], ['/memoriaprobak', 'Memóriapróbák']];
+    const items = [...roleItems, ['/', 'Gyakorlatok'], ['/memoriaprobak', 'Memóriapróbák'], ['/hanna-modszer', 'Hanna Módszer']];
     return h('nav', {className: 'school-nav', 'aria-label': 'Iskolai menü'},
       items.map(([path, label]) => h('a', {
         href: `#${path}`,
@@ -600,10 +602,15 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
       repetitionField,
     );
     const refreshSettings = () => {
+      settingsRoot._hannaSettings?.dispose?.();settingsRoot._hannaSettings=null;
       const game=games.find(item=>item.id===gameSelect.value);
       settingsRoot.classList.toggle('nback-step-settings',game?.id==='nback');
       settingsRoot.classList.toggle('cognitive-step-settings',isCognitiveGameId(game?.id));
-      if(game?.id==='nback'){
+      if(game?.id==='hanna-method'){
+        const component=createHannaSettings({h,value:{},compact:true,school:{user:currentUser,api},onChange:()=>settingsRoot.dispatchEvent(new Event('input',{bubbles:true}))});
+        settingsRoot._hannaSettings=component;settingsRoot._nbackSettings=null;settingsRoot._cognitiveSettings=null;settingsRoot.replaceChildren(component.element);
+        repetitions.value='1';repetitions.min='1';repetitions.max='10';repetitions.readOnly=false;repetitionField.hidden=false;
+      }else if(game?.id==='nback'){
         const component=createNbackSettings({h,value:{},compact:true,onChange:()=>settingsRoot.dispatchEvent(new Event('input',{bubbles:true}))});
         settingsRoot._nbackSettings=component;settingsRoot._cognitiveSettings=null;
         settingsRoot.replaceChildren(component.element);
@@ -693,6 +700,10 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
 
   function readStep(node) {
     const gameId = node.querySelector('[name=gameId]').value;
+    if(gameId==='hanna-method'){
+      const component=node.querySelector('.step-settings')?._hannaSettings;if(!component)throw new Error('A Hanna Módszer beállításai nem olvashatók.');
+      return {gameId,settings:component.getValue(),repetitions:Number(node.querySelector('[name=repetitions]').value)};
+    }
     if(gameId==='nback'){
       const component=node.querySelector('.step-settings')?._nbackSettings;
       if(!component)throw new Error('Az N-back beállításai nem olvashatók.');
@@ -773,7 +784,7 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
     if(result.studentId)backQuery.set('studentId',result.studentId);
     if(result.assignmentId)backQuery.set('assignmentId',result.assignmentId);
     const cognitive=isCognitiveGameId(result.gameId);
-    const stars=result.gameId==='nback'?'A Brain Workshop N-back forrás nem használ csillagokat.':cognitive?'A memóriapróbák nem adnak csillagot vagy rangpontot.':Number.isInteger(result.stars)?`${result.stars} csillag · ${'★'.repeat(result.stars)}${'☆'.repeat(3-result.stars)}`:'Ehhez az eredményhez még nincs meghatározott csillagértékelés.';
+    const stars=result.gameId==='hanna-method'?'A Hanna Módszer a felidézést méri, csillag vagy rangpont nélkül.':result.gameId==='nback'?'A Brain Workshop N-back forrás nem használ csillagokat.':cognitive?'A memóriapróbák nem adnak csillagot vagy rangpontot.':Number.isInteger(result.stars)?`${result.stars} csillag · ${'★'.repeat(result.stars)}${'☆'.repeat(3-result.stars)}`:'Ehhez az eredményhez még nincs meghatározott csillagértékelés.';
     shell(h('div', {},
       h('a', {className: 'back-link', href: `#/tanar/eredmenyek${backQuery.size?`?${backQuery}`:''}`}, '← Eredmények'),
       h('section', {className: 'school-hero compact-school-hero'}, h('span', {className: 'eyebrow'}, formatDate(result.at)), h('h1', {}, `${gameName(result.gameId)} · ${result.percent}%`), h('p', {}, result.summary || `${result.correct} / ${result.total} helyes válasz`)),
@@ -782,10 +793,10 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
         h('dt',{},'Játékváltozat'),h('dd',{},settingsName(result.gameId,result.settings)),
         h('dt',{},cognitive?'Feladateredmény':'Pontszám'),h('dd',{},cognitive&&result.metrics?.primaryMetric?`${result.metrics.primaryMetric.value} ${result.metrics.primaryMetric.unit||''}`:result.gameId==='nback'?`${result.percent}%`:`${result.correct} / ${result.total}`),
         h('dt',{},'Csillag'),h('dd',{},stars),
-        h('dt',{},result.gameId==='nback'?'Ingerenkénti idő':cognitive?'Mód':'Megjegyzési idő'),h('dd',{},result.gameId==='nback'?(result.settings?.selfPaced?'Saját tempó':`${Number(result.settings?.intervalMs||0)/1000} mp`):cognitive?(result.settings?.mode==='practice'?'Gyakorlás':'Rögzített próba'):`${result.settings?.seconds||10} mp`),
+        h('dt',{},result.gameId==='hanna-method'?'Kódolási idő':result.gameId==='nback'?'Ingerenkénti idő':cognitive?'Mód':'Megjegyzési idő'),h('dd',{},result.gameId==='hanna-method'?(result.settings.encodingMs?`${result.settings.encodingMs/1000} mp`:'Saját tempó'):result.gameId==='nback'?(result.settings?.selfPaced?'Saját tempó':`${Number(result.settings?.intervalMs||0)/1000} mp`):cognitive?(result.settings?.mode==='practice'?'Gyakorlás':'Rögzített próba'):`${result.settings?.seconds||10} mp`),
         h('dt',{},'Feladatsor'),h('dd',{},result.assignmentId?h('a',{className:'text-link',href:`#/tanar/feladatsorok?id=${encodeURIComponent(result.assignmentId)}`},result.assignmentTitle||'A kiosztott feladatsor megnyitása'):'Szabad gyakorlás'),
       ),result.rulesVersion===1?h('p',{className:'muted'},'Korábbi szabályokkal mentett kör.'):null),
-      result.gameId==='nback'?renderNbackResult(h,result):cognitive?h('div', {}, renderCognitiveResult(h,result), h('section', {className: 'school-card answer-review'},
+      result.gameId==='hanna-method'?renderHannaResult(h,result):result.gameId==='nback'?renderNbackResult(h,result):cognitive?h('div', {}, renderCognitiveResult(h,result), h('section', {className: 'school-card answer-review'},
         h('h2', {}, 'Válaszonkénti áttekintés'),
         details.length ? h('div', {className: 'answer-review-list'}, details.map((detail, index) => h('article', {className: `review-answer ${detail.correct ? 'correct' : 'incorrect'}`},
           h('span', {className: 'review-mark', 'aria-label': detail.correct ? 'Helyes' : 'Hibás'}, detail.correct ? '✓' : '×'),
@@ -931,7 +942,7 @@ export function createSchool({h, games = [], onPlay, onAuthChange = () => {}, re
   }
   function numericRange(min, max, step = 1) { const values = []; for (let value = min; value <= max; value += step) values.push(value); return values; }
   function levelName(gameId, value = 1) { return gameLevels(games.find(game => game.id === gameId)).find(level => level.value === Number(value))?.label || `${Number(value) || 1}. szint`; }
-  function settingsName(gameId,settings={}) { return gameId==='nback'?describeNbackSettings(settings):isCognitiveGameId(gameId)?describeCognitiveSettings(settings):levelName(gameId,settings?.level); }
+  function settingsName(gameId,settings={}) { return gameId==='hanna-method'?describeHannaSettings(settings):gameId==='nback'?describeNbackSettings(settings):isCognitiveGameId(gameId)?describeCognitiveSettings(settings):levelName(gameId,settings?.level); }
   function gameName(id) { return games.find(game => game.id === id)?.title || id || 'Ismeretlen játék'; }
   function initials(name) { return String(name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]?.toLocaleUpperCase('hu')).join(''); }
   function formatDate(value) { if (!value) return '–'; const date = new Date(value); return Number.isNaN(date.getTime()) ? '–' : date.toLocaleString('hu-HU', {year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'}); }

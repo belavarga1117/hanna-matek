@@ -9,8 +9,8 @@ const html=await readFile(path.join(root,'dist/index.html'),'utf8');for(const [,
 await access(path.join(root,'dist/assets/portraits.png'));
 await access(path.join(root,'dist/assets/scenes.png'));
 for(const f of (await walk(path.join(root,'server'))).filter(f=>f.endsWith('.js')))execFileSync(process.execPath,['--check',f]);
-const libs={core:(await import('../dist/games/core-games.js')).coreGames,association:(await import('../dist/games/association-games.js')).associationGames,advanced:(await import('../dist/games/advanced-games.js')).advancedGames,nback:(await import('../dist/nback/ui.js')).nbackGames,cognitive:(await import('../dist/cognitive/ui.js')).cognitiveGames};
-if(games.length!==18||new Set(games.map(g=>g.id)).size!==18)throw new Error('Expected eighteen unique games');
+const libs={hanna:(await import('../dist/hanna/ui.js')).hannaGames,core:(await import('../dist/games/core-games.js')).coreGames,association:(await import('../dist/games/association-games.js')).associationGames,advanced:(await import('../dist/games/advanced-games.js')).advancedGames,nback:(await import('../dist/nback/ui.js')).nbackGames,cognitive:(await import('../dist/cognitive/ui.js')).cognitiveGames};
+if(games.length!==19||new Set(games.map(g=>g.id)).size!==19)throw new Error('Expected nineteen unique game modules');
 for(const g of games)if(typeof libs[g.module]?.[g.id]?.mount!=='function')throw new Error(`Missing game: ${g.id}`);
 for(const f of files){if(/\.(env|md|log)$/.test(f))throw new Error(`Private source included: ${f}`);}
 console.log(`PASS: ${games.length} playable game modules, ${files.length} public files, syntax and local assets checked.`);

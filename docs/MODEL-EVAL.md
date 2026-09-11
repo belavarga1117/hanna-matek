@@ -73,3 +73,22 @@ Grok 4.6 medium, egyedi `review-20260911-shopping-r1`, statikus/tool/web/subagen
 ## Tanári Memóriaprofil – 2026-09-11
 
 Grok 4.6 medium, egyedi `review-20260911-teacher-profile-r1`, statikus/tool/web/subagent nélkül: PASS. Szerepkör szerinti végpontok, saját tanuló kiválasztása, adatok elkülönítése, késői válaszok eldobása, dispose és üres/hiba állapotok ellenőrizve. Root saját helyi tanári és tanulói Chrome-próbája külön igazolja a ténylegesen mentett profil betöltését.
+
+## Hanna Módszer – 2026-09-11, első motor/szerver review
+
+Explicit useroverride alapján Grok helyett Claude Code 2.1.258, `claude-opus-5`, effort medium, saját claude.ai Max hitelesítés, firstParty. Safe mode, tiltott toolok/MCP, csak átadott statikus forrás és szerződés. A tényleges JSON modelUsage igazolja a fő modellt; belső kiegészítő Haiku hívás is szerepel. Nem API-költségígéret vagy külön számla.
+
+R1 verdict CHANGES_REQUIRED; `.local/hanna-method/review-engine-r1.json`. Konkrét találatok többek között: reverse review elemazonosság, privát eszközöket tartalmazó tanári due címke, 365 nap feletti visszahívás, körök közti azonosítóütközés, 20 számjegyes achievement mezőút, saját asszociáció hozzárendelése és readiness normalizáció. A controller a tanári eredményeken keresztüli további privát snapshot/nyersadat utat is lezárja. Minden finding reprodukció/javítás vagy dokumentált döntés után új review-kört kap. Ez a kör nem PASS és nem kiadási engedélybizonyíték.
+
+### Hanna Módszer – Opus 5 medium R2 és R3 (2026-09-11)
+
+- Routing: saját Claude Code claude.ai Max, safe-mode, eszközök/MCP tiltva; JSON `modelUsage` főmodell canonicalModel `claude-opus-5`, provider `firstParty`. Mindkét hívás tényleges, nem becsült modellazonosság. Grok nem futott. A CLI költségmező listaáras becslés, nem bizonyít külön API-számlázást.
+- R2: `CHANGES_REQUIRED`, `.local/hanna-method/review-full-r2.json`. Megerősített R1 javítások; új részleges számsor, szöveges ismétlés, sorrendkeverés, szünet, saját történet, kiosztási validáció, nagy peg-készlet, tartalomváltozatosság, visszatérési állapot hibák. Motor/UI/server javítások és célzott regressziók készültek.
+- R3: `CHANGES_REQUIRED`, `.local/hanna-method/review-fixes-r3.json`. R2 teljes fő javításlista megerősítve. Új, reprodukált hiba: üres/idegen szó a begépelt Starttesztben még a régi rendezési validátorra futott; saját horgok és hozzákapcsolt tárgyak azonossága; tananyag kikapcsolási és érvénytelen beállítás visszaállítási UI. Javítókör aktív, önmagában ez nem kiadási PASS.
+- A controller 15/15 valódi böngészős rövid kört végzett saját tesztkörnyezetben, részleges számsor és részleges/javított szöveg mentésével; valódi13perces ismétlés, tanári kiosztás és újrabelépés utáni tanári részlet/profil. A 7napos megtartás kizárólag idővezérelt integrációs teszt, nem emberi hosszútávú UAT.
+
+### Hanna Módszer – R4 javító PASS és R5 szerverzárás (2026-09-11)
+
+- R4 statikus javító verdict **PASS**: `.local/hanna-method/review-fixes-r4.json`. Canonical model `claude-opus-5`, provider `firstParty`, effort medium, Claude Code safe-mode és tools tiltva. Megerősítette a kezdőteszt részpontozását, a peg/hely ütközések megszüntetését, az értelmes beállításokat és a saját tananyag validációját.
+- R4 külön jelezte, hogy e csomagban a szerveres review-kiosztás nem ellenőrizhető. Controller ellenőrzés két kapcsolódó javítást végzett: a tanári kiosztás létrehozása még nem generál tanulói esedékes tartalmat; a tanuló indításkor csak saját esedékes emlékeit kapja. Tanár által kiosztott review esetén is privát maradnak a régi saját tartalom konkrét válaszai.
+- Az új integrációs próba: kiosztás esedékesség előtt létrejön, indítás409; esedékesség után régi tartalommal teljesíthető,1/1teljesítés, tanári válaszredakció és dupla mentés igazolva. Teljes regresszió244/244PASS. R5 külön szerveres záróreview folyamatban; az éles kiadás még nem igazolt.

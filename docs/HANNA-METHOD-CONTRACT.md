@@ -52,13 +52,13 @@ Képernyőn belül átlátható, stabil pozíciójú feladatok, nagy érintőgom
 
 Ismert sorozatok, üres/hibás/helyes válaszok, sorrendhatárok, segített válasz, erőforrás-szerkesztés, esedékesség, gyors/hibás adaptáció, párhuzamos beküldés és napváltás. Elkülönített tesztadatbázis, külön saját QA-tanár és -tanuló. Mind a 15 tevékenységből valódi böngészős rövid kör; szerkesztő mentés és újrabelépés; tanári kiosztás → tanulói játék → mentés → tanári részlet; ismétlés, megszakítás/újrakezdés/dupla mentés; mobilképernyő; régi játékok regressziója. A hét elteltét idővezérelt integrációs teszt igazolhatja, de ezt nem állítjuk valódi hétnapos emberi próbának.
 
-Stabil integrált fa után független Grok 4.6 medium statikus review, egyedi kérésfájl, shell/tools/web/subagents tiltva. Reprodukált blokkolók javítása és fixreview. Meglévő Railway kiadás, migráció előtt ellenőrzött mentés/visszaállítás, kiadott fájlok és éles olvasás/mentés ellenőrzése saját QA-fiókkal. Valós felhasználói adatok nem tesztadatok. Rövid átadási táblázat minden követelményről, konkrét bizonyíték, eltérés/korlát és tényleges eltelt idő; játszható verzió megnyitása.
+Stabil integrált fa után független Claude Opus 5 medium statikus review a tulajdonos Claude Code Max előfizetésén, egyedi kérésfájl, safe-mode, shell/tools/MCP/subagents tiltva. Minden kör JSON modelUsage mezője igazolja a claude-opus-5 modellt és a first-party providert. Reprodukált blokkolók javítása és fixreview. Meglévő Railway kiadás, migráció előtt ellenőrzött mentés/visszaállítás, kiadott fájlok és éles olvasás/mentés ellenőrzése saját QA-fiókkal. Valós felhasználói adatok nem tesztadatok. Rövid átadási táblázat minden követelményről, konkrét bizonyíték, eltérés/korlát és tényleges eltelt idő; játszható verzió megnyitása.
 
 A controller a további konkrét mezőket és adattábla/API szerződést a fenti invariánsok megtartásával kiegészítheti, még a függő implementációs sávok indítása előtt.
 
 ## Konkrét V1 implementációs illesztés – 2026-09-11
 
-A felhasználó legfrissebb utasítása felülírja a fenti Grok-routingot: a független review a saját Claude Code előfizetésén kért Opus 5 medium; a hiteles modellroutingot a root ellenőrzi. Grok nem indul.
+A felhasználó legfrissebb utasítása szerinti reviewer-routing: a független review a saját Claude Code előfizetésén kért Opus 5 medium; a hiteles modellroutingot a root ellenőrzi. Grok nem indul.
 
 ### Motor ↔ felület
 
@@ -97,3 +97,19 @@ Fiókhoz kötött, tanár/tanuló egyaránt szerkeszthet **saját** eszközöket
 `createHannaSettings({h,value={},onChange,school?,compact=false})` → `{element,getValue(),setValue(raw)}`; használható hubból és tanári feladatsorhoz. Elérhető tevékenységek, paraméterek, saját erőforrások; minden szükséges írásos magyar instrukció. `renderHannaResult(h,result)` és `describeHannaSettings` a tanári/tanulói eredményrészlethez; új fejlődési nézet a dashboardból.
 
 Kötelező render guard: disposal/generáció minden aszinkron betöltésnél; szerep/fiókváltáskor késői válasz ne jelenjen meg. Köztes feladat tartson ki a teljes késleltetésig; pause/háttérbe kerülés állítja a lokális időzítőt, visszatéréskor explicit folytatás. Újrakezdés eldobja régi válaszokat/timereket, egy mentésre váró kör két befejezésgombbal se küldődjön kétszer.
+
+### Felidézési és napi nézet pontosítás
+
+A Startteszt üres mezőket ad, felkínált célelemkészlet nélkül: szó/kép/szám azonnali és késleltetett sorrendi szabad felidézés. A többi `ordered` mód a kért Recall1-rendezési gyakorlat: a célelemek megjelennek, a sorrendet kell rekonstruálni; a felület ezt kifejezetten közli. Ez nem egyenértékű a szabad felidézéssel, eltérő beállítás és összehasonlítási csoport. A szöveg kulcsgondolatai csak tanuláskor, korrekciónál és eredményben látszanak; visszahíváskor nincsenek felsorolva.
+
+A napi teljesítés a mentett eredményekből, Europe/Budapest napváltással számolódik. Az öt rész mellett valós „ma kész” jelölés; esedékes anyag nélkül az ismétlés indítása tiltott. Eredményből a Napi terv folytatása visszanyitja ezt a nézetet. Ez becsült 10–15 perces terv, a ténylegesen saját tempójú tanulás hosszabb lehet.
+
+A palotafotó legfeljebb 200 KB/fájl a szerkesztőben; a teljes szerveres kérés 1 MB, a normalizált eszköz 950 KB. Több fotónál az összesített méret számít, beleértve a base64 méretnövekedést. Nem 1 MB jár minden fotóhoz. A 100 horgos saját peg teljes gyakorlását 120 külön tárgyat tartalmazó készlet támogatja; a régi 52 tárgyas kisebb seedelt körök változatlanok.
+
+### Végleges beállítási szűkítés
+
+A tényleges nehézséget az elemszám, a tanulási idő, a késleltetés, a felidézési mód és az eredményhez igazodó elemszám-változás szabályozza. A korábbi névleges easy/normal/hard mező kompatibilitási bemenet marad, normalra egységesítve; nincs külön hatás nélküli nehézségválasztó.
+
+A konkrét/vegyes/absztrakt/saját tananyag választás a Láncsztori és Képkapcsoló módnál támogatott. Kulcsszóhíd, Szövegépítő és Fogalomból kép beépített vagy saját anyaggal működik; más tevékenység nem mutat hatás nélküli tartalmi szintet. Saját Kulcsszóhíd és Fogalomból kép külön megnevezést, jelentést és vizuális/hangzási kulcsot igényel; a kérdés nem tartalmazhatja magát a teljes helyes választ.
+
+A kezdőteszt minden visszahívása `entry:typed`: pontos számú mező, üresen hagyott vagy téves tartalom esetén részpontozás. A felkínált elemekből végzett sorrendezésnél az idegen elem továbbra is érvénytelen.

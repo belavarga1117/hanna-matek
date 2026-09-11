@@ -1,10 +1,11 @@
 import {normalizeConfig as normalizeNbackConfig} from './nback/engine.js';
 
 export function h(tag, props = {}, ...children) {
-  const node = document.createElement(tag);
+  const svgTags = new Set(['svg','g','path','circle','ellipse','rect','line','polyline','polygon','defs','linearGradient','radialGradient','stop','text','tspan','clipPath','mask']);
+  const node = svgTags.has(tag) && document.createElementNS ? document.createElementNS('http://www.w3.org/2000/svg',tag) : document.createElement(tag);
   for (const [key, value] of Object.entries(props || {})) {
     if (value === null || value === undefined || value === false) continue;
-    if (key === 'className') node.className = value;
+    if (key === 'className') { if(node.namespaceURI==='http://www.w3.org/2000/svg')node.setAttribute('class',value);else node.className = value; }
     else if (key === 'style' && typeof value === 'object') {
       for (const [property, setting] of Object.entries(value)) {
         if (property.startsWith('--')) node.style.setProperty(property, setting);
@@ -21,6 +22,8 @@ export function h(tag, props = {}, ...children) {
   for (const child of children.flat(Infinity)) {
     if (child !== null && child !== undefined && child !== false) node.append(child instanceof Node ? child : document.createTextNode(String(child)));
   }
+  // Native selects can only select a value after their options exist.
+  if (tag.toLowerCase() === 'select' && props?.value !== undefined) node.value = props.value;
   return node;
 }
 
