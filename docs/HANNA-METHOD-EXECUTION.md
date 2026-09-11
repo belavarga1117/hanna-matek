@@ -8,7 +8,7 @@
 - Tervezett függőségek: adatkontraktus → motor/tartalom és UI párhuzamosan → integráció/szerver/ismétlés és kész UI párhuzamosan → egységes regresszió, böngészős UAT, stabil review → javítás → kiadás.
 - Megőrzendő idegen változások: módosított `docs/FEATURE-MATRIX.md`; untracked `AMAKIDS-FELMERES-2026-09-10.md`, `HANNA-UJRABECSLES-ES-FEATURE-MATCH-2026-09-10.md`, `TARGYALASI-FELKESZITO-2026-09-10.md`, `docs/FINAL-PARITY-REPORT-2026-09-10.md`, `docs/REFERENCE-AUDIT-2026-09-10.md`.
 - Bizonyítékok: `.local/hanna-method/`; nincs titok vagy személyes tesztadat tracked dokumentumban.
-- Aktuális állapot: teljesítve, Railway kiadás és valódi mentés-visszaolvasás igazolva. Az alábbi napló időrendben őrzi a köztes állapotokat.
+- Aktuális állapot: **újranyitott teljesítési hullám**,2026-09-11 15:40:36UTC. A V1 kiadás/adatfolyam igazolt, de az eredeti Hanna-koncepció teljes mechanikai és vizuális scope-ja részleges volt. Az alábbi napló történeti, a legfrissebb hullám felülírja a teljeskész-minősítést.
 
 ## Első hullám – 2026-09-11 13:18 UTC
 

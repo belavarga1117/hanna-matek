@@ -1,6 +1,6 @@
 # Hanna Módszer – átadási ellenőrzés
 
-Állapot: **kiadva és ellenőrizve**. Indítás: 2026-09-11 13:10:24 UTC. Lezárás: 2026-09-11 15:19:51 UTC. Tényleges eltelt idő: **2 óra 9 perc 27 másodperc**.
+Állapot: **V1 történeti kiadás; a teljes eredeti scope audit után újranyitva**. A lent dokumentált konkrét tesztek és kiadás megtörténtek, de a „nem maradt kötelező funkcióhiány” minősítés túl erős volt. Az eredeti koncepcióhoz hiányzó mély tanítási mechanikák és vizuális rendszer elfogadási mátrixa: `HANNA-METHOD-ORIGINAL-SCOPE-ACCEPTANCE.md`. V1 indítás:2026-09-11 13:10:24UTC, kiadási lezárás:15:19:51UTC, eltelt2óra9perc27másodperc. Új hullám indulása:15:40:36UTC.
 
 ## Hol található
 
