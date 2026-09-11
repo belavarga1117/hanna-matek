@@ -30,3 +30,10 @@ A Titkos kód szerkesztőjének 207 px széles kártyáiba korábban egyetlen v�
 Valódi Chrome-próba: mindkét jelhalmaz, a „fényképezőgép” és „borostyán háromszög” hosszú címke, párosításcsere tíz egyedi jellel. Desktopon és 390 CSS-pixeles mobil-emulációban mind a 30 gyermekelem a tíz kártyán belül maradt; a dokumentum nem szélesebb a viewportnál. A megjegyzési szakasz és a visszafejtési képernyőre lépés működik. Az érintett 11 teszt és a syntax/asset ellenőrzés PASS; Grok 4.6 medium statikus review PASS. Játékszabály, időzítés és pontozás nem változott. Bizonyítékok: `.local/code-layout/`.
 
 A kódkártya-javítás kiadása: `febc6c4b-e83f-437f-854c-98e9e266e34b`, Railway SUCCESS, runtime `0a95389`. 94/94 publikus fájl és 111/111 futó forrásfájl pontos lenyomategyezés, health OK. Az éles vendégnavigáció ellenőrizve; az éles játékhoz belépés kell. Az interaktív játékteszt saját helyi QA-fiókon futott, azonos kiadott fájlokkal. A friss éles Memóriapróbák oldal megnyitva.
+
+
+## Bevásárlólista egy képernyőn
+
+A termékes megjegyzési rácsból hiányzott az oszlopkiosztás, miközben a kártyák az általános négyzetes méretezést örökölték. Chrome-ban a kilenc termék 3950 px magas oszlopot alkotott. A Bevásárlólista most mindkét változatban 3×3-as rácsot kap, a második szinten a számok a kártyán belül jelzik az eredeti polcsorrendet. A megjegyzési kártyák magassága a képernyőhöz igazodik; az Árcédulák azonos hibáját ugyanebben a két fájlban javítottuk. A szabály, generálás, pontozás és időzítés változatlan.
+
+Helyi valódi Chrome UAT saját tesztfiókokkal: Bevásárlólista L1 tanulói teljes kör 9/9 és mentés; L2 nehéz tanári előnézet 9/9; Árcédulák L2 öt termék 10/10. Tanári fejléc mellett minden megjegyzendő kártya és a Készen állok gomb teljesen látszik 1365×768, 390×667, 375×667 és 390×844 CSS-pixeles képernyőn; vízszintes túlcsordulás nincs. Mobil eszközméret-emuláció történt, fizikai telefonpróbát ez nem állít. 19/19 érintett association teszt, valamint szintaxis/94 nyilvános fájl ellenőrzése PASS. Bizonyítékok: `.local/shopping-layout/browser-evidence.json`.

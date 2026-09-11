@@ -220,3 +220,72 @@
 .association-sort-row, .association-label, .association-shop-options [draggable], .association-cart-slot { touch-action:none; user-select:none; }
 .is-dragging { opacity:.6; cursor:grabbing; }
 .is-drop-target { outline:3px solid var(--purple); outline-offset:2px; }
+
+/* A study list must be visible together, including the ordered shelf variant. */
+.game-stage .association-study-grid {
+  width: min(100%, 620px);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.association-study-grid .object-tile {
+  aspect-ratio: auto;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  padding: 10px 6px;
+  gap: 3px;
+}
+.shopping-study-item {
+  position: relative;
+  min-width: 0;
+  height: clamp(72px, 12svh, 118px);
+}
+.shopping-study-number {
+  position: absolute;
+  top: 5px;
+  left: 7px;
+  z-index: 1;
+  color: var(--purple);
+  font-size: .75rem;
+}
+.association-study-grid .object-emoji {
+  font-size: clamp(1.65rem, 4svh, 2.4rem);
+  line-height: 1.15;
+}
+.association-study-grid strong {
+  overflow-wrap: anywhere;
+}
+.price-study-grid > .object-tile {
+  min-height: 110px;
+}
+.play-page:has(.association-study-grid) .play-panel {
+  min-height: 0;
+  padding: 18px 24px;
+}
+.play-page:has(.association-study-grid) .phase-heading {
+  margin-bottom: 12px;
+}
+.play-page:has(.association-study-grid) .phase-heading h2 {
+  font-size: 1.5rem;
+  margin-bottom: 5px;
+}
+.play-page:has(.association-study-grid) .timer-wrap {
+  margin-bottom: 14px;
+}
+.play-page:has(.association-study-grid) .ready-row {
+  margin-top: 14px;
+}
+@media (max-width: 620px) {
+  .game-stage .association-study-grid { gap: 6px; }
+  .association-study-grid .object-tile { font-size: .75rem; padding: 8px 4px; }
+  .shopping-study-item { height: clamp(70px, 11svh, 92px); }
+  .play-page:has(.association-study-grid) .play-panel { padding: 14px 10px; }
+  .play-page:has(.association-study-grid) .phase-heading p { font-size: .85rem; }
+}
+@media (max-height: 740px) {
+  .play-page:has(.association-study-grid) { padding-top: 6px; }
+  .play-page:has(.association-study-grid) .play-top { min-height: 44px; margin-bottom: 8px; }
+  .play-page:has(.association-study-grid) .phase-heading { margin-bottom: 8px; }
+  .play-page:has(.association-study-grid) .timer-wrap { margin-bottom: 8px; }
+  .play-page:has(.association-study-grid) .ready-row { margin-top: 8px; }
+}

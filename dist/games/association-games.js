@@ -177,7 +177,7 @@ function numericInput(label,min,max){
 function mountPrices(ctx){
   const level=Number(ctx.settings.level)||1,items=generatePrices(ctx.settings.count,ctx.settings.difficulty,ctx.rand,level),answers=new Map();
   ctx.phase('Árcédulák',level>=2?'Jegyezd meg külön az árat és a kedvezményt!':'Jegyezd meg az árat; a kedvezmény százaléka támpont marad.');clear(ctx.root);
-  ctx.root.append(h('div',{className:'game-stack'},h('div',{className:'memory-grid'},...items.map(item=>itemTile(item,`${item.price} Ft · ${item.discount}% kedvezmény`)))));
+  ctx.root.append(h('div',{className:'game-stack'},h('div',{className:'memory-grid association-study-grid price-study-grid'},...items.map(item=>itemTile(item,`${item.price} Ft · ${item.discount}% kedvezmény`)))));
   ctx.memorize(()=>{
     const inputs=[];let check;
     const valid=()=>inputs.every(({input,min,max})=>/^\d{1,2}$/.test(input.value)&&Number(input.value)>=min&&Number(input.value)<=max);
@@ -193,7 +193,7 @@ function mountPrices(ctx){
 function mountShopping(ctx){
   const level=Number(ctx.settings.level)||1,round=generateShopping(ctx.settings.count,ctx.rand,ctx.settings),retry=createRetrySession();
   ctx.phase('Bevásárlólista',level>=2?'Jegyezd meg a termékek pontos polcsorrendjét!':'Jegyezd meg, mi van a listán!');clear(ctx.root);
-  ctx.root.append(h('div',{className:'game-stack'},h('div',{className:'memory-grid'},...round.targets.map((item,index)=>h('div',{},level>=2?h('strong',{},`${index+1}. `):null,itemTile(item))))));
+  ctx.root.append(h('div',{className:'game-stack'},h('div',{className:'memory-grid association-study-grid shopping-study-grid','aria-label':level>=2?'Kilenc termék polcsorrendben':'Kilenc megjegyzendő termék'},...round.targets.map((item,index)=>h('div',{className:'shopping-study-item'},level>=2?h('strong',{className:'shopping-study-number'},`${index+1}.`):null,itemTile(item))))));
   ctx.memorize(()=>{
     const chosen=Array(9).fill(null),board=h('div',{className:'game-stack'});let selected=null,dragged=null;
     const place=(id,index)=>{const source=chosen.indexOf(id),displaced=chosen[index];chosen[index]=id;if(source>=0&&source!==index)chosen[source]=displaced;selected=null;dragged=null;draw();};
