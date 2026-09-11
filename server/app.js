@@ -223,17 +223,19 @@ function isCognitiveGame(gameId) {
 function splitActiveRecallSettings(raw) {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) throw badRequest('Az aktív felidézés beállítása érvénytelen.', 'INVALID_GAME_SETTINGS');
   if (!Array.isArray(raw.items) || raw.items.length < 1 || raw.items.length > 20) throw badRequest('Az aktív felidézéshez 1–20 kérdés szükséges.', 'INVALID_GAME_SETTINGS');
-  const privateItems = [];
-  const publicItems = raw.items.map((item, index) => {
+  const acceptedAnswers = [];
+  const questions = raw.items.map((item, index) => {
     if (!item || typeof item !== 'object' || Array.isArray(item)) throw badRequest('Az aktív felidézés egyik kérdése érvénytelen.', 'INVALID_GAME_SETTINGS');
     const prompt = cleanText(item.prompt, `items[${index}].prompt`, { required: true, max: 500 });
     const studyText = cleanText(item.studyText, `items[${index}].studyText`, { max: 1200 });
     if (!Array.isArray(item.acceptedAnswers) || item.acceptedAnswers.length < 1 || item.acceptedAnswers.length > 12) throw badRequest('Minden kérdéshez 1–12 elfogadott válasz szükséges.', 'INVALID_GAME_SETTINGS');
-    const acceptedAnswers = [...new Set(item.acceptedAnswers.map((value, answerIndex) => cleanText(value, `items[${index}].acceptedAnswers[${answerIndex}]`, { required: true, max: 300 })) )];
-    privateItems.push({ index, acceptedAnswers });
-    return { index, prompt, ...(studyText ? { studyText } : {}) };
+    const answers = [...new Set(item.acceptedAnswers.map((value, answerIndex) => cleanText(value, `items[${index}].acceptedAnswers[${answerIndex}]`, { required: true, max: 300 })))];
+    const questionId = `q${index + 1}`;
+    acceptedAnswers.push({ questionId, answers });
+    return { questionId, question: prompt, learningExplanation: studyText || '' };
   });
-  return { publicSettings: { ...raw, items: publicItems }, privateSettings: { version: 1, items: privateItems } };
+  const { items: _items, ...rest } = raw;
+  return { publicSettings: { ...rest, questions }, privateSettings: { acceptedAnswers } };
 }
 
 function nbackChallengeIdentity(settings) {
@@ -290,7 +292,7 @@ function publicAttempt(row) {
 function nextReviewAvailableAt(gameId, settings, completed, lastCompletedAt) {
   if (gameId !== 'active-recall' || completed < 1 || !lastCompletedAt) return null;
   const delay = settings?.reviewDelayMinutes;
-  if (!Number.isInteger(delay) || delay < 1 || delay > 10_080) return null;
+  if (!Number.isInteger(delay) || delay < 1 || delay > 525_600) return null;
   return new Date(new Date(lastCompletedAt).valueOf() + delay * 60_000).toISOString();
 }
 
@@ -843,6 +845,12 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
             if (completed.rows[0].count >= step.rows[0].repetitions) throw conflict('Ezt a lépést már teljesítetted.', 'REPETITIONS_COMPLETE');
             availableAt = nextReviewAvailableAt(gameId, settings, completed.rows[0].count, completed.rows[0].last_completed_at);
             if (availableAt && new Date(availableAt) > new Date()) throw conflict(`A későbbi felidézés ${availableAt} után nyitható meg.`, 'REVIEW_NOT_DUE');
+            if (gameId === 'active-recall' && completed.rows[0].count > 0) settings = settingsForVersion(engine, gameId, {
+              ...settings,
+              reviewRound: 'review',
+              scheduledAt: new Date(completed.rows[0].last_completed_at).toISOString(),
+              availableAt,
+            }, rulesVersion);
             const pending = await db.query(
               `SELECT * FROM attempts WHERE student_id=$1 AND assignment_step_id=$2 AND submitted_at IS NULL
                ORDER BY created_at DESC LIMIT 1 FOR UPDATE`, [user.id, stepId],
@@ -930,6 +938,7 @@ export function createRequestHandler({ pool, gameEngine, config: suppliedConfig 
             if (completed.rows[0].count >= step.rows[0].repetitions) throw conflict('Ezt a lépést már teljesítetted.', 'REPETITIONS_COMPLETE');
           }
           const duration = Math.max(0, Math.round(Date.now() - new Date(attempt.created_at).valueOf()));
+          if (attempt.game_id === 'picture-place' && duration < attempt.settings.delayedMinimumMs) throw conflict('A késleltetett felidézés ideje még nem telt le.', 'DELAY_NOT_COMPLETE');
           let score;
           try { score = engine.scoreAttempt(attempt.game_id, attempt.settings, Number(attempt.seed), body.answer, attempt.rules_version, {
             privateSettings: attempt.private_settings ?? null,

@@ -1,5 +1,6 @@
 {
-  "version": "hu-tunde-1",
+  "version": "hu-digits-v1",
+  "voiceVersion": "hu-tunde-1",
   "language": "hu-HU",
   "voice": "macOS Tünde",
   "rateWordsPerMinute": 145,

@@ -2,11 +2,17 @@ import {normalizeSettings} from './core.js';
 import * as legacy from './legacy/v1/game-engine.js';
 import {awardStars} from './scoring.js';
 import {normalizeConfig as normalizeNbackConfig,generateSession as generateNbackSession,scoreSession as scoreNbackSession} from './nback/engine.js';
+import {isCognitiveGame,normalizeCognitiveSettings,scoreCognitiveAttempt,cognitiveComparabilityIdentity} from './cognitive/engine.js';
+export {cognitiveComparabilityIdentity};
 export const CURRENT_RULES_VERSION = 2;
 export function normalizeSettingsForVersion(gameId, raw, version=2) {
   if(gameId==='nback'){
     if(version!==2)throw new RangeError('Az N-back csak a 2. szabályverzióval indítható. Frissítsd az oldalt.');
     return normalizeNbackConfig(raw);
+  }
+  if(isCognitiveGame(gameId)){
+    if(version!==2)throw new RangeError('A memóriapróbák csak a 2. szabályverzióval indíthatók. Frissítsd az oldalt.');
+    return normalizeCognitiveSettings(gameId,raw);
   }
   if(version===1)return legacy.normalizeGameSettings(gameId,raw);
   if(version!==2)throw new RangeError('Ismeretlen játékszabály-verzió.');
@@ -22,12 +28,21 @@ export const GAME_RULES=Object.freeze({
   prices:{levels:[1,2],count:[3,5]},shopping:{levels:[1,2],fixedCount:9},picture:{levels:[1,2],rounds:[3,5]},
   code:{levels:[1,2,3],rounds:[3,5],symbolSets:['objects','abstract'],messageLengths:{1:3,2:4,3:5}},
   nback:{nbackVersion:1,modes:28,n:[1,20],trialCount:[4,200],intervalMs:[400,10000]},
+  'spatial-span':{cognitiveVersion:1},'digit-span':{cognitiveVersion:1},'picture-place':{cognitiveVersion:1},
+  'complex-span':{cognitiveVersion:1},recognition:{cognitiveVersion:1},'attention-nogo':{cognitiveVersion:1},'active-recall':{cognitiveVersion:1},
 });
 export const RAW_ANSWER_SHAPES=Object.freeze({
   digits:'{digits:string}',grid:'{cells:number[]}',path:'{cells:number[]}',missing:'{choiceId:string}',stations:'{items:string[]}',
   faces:'{attempts:[{answers:[{faceId,name,job?,room?}]}]}',prices:'{answers:[{itemId,price,discount?}]}',shopping:'{attempts:[{itemIds:string[]}]}',
   picture:'level1 {rounds:[{choiceId:string}]}; level2 {rounds:[{attempts:[{itemIds:string[]}]}]}',code:'{mapping:[{digit,symbolId}],answers:[{attempts:string[]}]} ',
   nback:'{version:1,events:[{trialIndex:number,channel:string,atMs:number,value:true|string}]}',
+  'spatial-span':'{version:1,events:[{eventId,type:"response",trialIndex,atMs,value:number[]}]}',
+  'digit-span':'{version:1,events:[{eventId,type:"response",trialIndex,atMs,value:number[]}]}',
+  'picture-place':'{version:1,events:[{eventId,type:"response",trialIndex,atMs,value:number}]}',
+  'complex-span':'{version:1,events:[{eventId,type:"response",trialIndex,atMs,value:boolean|number[]}]}',
+  recognition:'{version:1,events:[{eventId,type:"response",trialIndex,atMs,value:"old"|"new"}]}',
+  'attention-nogo':'{version:1,events:[{eventId,type:"response",trialIndex,atMs,value:true}]}',
+  'active-recall':'{version:1,events:[{eventId,type:"response",trialIndex,atMs,value:string}]}',
 });
 const UINT32_MAX=0xffffffff;
 export const COMMON_GAME_SETTINGS=Object.freeze({
@@ -47,6 +62,7 @@ function requestedInteger(raw,key,fallback){
 }
 export function normalizeGameSettings(gameId,raw={}){
   if(gameId==='nback')return normalizeNbackConfig(raw);
+  if(isCognitiveGame(gameId))return normalizeCognitiveSettings(gameId,raw);
   const rule=GAME_RULES[gameId];if(!rule)throw new RangeError(`Ismeretlen játék: ${String(gameId)}`);const levels=rule.levels;
   if(raw===null||typeof raw!=='object'||Array.isArray(raw))throw new TypeError('A játékbeállítások objektumként adhatók meg.');
   const level=requestedInteger(raw,'level',1);if(!levels.includes(level))throw new RangeError(`A(z) ${gameId} játékban nincs ${level}. szint.`);
@@ -85,12 +101,16 @@ function complete(scored,summary=scored.summary,details=scored.details||[]){cons
 function positionDetails(expected,actual,label='hely'){return expected.map((value,index)=>({label:`${index+1}. ${label}`,expected:String(value),actual:actual[index]===undefined?'—':String(actual[index]),correct:actual[index]===value}));}
 
 // RAW_ANSWER_SHAPES describes v2; the frozen legacy engine accepts v1 contracts.
-export function scoreAttempt(gameId,rawSettings,seed,answer,version=2){
+export function scoreAttempt(gameId,rawSettings,seed,answer,version=2,context={}){
   if(gameId==='nback'){
     if(version!==2)throw new RangeError('Az N-back nem pontozható a régi szabályverzióval.');
     const settings=normalizeNbackConfig(rawSettings);
     const session=generateNbackSession({seed,config:settings});
     return {...scoreNbackSession(session,answer,{lowScoreCount:settings.lowScoreCount}),rulesVersion:2};
+  }
+  if(isCognitiveGame(gameId)){
+    if(version!==2)throw new RangeError('A memóriapróba nem pontozható a régi szabályverzióval.');
+    return {...scoreCognitiveAttempt(gameId,rawSettings,seed,answer,context),rulesVersion:2};
   }
   if(version===1){const score=legacy.scoreAttempt(gameId,rawSettings,seed,answer);return {...score,...awardStars(gameId,rawSettings,score,1),rulesVersion:1};}
   if(version!==2)throw new RangeError('Ismeretlen játékszabály-verzió.');
