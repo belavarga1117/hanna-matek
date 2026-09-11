@@ -1,0 +1,20 @@
+{
+  "version": "hu-tunde-1",
+  "language": "hu-HU",
+  "voice": "macOS Tünde",
+  "rateWordsPerMinute": 145,
+  "format": "PCM signed 16-bit little-endian, 22050 Hz, mono WAV",
+  "generation": "Offline macOS speech synthesis; trimmed leading/trailing silence and appended 120 ms padding.",
+  "files": [
+    {"digit": 0, "spoken": "nulla", "file": "digit-0.wav", "sha256": "15c2dac6ee9dfc3beb54288c7334414e604cd25c4204b48f8b5f06deb7b0f5ec"},
+    {"digit": 1, "spoken": "egy", "file": "digit-1.wav", "sha256": "6a280d5f3d1651e7760a092f4a7e65b6c56a459ee2b303e824ce38e13eb0a59d"},
+    {"digit": 2, "spoken": "kettő", "file": "digit-2.wav", "sha256": "dba6aa84b7f0b0389cb5b6d3ab741ce185836665e26e7479fd26166413f03962"},
+    {"digit": 3, "spoken": "három", "file": "digit-3.wav", "sha256": "fe86090ac0ad61309ff34dd14ef09e5b4f8c2660f2531ac574759f55403f0ca4"},
+    {"digit": 4, "spoken": "négy", "file": "digit-4.wav", "sha256": "a180f52c2af27e2564ef509181ddc7cfe2c43cf4c12bc4cbb9f3cabd63746abb"},
+    {"digit": 5, "spoken": "öt", "file": "digit-5.wav", "sha256": "93ee0721e95a2f591c9e1c910aaff291b57fae4cf3736ce03c009bc1d3429b2e"},
+    {"digit": 6, "spoken": "hat", "file": "digit-6.wav", "sha256": "ee67590792c9585a09c5989e3488abcd2a8cc547a199b8d78b8d41449f61638a"},
+    {"digit": 7, "spoken": "hét", "file": "digit-7.wav", "sha256": "6f87ce730ab990c616146d6c6bb0587f6be4b73716f3eb54e6a4872aa71b382b"},
+    {"digit": 8, "spoken": "nyolc", "file": "digit-8.wav", "sha256": "c73f0a586d95396f53c92521903bb79412ede30412f6b27b06f240764009c518"},
+    {"digit": 9, "spoken": "kilenc", "file": "digit-9.wav", "sha256": "fcd6cd88cb7039cf1c2a8a08d3f4eeca719f5f7b1d0718fc944cee85f89935b9"}
+  ]
+}
