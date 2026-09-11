@@ -25,7 +25,7 @@ export function groupComparableResults(results=[]){
 
 function unitLabel(unit){return {items:'elem',percent:'%',questions:'kérdés',ms:'ms'}[unit]||unit||'';}
 function dateLabel(value){const date=new Date(value);return Number.isNaN(date.getTime())?'Ismeretlen idő':date.toLocaleDateString('hu-HU',{month:'short',day:'numeric'});}
-function familyTitle(id){return COGNITIVE_META[id]?.title||id;}
+function familyTitle(id){return id==='nback'?'N-back Műhely':COGNITIVE_META[id]?.title||id;}
 
 function svgChart(h,series,title){
   const ns='http://www.w3.org/2000/svg';const make=(tag,attrs={})=>{const node=document.createElementNS?document.createElementNS(ns,tag):h(tag,{});for(const[k,v]of Object.entries(attrs))node.setAttribute(k,String(v));return node;};

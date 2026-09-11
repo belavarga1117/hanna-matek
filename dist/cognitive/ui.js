@@ -156,6 +156,18 @@ const FALLBACK_SOURCES=[
   {sourceId:'hedge-2018',citation:'Hedge és mtsai. (2018) · The reliability paradox',url:'https://pubmed.ncbi.nlm.nih.gov/28726177/',method:'A csoportszintű hatások és az egyéni különbségek megbízhatóságának eltérése.'},
 ];
 
+const REFERENCE_APPLICABILITY_HU={
+  '10.3389/fpsyg.2014.00939':'A korcsoportok, az instrukció nyelve és az érintőképernyős geometria eltér a Hanna térösvényétől; a tanulmány csoportátlagokat közöl, egyéni normát nem.',
+  '10.1080/13803395.2010.493149':'Angol, felnőtt, vizsgálatvezető által rögzített adaptív hallási eljárás; eltér a Hanna érintéses válaszától és leállítási szabályától. A közlemény csak hivatkozható.',
+  '10.4306/pi.2014.11.1.39':'Koreai idősebb felnőttek vizsgálatvezetővel felvett WAIS-R változata; a minta, az eljárás és a nem kereskedelmi licenc sem felel meg a Hanna-protokollnak.',
+  '10.1037/a0012577':'Angol szavakat és számtant használó, szóbeli, vizsgálatvezető által ütemezett eljárás; eltér a Hanna téri megőrzésétől, szimmetriadöntésétől és megfelelési szabályától.',
+  '10.1371/journal.pone.0101750':'Más terhelés, hat visszajelzéses tanulási kör, más ingerek és húszperces megállási szabály. A CC BY a tanulmány adataira vonatkozik, a Cogstate szoftverére és ingereire nem.',
+  '10.3389/fpsyg.2015.01544':'Betűs, billentyűzetes E-Prime eljárás más célingerszámmal és leállítással; nem egyezik a Hanna N-back összehasonlíthatósági kulcsával.',
+  '10.3389/fnhum.2024.1304221':'Önként jelentkező felnőtt webes minta, saját havi képkészletek és szóközbillentyűs időzítés; eltér a Hanna felismerési próbájától, korcellás n és nyers szórás sincs közölve.',
+  '10.7717/peerj.1460':'Fiatal felnőtt, csak előrefelé mért PEBL-pontok, hiányosan leírt leállítás és számítógépes bemutatás; nem egyezik a Hanna számsorpróbájával.',
+  '10.1093/arclin/acag010':'Jogvédett feladatverziók, gyártói átszámítások, eltérő eszközök és megállási szabályok; a kiadói táblázat itt csak hivatkozásként szerepel.',
+};
+
 export async function loadCognitiveReferences(){
   try{const module=await import('./reference-data.js');const records=module.cognitiveReferenceData||module.default;return Array.isArray(records)?records:[];}catch{return [];}
 }
@@ -164,7 +176,7 @@ function sourceCard(h,record){
   const canShowNumbers=record?.license?.reuse==='data-reuse';
   const sample=record.sample||{};const task=record.task||{};const values=canShowNumbers&&Array.isArray(record.table?.values)?record.table.values:[];
   const ageLabel=sample.ageMin==null?'':sample.ageMax==null?`${sample.ageMin} év felett`:sample.ageMin===sample.ageMax?`${sample.ageMin} éves`:`${sample.ageMin}–${sample.ageMax} év`;
-  return h('article',{className:'source-card'},h('span',{className:'source-kind'},record.sourceType||'kutatási forrás'),h('h3',{},record.citation||record.sourceId),h('p',{},record.method||[task.name,task.version,task.modality].filter(Boolean).join(' · ')),(ageLabel||sample.n!=null)?h('p',{className:'source-sample'},`${ageLabel}${ageLabel&&sample.n!=null?' · ':''}${sample.n!=null?`n=${sample.n}`:''}`):null,values.length?h('div',{className:'reference-values'},values.slice(0,4).map(value=>h('span',{},`${value.ageLabel||'Minta'} · ${value.metric}: ${value.mean}${value.sd!=null?` (SD ${value.sd})`:''}`))):null,values.length?h('small',{},`Forrásadat: ${record.sourceId} · ${record.table?.locator||'pontos hely nincs megadva'}`):null,h('p',{className:'source-applicability'},record.applicability?.reason||'A külső eljárás nem azonos a Hanna-protokollal; személyes percentilis nem számolható.'),h('a',{className:'text-link',href:record.url,target:'_blank',rel:'noopener noreferrer'},'Forrás megnyitása ↗'),record.license?.reuse==='link-only'?h('small',{},'A licenc miatt a számszerű táblázat itt nem jelenik meg.'):null);
+  return h('article',{className:'source-card'},h('span',{className:'source-kind'},record.sourceType||'kutatási forrás'),h('h3',{},record.citation||record.sourceId),h('p',{},record.method||[task.name,task.version,task.modality].filter(Boolean).join(' · ')),(ageLabel||sample.n!=null)?h('p',{className:'source-sample'},`${ageLabel}${ageLabel&&sample.n!=null?' · ':''}${sample.n!=null?`n=${sample.n}`:''}`):null,values.length?h('div',{className:'reference-values'},values.slice(0,4).map(value=>h('span',{},`${value.ageLabel||'Minta'} · ${value.metric}: ${value.mean}${value.sd!=null?` (SD ${value.sd})`:''}`))):null,values.length?h('small',{},`Forrásadat: ${record.sourceId} · ${record.table?.locator||'pontos hely nincs megadva'}`):null,h('p',{className:'source-applicability'},REFERENCE_APPLICABILITY_HU[record.sourceId]||record.applicability?.reason||'A külső eljárás nem azonos a Hanna-protokollal; személyes percentilis nem számolható.'),h('a',{className:'text-link',href:record.url,target:'_blank',rel:'noopener noreferrer'},'Forrás megnyitása ↗'),record.license?.reuse==='link-only'?h('small',{},'A licenc miatt a számszerű táblázat itt nem jelenik meg.'):null);
 }
 
 export function renderCognitiveHub({h}){
