@@ -4,6 +4,8 @@ Indítás: 2026-09-11. Tulajdonosi felhatalmazás: önálló, párhuzamos agente
 
 Állapotdelta, 2026-09-11: a controller átvette a teljes sort. Az első kötelező interfészkapu a [Memóriapróbák közös szerződésében](COGNITIVE-SYSTEM-CONTRACT.md) rögzült (`contractVersion: 1`): családok, gyakorlás/próba módok, determinisztikus ingerterv, nyers események, szerveres metrikák, összehasonlíthatóság, minőségi jelzések, privát tanári válaszok, tényleges késleltetés és forrásolt korosztályos referenciaadat. Ez a verzió a párhuzamos motor-, kutatási- és felületi sáv közös alapja.
 
+Állapotdelta, 2026-09-11 11:33 CEST: az integrált kódjelölt `791ed24`. A teljes helyi gate 153/153 PASS, a statikus ellenőrzés 18 modult és 73 publikus fájlt igazol. Mind a hét paradigma, a teljes azonnali felidézéshez kötött és újrakezdéskor megújuló 60 másodperces szerveres kép–hely késleltetés, a helyi magyar számsorhang, a 390 px-es mobil setup, a profil, valamint a saját tanári kiosztás → első felidézés → szerveres időzár → későbbi felidézés → 2/2 tanári progress és válaszrészlet valódi böngészőben végigment. Az első Grok 4.6 review öt hibával blokkolt; a `791ed24` mindet javította, és a fix-scoped exact-snapshot review PASS. A friss production adatmentés eldobható restore-ja PASS. A teljes követelmény- és UAT-bizonyíték a [kiadási dokumentumban](COGNITIVE-SYSTEM-DELIVERY-2026-09-11.md) él. A Railway-kiadás és élő ellenőrzés maradt nyitott kapu.
+
 Kanonikus projekt: `/Users/vargabela/Projects/hanna matek`, `codex/memory-workshop`, induló commit `095d3a454829027e8df3ccf49b2909861ce85978`. A korábbi AMAkids-kutatási dokumentumok és a `docs/FEATURE-MATRIX.md` jelenlegi módosítása nem ennek a munkának a része.
 
 ## Leszállítandó működés
